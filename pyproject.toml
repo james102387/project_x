@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crystal"
+version = "0.1.0"
+description = "Neuro-symbolic prompt compiler for LLMs"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+markers = [
+    "llm: tests that require LLM API access",
+]
+testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+where = ["src"]

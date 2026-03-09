@@ -1,0 +1,12 @@
+# Crystal — Cursor Rules
+
+## Session workflow
+- Read `docs/DEVLOG.md` at session start
+- Write working notes to `docs/SESSION.md` during the session
+- Append a dated entry to `docs/DEVLOG.md` before each commit: what changed, why, what's broken
+- Clear `docs/SESSION.md` at session end
+
+## Hard constraints
+- Run `pytest tests/ -v` before every commit. Do not commit with failing tests.
+- When adding functionality, add test cases to `tests/golden/test_cases.py` first.
+- Verify spaCy dep trees empirically with `show_parse()` before assuming structure.
