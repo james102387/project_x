@@ -5,6 +5,31 @@ Point the LLM at this file at the start of each session for full context.
 
 ---
 
+## 2026-03-08 — Three-View Savings Metrics
+
+### What happened
+- Added `token_savings_pct`: raw token ratio reflecting actual API billing cost
+- Added `marginal_savings_pct`: marginal cost model `N + 2BN + N²` against a
+  configurable base context (default 2000 tokens)
+- Retained `savings_pct` as legacy isolated N+N² compute proxy
+- New `marginal_cost()` function in `metrics.py`
+- `estimate_metrics()` now accepts optional `base_context` parameter
+- `run.py` golden test output shows all three columns (TOKENS / ISOLATED / MARGINAL)
+- Single-prompt and full-graph displays updated to show all three views
+- 8 new tests for `marginal_cost` and the new savings fields; 95/95 passing
+
+### Decisions made
+- Token and marginal views agree closely for math_augmented (~-314% vs ~-318%)
+  because user prompts are small relative to typical base contexts
+- Isolated N+N² overstated math_augmented penalty by ~5x (-1535% vs -314%)
+- Kept isolated metric for backwards compatibility but it's now clearly labelled
+
+### Known issues
+- math_augmented compiled prompts are still longer than raw (negative savings
+  across all three views) — this is by design; the value is accuracy
+
+---
+
 ## 2026-03-08 — Token Metrics & math_answerable Bypass
 
 ### What happened

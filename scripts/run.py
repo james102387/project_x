@@ -120,9 +120,11 @@ def run_golden_tests():
     )
 
     print()
-    print("=" * 120)
-    print(f"  {'PROMPT':<55} {'EXPECTED':<18} {'GOT':<18} {'RESULT':<10} {'SAVINGS':<10} {'STATUS'}")
-    print("=" * 120)
+    w = 150
+    print("=" * w)
+    print(f"  {'PROMPT':<55} {'EXPECTED':<18} {'GOT':<18} {'RESULT':<8} "
+          f"{'TOKENS':<9} {'ISOLATED':<9} {'MARGINAL':<9} {'STATUS'}")
+    print("=" * w)
 
     for category, (prompt, expected_type, expected_result) in all_cases:
         result = run_local(prompt)
@@ -133,10 +135,13 @@ def run_golden_tests():
         result_ok = actual_result == expected_result
 
         m = result.get("metrics", {})
-        savings = m.get("savings_pct", 0.0)
-        savings_str = f"{savings:+.0%}"
+        tok_sav = m.get("token_savings_pct", 0.0)
+        iso_sav = m.get("savings_pct", 0.0)
+        mar_sav = m.get("marginal_savings_pct", 0.0)
 
-        metrics_by_type.setdefault(actual_type, []).append(savings)
+        metrics_by_type.setdefault(actual_type, []).append(
+            {"token": tok_sav, "isolated": iso_sav, "marginal": mar_sav}
+        )
 
         if type_ok and result_ok:
             status = "PASS"
@@ -150,19 +155,25 @@ def run_golden_tests():
 
         display_result = str(actual_result) if actual_result is not None else "—"
         print(f"  {prompt:<55} {expected_type:<18} {actual_type:<18} "
-              f"{display_result:<10} {savings_str:<10} {status}")
+              f"{display_result:<8} {tok_sav:+.0%}     {iso_sav:+.0%}     "
+              f"{mar_sav:+.0%}     {status}")
 
     print()
     print(f"  Results: {passed} passed, {failed} failed, {passed + failed} total")
 
     if metrics_by_type:
         print()
-        print("  Token Savings by Type:")
+        print("  Savings by Type (averages):")
+        print(f"    {'TYPE':<20} {'TOKENS':>8} {'ISOLATED':>10} {'MARGINAL':>10}  {'n':>3}")
+        print(f"    {'─' * 55}")
         for ptype in ("pure_math", "math_answerable", "math_augmented", "no_match"):
             vals = metrics_by_type.get(ptype, [])
             if vals:
-                avg = sum(vals) / len(vals)
-                print(f"    {ptype:<20} avg savings: {avg:+.0%}  (n={len(vals)})")
+                avg_tok = sum(v["token"] for v in vals) / len(vals)
+                avg_iso = sum(v["isolated"] for v in vals) / len(vals)
+                avg_mar = sum(v["marginal"] for v in vals) / len(vals)
+                print(f"    {ptype:<20} {avg_tok:>+7.0%} {avg_iso:>+9.0%} "
+                      f"{avg_mar:>+9.0%}  {len(vals):>3}")
 
     if errors:
         print()
@@ -207,7 +218,9 @@ def run_full_graph(prompt: str):
         print(f"    Compiled tokens: {m.get('compiled_prompt_tokens', 'N/A')}")
         print(f"    Raw compute:     {m.get('raw_compute', 'N/A')}")
         print(f"    Compiled compute:{m.get('compiled_compute', 'N/A')}")
-        print(f"    Savings:         {m.get('savings_pct', 0):.0%}")
+        print(f"    Token savings:   {m.get('token_savings_pct', 0):+.0%}")
+        print(f"    Isolated N+N²:   {m.get('savings_pct', 0):+.0%}")
+        print(f"    Marginal (B=2k): {m.get('marginal_savings_pct', 0):+.0%}")
         if m.get("actual_prompt_tokens") is not None:
             print(f"    API prompt tkns: {m['actual_prompt_tokens']}")
             print(f"    API output tkns: {m['actual_output_tokens']}")
@@ -246,7 +259,9 @@ def main():
             print(f"\n  Token Metrics:")
             print(f"    Raw tokens:      {m.get('raw_prompt_tokens', 'N/A')}")
             print(f"    Compiled tokens: {m.get('compiled_prompt_tokens', 'N/A')}")
-            print(f"    Savings:         {m.get('savings_pct', 0):.0%}")
+            print(f"    Token savings:   {m.get('token_savings_pct', 0):+.0%}")
+            print(f"    Isolated N+N²:   {m.get('savings_pct', 0):+.0%}")
+            print(f"    Marginal (B=2k): {m.get('marginal_savings_pct', 0):+.0%}")
     else:
         success = run_golden_tests()
         sys.exit(0 if success else 1)
