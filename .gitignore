@@ -20,3 +20,6 @@ build/
 
 # Environment / secrets
 .env
+
+# Benchmark results (timestamped JSON files)
+benchmarks/results/*.json

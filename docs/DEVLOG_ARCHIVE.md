@@ -5,6 +5,19 @@ Only the most recent ~5 entries stay in `DEVLOG.md`.
 
 ---
 
+## 2026-03-08 — Token Metrics & math_answerable Bypass
+
+### What changed
+- Split `math_in_context` → `math_answerable` (LLM bypass) + `math_augmented` (LLM required)
+- `REASONING_SIGNALS` set gates augmented path; default is bypass
+- tiktoken-based metrics, Gemini `usage_metadata` integration
+- 3 new golden cases, 13 new tests; 93/93 passing
+
+### Decisions
+- Conservative bypass: only advisory/explanatory/comparative/predictive words trigger LLM
+
+---
+
 ## 2026-02-15 — Project Scaffolding & Verb-Semantic Detection
 
 ### What happened

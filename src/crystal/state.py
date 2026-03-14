@@ -11,11 +11,15 @@ class CrystalState(TypedDict):
     preprocessed: list[dict]
     tool_results: list[dict]
     compiled_prompt: str
-    prompt_type: str                # pure_math | math_answerable | math_augmented | kg_answerable | no_math
+    prompt_type: str                # pure_math | math_answerable | math_augmented | kg_answerable | kg_augmented | no_math
     llm_response: str
     final_response: str             # the actual output to the user
     fallback_to_llm: bool
     token_metrics: dict
+    # KG-specific fields
+    kg_detections: list[dict]       # entity/predicate detections from KG detector
+    kg_results: list[dict]          # resolved KG lookup results
+    kg_entities_found: list[str]    # entity strings matched in prompt
 
 
 def make_initial_state(prompt: str) -> CrystalState:
@@ -33,4 +37,7 @@ def make_initial_state(prompt: str) -> CrystalState:
         "final_response": "",
         "fallback_to_llm": False,
         "token_metrics": {},
+        "kg_detections": [],
+        "kg_results": [],
+        "kg_entities_found": [],
     }

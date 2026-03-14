@@ -8,18 +8,26 @@ def kg_detection_node(state: dict) -> dict:
     """
     Scan the prompt for known KG entities with question structure.
 
-    Runs after math detection. Only fires if no math detection was
-    made (math takes priority for math queries).
+    Runs after math detection. Always fires regardless of whether math
+    detections exist — the planner merges both detection types.
     """
     detections = list(state.get("tool_detections", []))
-
-    if detections:
-        return {"tool_detections": detections}
 
     doc = state["spacy_doc"]
     detection = detect_kg_query(doc, remulak_kg)
 
+    kg_detections = []
+    kg_entities_found = []
+
     if detection is not None:
         detections.append(detection)
+        kg_detections.append(detection)
+        kg_entities_found = [
+            s["entity"] for s in detection.get("entity_spans", [])
+        ]
 
-    return {"tool_detections": detections}
+    return {
+        "tool_detections": detections,
+        "kg_detections": kg_detections,
+        "kg_entities_found": kg_entities_found,
+    }

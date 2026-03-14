@@ -6,6 +6,7 @@ Classifies the prompt into one of these types:
   math_answerable:  "John has 10..."     → return result directly, skip LLM
   math_augmented:   "...is she wise?"    → inject result, simplify prompt for LLM
   kg_answerable:    "What is the capital of Remulak?" → return KG facts, skip LLM
+  kg_augmented:     "Why is Remulak's government a technocratic council?" → inject KG facts, LLM reasons
   no_math:          (shouldn't reach here — plan_builder catches it)
 """
 
@@ -62,6 +63,8 @@ def _classify_prompt_type(raw_prompt: str, doc, tool_results: list[dict]) -> str
 
     kg_results = [r for r in tool_results if r.get("tool") == "kg" and r.get("success")]
     if kg_results:
+        if _has_reasoning_signals(doc):
+            return "kg_augmented"
         return "kg_answerable"
 
     math_keywords = ADDITION_VERBS | ADDITION_CONJUNCTIONS | ADDITION_NOUNS | ADDITION_SYMBOLS
@@ -107,6 +110,24 @@ def _format_kg_results(tool_results: list[dict]) -> str:
         for fact in r["results"]:
             lines.append(f"{fact['subject']} — {fact['predicate']}: {fact['object']}")
     return "\n".join(lines)
+
+
+def _build_kg_augmented_prompt(raw_prompt: str, tool_results: list[dict]) -> str:
+    """Build a prompt with grounded KG facts injected for LLM reasoning."""
+    facts = []
+    for r in tool_results:
+        if not r.get("success") or r.get("tool") != "kg":
+            continue
+        for fact in r["results"]:
+            facts.append(f"  {fact['subject']} — {fact['predicate']}: {fact['object']}")
+
+    return (
+        f"The user asked: '{raw_prompt}'\n\n"
+        f"The following facts have been verified from the knowledge graph:\n"
+        f"{chr(10).join(facts)}\n\n"
+        f"Answer the user's question using these grounded facts. "
+        f"Do not invent information beyond what is provided."
+    )
 
 
 def _build_simplified_prompt(raw_prompt: str, tool_results: list[dict]) -> str:
@@ -155,6 +176,16 @@ def prompt_compiler_node(state: dict) -> dict:
             "prompt_type": prompt_type,
             "compiled_prompt": "",
             "final_response": display,
+            "token_metrics": metrics.to_dict(),
+        }
+
+    if prompt_type == "kg_augmented":
+        compiled = _build_kg_augmented_prompt(raw, tool_results)
+        metrics = estimate_metrics(raw, compiled, prompt_type)
+        return {
+            "prompt_type": "kg_augmented",
+            "compiled_prompt": compiled,
+            "final_response": "",
             "token_metrics": metrics.to_dict(),
         }
 

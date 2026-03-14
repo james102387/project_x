@@ -9,6 +9,7 @@ Prompt types:
   math_answerable — narrative math where Crystal has the full answer, skip LLM
   math_augmented  — math embedded in a question requiring LLM reasoning
   kg_answerable   — KG lookup returned facts, skip LLM
+  kg_augmented    — KG facts + reasoning signals, inject facts for LLM
   no_match        — no computable math detected
 """
 
@@ -50,18 +51,38 @@ MATH_AUGMENTED_CASES = [
 ]
 
 KG_ANSWERABLE_CASES = [
-    # Exact predicate
+    # --- Exact predicate (forward lookup) ---
     ("What is the capital of Remulak?", "kg_answerable", "Remulak — capital: Zelphos"),
     ("Who is the leader of Remulak?", "kg_answerable", "Remulak — leader: Grand Vizier Korth"),
     ("What is the population of Draveth?", "kg_answerable", "Draveth — population: 1.8 billion"),
-    # Alias predicates
+    ("What is the population of Sulari?", "kg_answerable", "Sulari — population: 1.4 billion"),
+    ("What is the capital of Khotane?", "kg_answerable", "Khotane — capital: Tessavri"),
+    ("What is the climate of Yelvri?", "kg_answerable", "Yelvri — climate: polar tundra"),
+    ("What is the population of Remulak?", "kg_answerable", "Remulak — population: 4.3 billion"),
+    # --- Alias predicates ---
     ("What is the capital city of Remulak?", "kg_answerable", "Remulak — capital: Zelphos"),
     ("Who is the head of state of Remulak?", "kg_answerable", "Remulak — leader: Grand Vizier Korth"),
     ("What is the currency of Remulak?", "kg_answerable", "Remulak — currency: the Vreth"),
-    # Multi-word entity
+    ("What is the weather of Sulari?", "kg_answerable", "Sulari — climate: arid desert highlands"),
+    ("What is the government of Remulak?", "kg_answerable", "Remulak — government type: technocratic council"),
+    # --- Multi-word entity ---
     ("How old is Grand Vizier Korth?", "kg_answerable", "Grand Vizier Korth — age: 142 standard years"),
-    # Question with "tell me"
+    ("Where was Grand Vizier Korth born?", "kg_answerable", "Grand Vizier Korth — birthplace: Zelphos"),
+    # --- Request verbs ---
     ("Tell me about the climate of Draveth", "kg_answerable", "Draveth — climate: temperate with long dry seasons"),
+    ("Describe the major landmark of Khotane", "kg_answerable", "Khotane — major landmark: The Hanging Forests of Druen"),
+    # --- Reverse lookup phrasing ---
+    ("What is Draveth known for?", "kg_answerable", "Draveth — known for: government and military academies"),
+    ("What is Sulari known for?", "kg_answerable", "Sulari — known for: mining and heavy industry"),
+    # --- Technology & military ---
+    ("What is the technology level of Remulak?", "kg_answerable", "Remulak — technology level: post-fusion, pre-singularity"),
+    ("What is the most popular sport on Remulak?", "kg_answerable", "Remulak — most popular sport: skyracing"),
+]
+
+KG_AUGMENTED_CASES = [
+    ("Why does Remulak have a technocratic council?", "kg_augmented", None),
+    ("Should Grand Vizier Korth retire given his age?", "kg_augmented", None),
+    ("Explain why Draveth is important to Remulak", "kg_augmented", None),
 ]
 
 NEGATIVE_CASES = [
@@ -79,6 +100,10 @@ NEGATIVE_CASES = [
     ("hello how are you", "no_match", None),
     ("what's the weather like", "no_match", None),
     ("tell me about the history of mathematics", "no_match", None),
+    # KG negatives — entities not in the knowledge graph
+    ("What is the capital of France?", "no_match", None),
+    ("Who is the president of the United States?", "no_match", None),
+    ("What is the population of Tokyo?", "no_match", None),
 ]
 
 # Back-compat alias: tests that import MATH_IN_CONTEXT_CASES get the answerable set
@@ -86,5 +111,5 @@ MATH_IN_CONTEXT_CASES = MATH_ANSWERABLE_CASES
 
 ALL_CASES = (
     PURE_MATH_CASES + MATH_ANSWERABLE_CASES + MATH_AUGMENTED_CASES
-    + KG_ANSWERABLE_CASES + NEGATIVE_CASES
+    + KG_ANSWERABLE_CASES + KG_AUGMENTED_CASES + NEGATIVE_CASES
 )

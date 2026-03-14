@@ -4,12 +4,10 @@ from langgraph.graph import StateGraph, END
 
 from crystal.state import CrystalState
 from crystal.nodes.parser import spacy_parser_node
-from crystal.nodes.math_detection import math_detection_node
-from crystal.nodes.kg_detection import kg_detection_node
+from crystal.nodes.math import math_detection_node, calculator_node
+from crystal.nodes.kg import kg_detection_node, kg_node
 from crystal.nodes.planner import plan_builder_node
 from crystal.nodes.preprocessor import preprocessor_node
-from crystal.nodes.calculator import calculator_node
-from crystal.nodes.kg import kg_node
 from crystal.nodes.compiler import prompt_compiler_node
 from crystal.nodes.llm_nodes import direct_return_node, llm_augmented_node, llm_fallback_node
 
@@ -28,12 +26,13 @@ def should_call_llm_after_compile(state: CrystalState) -> str:
 
 def build_crystal_graph():
     """
-    Five paths:
+    Six paths:
     1. Calculator → Pure math → Direct return (no LLM)
     2. Calculator → Math answerable → Direct return (no LLM)
     3. Calculator → Math augmented → Simplified prompt to LLM
     4. KG → KG answerable → Direct return (no LLM)
-    5. No tools matched → Raw prompt to LLM
+    5. KG → KG augmented → Grounded facts to LLM for reasoning
+    6. No tools matched → Raw prompt to LLM
     """
     graph = StateGraph(CrystalState)
 

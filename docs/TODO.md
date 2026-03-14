@@ -2,14 +2,14 @@
 
 ## MVP — Prove the value proposition with numbers
 
-- [ ] **7. CrystalState schema update** — Add KG-related fields (`kg_detections`, `kg_results`, etc.) to the TypedDict so new nodes can communicate through state.
-- [ ] **1. KG detection node** — Scan raw text against `kg.entities` (hash lookup, no spaCy). Detect entity mentions, match predicates via aliases. Wire into `graph.py` alongside `math_detection`.
-- [ ] **2. KG execution node** — Takes preprocessed KG lookups, runs `kg.lookup()`, returns results. Parallel to `calculator_node` in the graph.
-- [ ] **8. Planner update** — Handle multiple detection types (calculator + KG) in the same plan. Flat/parallel only — no dependency resolution yet.
-- [ ] **3. Compiler: `kg_answerable` / `kg_augmented`** — `kg_answerable` returns the fact directly; `kg_augmented` injects grounded facts into a simplified prompt for the LLM.
-- [ ] **4. Golden test cases for KG** — ~20 Remulak questions with known answers (forward lookup, reverse lookup, alias resolution, negatives). Add to `tests/golden/test_cases.py`.
-- [ ] **5. Baseline benchmark** — Send the same Remulak questions to a naked LLM (no KG). Record answers. Auto-score against ground truth. This is the "before" measurement.
-- [ ] **6. Treatment benchmark** — Run the same questions through Crystal with KG. Auto-score. Compare accuracy/hallucination rate against baseline. This produces the pitch-deck number.
+- [x] **7. CrystalState schema update** — Add KG-related fields (`kg_detections`, `kg_results`, `kg_entities_found`) to the TypedDict so new nodes can communicate through state.
+- [x] **1. KG detection node** — Scan raw text against `kg.entities` (hash lookup, no spaCy). Detect entity mentions, match predicates via aliases. Wire into `graph.py` alongside `math_detection`. Removed math-priority gate so both detectors can fire.
+- [x] **2. KG execution node** — Takes preprocessed KG lookups, runs `kg.lookup()`, returns results. Parallel to `calculator_node` in the graph. Now populates `kg_results` state field.
+- [x] **8. Planner update** — Handle multiple detection types (calculator + KG) in the same plan. Flat/parallel only — no dependency resolution yet. (Already supported by existing loop.)
+- [x] **3. Compiler: `kg_answerable` / `kg_augmented`** — `kg_answerable` returns the fact directly; `kg_augmented` injects grounded facts into a simplified prompt for the LLM. Reasoning signals ("why", "should", "explain") gate the augmented path.
+- [x] **4. Golden test cases for KG** — 20 KG answerable + 3 KG augmented + 3 KG negative Remulak questions with known answers (forward lookup, reverse lookup, alias resolution, negatives). Added to `tests/golden/test_cases.py`.
+- [x] **5. Baseline benchmark** — Send the same Remulak questions to a naked LLM (no KG). Record answers. Auto-score against ground truth. This is the "before" measurement. Result: 0% accuracy.
+- [x] **6. Treatment benchmark** — Run the same questions through Crystal with KG. Auto-score. Compare accuracy/hallucination rate against baseline. Result: 100% accuracy. Produces the pitch-deck number.
 
 ## 2.0 — After the MVP proves the concept
 

@@ -15,12 +15,12 @@ from __future__ import annotations
 from crystal.tools.kg.graph import KnowledgeGraph
 
 
-QUESTION_WORDS = {"what", "who", "where", "when", "which", "how", "whose", "whom"}
+QUESTION_WORDS = {"what", "who", "where", "when", "which", "how", "whose", "whom", "why"}
 REQUEST_VERBS = {"tell", "describe", "explain", "show", "list", "give", "name"}
 
 # Words to strip when extracting predicate phrases from questions
 NOISE_WORDS = {
-    "what", "who", "where", "when", "which", "how", "whose", "whom",
+    "what", "who", "where", "when", "which", "how", "whose", "whom", "why",
     "is", "are", "was", "were", "the", "a", "an",
     "do", "does", "did", "tell", "me", "about", "describe", "show",
     "?", "'s", "s",
@@ -139,6 +139,9 @@ QUESTION_PREDICATE_MAP = {
     "many moons": "number of moons",
     "many continents": "number of continents",
     "many languages": "number of languages",
+    "born": "birthplace",
+    "known": "known for",
+    "famous": "known for",
 }
 
 
@@ -158,7 +161,9 @@ def detect_kg_query(
     if not has_question_structure(doc):
         return None
 
-    primary = entity_spans[0]
+    # Prefer entities that are subjects in the KG (have forward-lookup facts)
+    subject_spans = [s for s in entity_spans if kg.lookup(subject=s["entity"])]
+    primary = subject_spans[0] if subject_spans else entity_spans[0]
     entity_text = primary["entity"]
 
     predicate_phrase = extract_predicate_phrase(doc, entity_spans)

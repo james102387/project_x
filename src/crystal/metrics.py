@@ -74,6 +74,7 @@ def estimate_metrics(
     raw_cost = compute_proxy(raw_n)
 
     if prompt_type in ("pure_math", "math_answerable", "kg_answerable"):
+        # LLM bypassed entirely — 100% savings
         return TokenMetrics(
             raw_prompt_tokens=raw_n,
             compiled_prompt_tokens=0,
@@ -85,7 +86,7 @@ def estimate_metrics(
             prompt_type=prompt_type,
         )
 
-    if prompt_type == "math_augmented":
+    if prompt_type in ("math_augmented", "kg_augmented"):
         comp_n = count_tokens(compiled_prompt)
         comp_cost = compute_proxy(comp_n)
 
