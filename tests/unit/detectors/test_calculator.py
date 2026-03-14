@@ -1,7 +1,7 @@
 """Unit tests for explicit math pattern detectors."""
 
 import pytest
-from crystal.detectors.calculator import (
+from crystal.detectors.math.explicit import (
     match_verb_pattern,
     match_conjunction_pattern,
     match_noun_pattern,

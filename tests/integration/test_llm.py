@@ -2,7 +2,7 @@
 Integration tests that exercise the full LangGraph pipeline including LLM.
 
 All tests are marked @pytest.mark.llm and skipped by default.
-Run with:  pytest --run-llm tests/test_llm_integration.py -v
+Run with:  pytest --run-llm tests/integration/test_llm.py -v
 
 Uses the cached_llm fixture so only the first run hits the real API;
 subsequent runs replay from tests/fixtures/llm_cache.json.

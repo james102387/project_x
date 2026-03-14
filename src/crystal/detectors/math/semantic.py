@@ -10,7 +10,7 @@ Example: "John has 10 apples and buys 5 more"
     → result: 15
 """
 
-from .calculator import extract_numbers
+from .explicit import extract_numbers
 
 # ---------------------------------------------------------------------------
 # Verb-semantic classification

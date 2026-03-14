@@ -1,7 +1,7 @@
 """Unit tests for semantic verb pattern detection."""
 
 import pytest
-from crystal.detectors.semantic import match_semantic_verb_pattern, evaluate_semantic_steps
+from crystal.detectors.math.semantic import match_semantic_verb_pattern, evaluate_semantic_steps
 
 
 class TestSemanticVerbDetection:

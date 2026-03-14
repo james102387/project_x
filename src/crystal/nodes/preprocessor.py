@@ -29,4 +29,15 @@ def preprocessor_node(state: dict) -> dict:
                     "error": "Non-numeric arguments detected",
                 })
 
+        elif plan_item["tool"] == "kg":
+            results = plan_item.get("results", [])
+            preprocessed.append({
+                "tool": "kg",
+                "operation": "lookup",
+                "entity": plan_item["entity"],
+                "results": results,
+                "ready": bool(results),
+                **({"error": "No KG results found"} if not results else {}),
+            })
+
     return {"preprocessed": preprocessed}

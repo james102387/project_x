@@ -8,6 +8,7 @@ Prompt types:
   pure_math       — bare arithmetic, skip LLM entirely
   math_answerable — narrative math where Crystal has the full answer, skip LLM
   math_augmented  — math embedded in a question requiring LLM reasoning
+  kg_answerable   — KG lookup returned facts, skip LLM
   no_match        — no computable math detected
 """
 
@@ -48,6 +49,21 @@ MATH_AUGMENTED_CASES = [
     ("I started with 50 and lost 30, explain what happened", "math_augmented", 20),
 ]
 
+KG_ANSWERABLE_CASES = [
+    # Exact predicate
+    ("What is the capital of Remulak?", "kg_answerable", "Remulak — capital: Zelphos"),
+    ("Who is the leader of Remulak?", "kg_answerable", "Remulak — leader: Grand Vizier Korth"),
+    ("What is the population of Draveth?", "kg_answerable", "Draveth — population: 1.8 billion"),
+    # Alias predicates
+    ("What is the capital city of Remulak?", "kg_answerable", "Remulak — capital: Zelphos"),
+    ("Who is the head of state of Remulak?", "kg_answerable", "Remulak — leader: Grand Vizier Korth"),
+    ("What is the currency of Remulak?", "kg_answerable", "Remulak — currency: the Vreth"),
+    # Multi-word entity
+    ("How old is Grand Vizier Korth?", "kg_answerable", "Grand Vizier Korth — age: 142 standard years"),
+    # Question with "tell me"
+    ("Tell me about the climate of Draveth", "kg_answerable", "Draveth — climate: temperate with long dry seasons"),
+]
+
 NEGATIVE_CASES = [
     ("add me to the list", "no_match", None),
     ("the sum of all fears", "no_match", None),
@@ -68,4 +84,7 @@ NEGATIVE_CASES = [
 # Back-compat alias: tests that import MATH_IN_CONTEXT_CASES get the answerable set
 MATH_IN_CONTEXT_CASES = MATH_ANSWERABLE_CASES
 
-ALL_CASES = PURE_MATH_CASES + MATH_ANSWERABLE_CASES + MATH_AUGMENTED_CASES + NEGATIVE_CASES
+ALL_CASES = (
+    PURE_MATH_CASES + MATH_ANSWERABLE_CASES + MATH_AUGMENTED_CASES
+    + KG_ANSWERABLE_CASES + NEGATIVE_CASES
+)

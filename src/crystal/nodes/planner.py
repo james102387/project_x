@@ -13,14 +13,22 @@ def plan_builder_node(state: dict) -> dict:
 
     plan = []
     for detection in detections:
-        entry = {
-            "tool": detection["tool"],
-            "operation": detection["operation"],
-            "args": detection["raw_args"],
-        }
-        if detection["operation"] == "semantic_math":
-            entry["steps"] = detection.get("steps", [])
-            entry["result"] = detection.get("result")
-        plan.append(entry)
+        if detection["tool"] == "kg":
+            plan.append({
+                "tool": "kg",
+                "operation": "lookup",
+                "entity": detection["entity"],
+                "results": detection["results"],
+            })
+        else:
+            entry = {
+                "tool": detection["tool"],
+                "operation": detection["operation"],
+                "args": detection["raw_args"],
+            }
+            if detection["operation"] == "semantic_math":
+                entry["steps"] = detection.get("steps", [])
+                entry["result"] = detection.get("result")
+            plan.append(entry)
 
     return {"plan": plan, "fallback_to_llm": False}

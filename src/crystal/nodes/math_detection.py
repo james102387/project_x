@@ -1,10 +1,10 @@
-"""Calculator detector node — runs explicit and semantic pattern matchers."""
+"""Math detection node — runs explicit and semantic pattern matchers."""
 
-from crystal.detectors.calculator import EXPLICIT_PATTERNS
-from crystal.detectors.semantic import match_semantic_verb_pattern, evaluate_semantic_steps
+from crystal.detectors.math import EXPLICIT_PATTERNS
+from crystal.detectors.math import match_semantic_verb_pattern, evaluate_semantic_steps
 
 
-def calculator_detector_node(state: dict) -> dict:
+def math_detection_node(state: dict) -> dict:
     """
     Run all detection patterns against the spaCy doc.
 

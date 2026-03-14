@@ -20,8 +20,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 import numpy as np
 import spacy
 
-from crystal.detectors.calculator import EXPLICIT_PATTERNS
-from crystal.detectors.semantic import match_semantic_verb_pattern, evaluate_semantic_steps
+from crystal.detectors.math import EXPLICIT_PATTERNS
+from crystal.detectors.math import match_semantic_verb_pattern, evaluate_semantic_steps
 from crystal.nodes.compiler import _classify_prompt_type, _build_simplified_prompt
 from crystal.nodes.parser import show_parse
 from crystal.metrics import estimate_metrics

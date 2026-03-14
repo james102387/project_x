@@ -25,10 +25,14 @@ and accumulates information at each step.
 
 - **Calculator** — Explicit math (`5 + 3`, `add 5 and 3`, `the sum of 10 and 20`)
 - **Calculator (Semantic)** — Implied math via verb classification (`John has 10 apples and buys 5 more`)
+- **Knowledge Graph** — Generic hash-table KG engine over `(subject, predicate, object)` triplets with forward and reverse indexes
+
+## Synthetic Datasets
+
+- **Remulak** — 75 triplets describing a fictional alien planet (geography, government, economy, culture). No LLM can answer from training data, proving KG value.
 
 ## Planned Tools
 
-- **Knowledge Graph** — Static hash table lookup with synonym resolution
 - **KG Crystallization** — Automated knowledge promotion and maintenance
 
 ## Setup
@@ -62,26 +66,41 @@ crystal/
 │   ├── state.py            # CrystalState schema
 │   ├── graph.py            # LangGraph wiring
 │   ├── llm.py              # LLM client wrapper
+│   ├── metrics.py          # Token counting and savings metrics
+│   ├── data/
+│   │   └── remulak.py      # Remulak synthetic triplet dataset (pure data)
 │   ├── detectors/
-│   │   ├── calculator.py   # Explicit math pattern matchers
-│   │   └── semantic.py     # Verb-semantic word problem detection
+│   │   ├── math/
+│   │   │   ├── explicit.py # Explicit math pattern matchers
+│   │   │   └── semantic.py # Verb-semantic word problem detection
+│   │   └── kg.py           # KG entity + question structure detector
 │   ├── tools/
-│   │   └── calculator.py   # NumPy calculator execution
+│   │   ├── calculator.py   # NumPy calculator execution
+│   │   └── kg/
+│   │       ├── graph.py    # Generic KG hash-table engine
+│   │       └── remulak.py  # Remulak convenience instance
 │   └── nodes/
-│       ├── parser.py       # spaCy parser node
-│       ├── detector.py     # Calculator detector node
-│       ├── planner.py      # Plan builder node
-│       ├── preprocessor.py # Preprocessor node
-│       ├── compiler.py     # Prompt compiler node
-│       └── llm_nodes.py    # LLM augmented + fallback nodes
+│       ├── parser.py         # spaCy parser node
+│       ├── math_detection.py # Math detection node
+│       ├── kg_detection.py   # KG detection node
+│       ├── kg.py             # KG execution node
+│       ├── planner.py        # Plan builder node
+│       ├── preprocessor.py   # Preprocessor node
+│       ├── compiler.py       # Prompt compiler node
+│       └── llm_nodes.py      # LLM augmented + fallback nodes
 ├── tests/
+│   ├── conftest.py         # Shared fixtures (spaCy nlp, LLM cache)
 │   ├── golden/
 │   │   └── test_cases.py   # Hand-crafted golden test cases
-│   ├── test_detectors.py   # Unit tests for pattern matchers
-│   ├── test_semantic.py    # Unit tests for semantic verb detection
-│   ├── test_compiler.py    # Unit tests for prompt classification + compilation
-│   ├── test_pipeline.py    # Integration tests (full local pipeline)
-│   └── conftest.py         # Shared fixtures (spaCy nlp, sample docs)
+│   ├── fixtures/
+│   │   └── llm_cache.json  # Cached LLM responses for offline testing
+│   ├── unit/
+│   │   ├── detectors/      # Calculator, semantic, KG detector tests
+│   │   ├── tools/          # KG tool (lookup, aliases, entity index) tests
+│   │   └── nodes/          # Compiler, metrics tests
+│   └── integration/
+│       ├── test_pipeline.py  # Full local pipeline (no LLM)
+│       └── test_llm.py       # Full LangGraph pipeline (requires API key)
 ├── scripts/
 │   └── run.py              # Interactive runner (golden tests, single prompts, parse trees)
 ├── docs/

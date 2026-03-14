@@ -1,132 +1,63 @@
 # Crystal Development Log
 
-Reverse-chronological record of changes, decisions, and known issues.
-Point the LLM at this file at the start of each session for full context.
+Reverse-chronological record of changes and decisions.
+Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.md`.
+
+---
+
+## Active Focus
+
+Update this section each session with current priorities.
+
+- **KG integration:** detector, execution node, and compiler wired into graph. Needs golden test benchmarks.
+- **Benchmarking:** baseline (naked LLM) vs treatment (Crystal + tools) accuracy comparison not yet run.
+- **math_augmented cost:** compiled prompts are longer than raw — by design, but worth revisiting.
+
+---
+
+## 2026-03-14 — Module Restructuring
+
+### What changed
+- Moved `detectors/calculator.py` + `detectors/semantic.py` into `detectors/math/` subfolder
+  - `calculator.py` → `explicit.py`, `semantic.py` unchanged
+  - `__init__.py` re-exports all public symbols
+- Moved `tools/kg.py` + `tools/remulak_kg.py` into `tools/kg/` subfolder
+  - `kg.py` → `graph.py`, `remulak_kg.py` → `remulak.py`
+- Renamed `nodes/detector.py` → `nodes/math_detection.py`
+- Renamed `nodes/kg_detector.py` → `nodes/kg_detection.py`
+- Function names: `math_detection_node`, `kg_detection_node`
+- Graph node labels: `"math_detection"`, `"kg_detection"`
+- 149/149 passing, 5 skipped
+
+### Decisions
+- `semantic.py` grouped with calculator (same detection pipeline)
+- Node files use `_detection` (noun) not `_detector` (agent noun) to avoid
+  confusion with the actual detector modules in `detectors/`
 
 ---
 
 ## 2026-03-08 — Three-View Savings Metrics
 
-### What happened
-- Added `token_savings_pct`: raw token ratio reflecting actual API billing cost
-- Added `marginal_savings_pct`: marginal cost model `N + 2BN + N²` against a
-  configurable base context (default 2000 tokens)
-- Retained `savings_pct` as legacy isolated N+N² compute proxy
-- New `marginal_cost()` function in `metrics.py`
-- `estimate_metrics()` now accepts optional `base_context` parameter
-- `run.py` golden test output shows all three columns (TOKENS / ISOLATED / MARGINAL)
-- Single-prompt and full-graph displays updated to show all three views
-- 8 new tests for `marginal_cost` and the new savings fields; 95/95 passing
+### What changed
+- Three savings views: `token_savings_pct` (billing), `marginal_savings_pct` (contextual cost), `savings_pct` (legacy)
+- New `marginal_cost()` function, `estimate_metrics()` accepts `base_context` param
+- 8 new tests; 95/95 passing
 
-### Decisions made
-- Token and marginal views agree closely for math_augmented (~-314% vs ~-318%)
-  because user prompts are small relative to typical base contexts
-- Isolated N+N² overstated math_augmented penalty by ~5x (-1535% vs -314%)
-- Kept isolated metric for backwards compatibility but it's now clearly labelled
-
-### Known issues
-- math_augmented compiled prompts are still longer than raw (negative savings
-  across all three views) — this is by design; the value is accuracy
+### Decisions
+- Isolated N+N² overstated penalties ~5x; kept for backwards compat, clearly labelled
 
 ---
 
 ## 2026-03-08 — Token Metrics & math_answerable Bypass
 
-### What happened
-- Split `math_in_context` into `math_answerable` (LLM bypass) and `math_augmented`
-  (LLM required). All 11 former math_in_context golden cases are now math_answerable.
-- Added `REASONING_SIGNALS` set in compiler: advisory/explanatory/comparative/predictive
-  words trigger math_augmented; everything else bypasses the LLM.
-- Added `src/crystal/metrics.py`: tiktoken-based token counting, N + N^2 compute proxy,
-  `TokenMetrics` dataclass, `estimate_metrics()` function.
-- `call_llm` now returns `(text, usage_dict)` tuple with Gemini `usage_metadata`.
-- LLM nodes merge actual API token counts into `state["token_metrics"]`.
-- `scripts/run.py` displays token savings per prompt and summary by type.
-- Fixed `llm_fallback_node` not setting `prompt_type` (was empty string).
-- Fixed `llm_nodes.py` import binding so `cached_llm` monkeypatch works.
-- Seeded `tests/fixtures/llm_cache.json` so LLM tests pass without API key.
-- 3 new `math_augmented` golden cases, 13 new tests. 93/93 passing.
+### What changed
+- Split `math_in_context` → `math_answerable` (LLM bypass) + `math_augmented` (LLM required)
+- `REASONING_SIGNALS` set gates augmented path; default is bypass
+- tiktoken-based metrics, Gemini `usage_metadata` integration
+- 3 new golden cases, 13 new tests; 93/93 passing
 
-### Decisions made
-- `math_answerable` returns bare numeric result (same as `pure_math`)
-- `REASONING_SIGNALS` is conservative: default is bypass, only explicit reasoning
-  demands go to LLM
-- tiktoken `cl100k_base` for token counting — approximate but sufficient for
-  relative comparisons
-
-### Known issues
-- `math_augmented` compiled prompts are longer than raw prompts (negative savings)
-  — this is expected; the value is accuracy, not token reduction
-- LLM cache contains canned responses, not real Gemini output
-
-### Next steps
-1. Run with real API key to populate cache with actual Gemini responses
-2. Measure accuracy delta: math_answerable direct return vs LLM-narrated response
-3. Begin KG tool implementation
-
----
-
-## 2026-03-08 — LLM Test Infrastructure
-
-### What happened
-- Added `--run-llm` pytest flag: LLM integration tests are skipped by default,
-  opt-in with `pytest --run-llm`
-- Added `cached_llm` fixture: caches real Gemini responses to
-  `tests/fixtures/llm_cache.json` so only the first run hits the API
-- Created `tests/test_llm_integration.py` with tests for all three graph paths
-  (augmented, fallback, direct return)
-- Made Gemini client lazy-init in `src/crystal/llm.py` so imports work without
-  `GOOGLE_API_KEY` set (was crashing test collection)
-
-### Decisions made
-- LLM tests gated behind a flag rather than always-on — prevents accidental
-  API spending and rate limiting during normal development
-- Cache keyed by SHA-256 of prompt text; delete the JSON file to force refresh
-
-### Known issues
-- `tests/fixtures/llm_cache.json` does not exist yet; first `pytest --run-llm`
-  invocation will create it (requires `GOOGLE_API_KEY` env var)
-
-### Next steps
-1. Run `pytest --run-llm` once with a valid API key to populate the cache
-2. Decide whether to commit the cache file to git
-
----
-
-## 2026-02-15 — Project Scaffolding & Verb-Semantic Detection
-
-### What happened
-- Migrated from single-file Colab prototype to proper Python package structure
-- Decomposed monolithic `crystal_router.py` into modular `src/crystal/` package
-- Implemented verb-semantic detection for implied math word problems
-- Added three-way prompt classification (pure_math / math_in_context / no_match)
-- Created comprehensive test suite with golden test cases
-- Added `.cursorrules` following minimal-requirements approach (per ETH Zurich paper on context files)
-
-### What works
-- All 4 explicit addition patterns (verb, conjunction, noun, symbol): 14/14 passing
-- Semantic verb detection with acquire/lose/state classification
-- Zero false positives on all 14 negative test cases
-- Pure math queries skip LLM entirely
-- Prompt compiler injects results into simplified prompts for LLM
-
-### Known bugs
-- **Semantic verb conj-skip needs verification:** The fix to skip conjoined verb
-  children is in `detectors/semantic.py` but was never confirmed working (Colab
-  module cache issue). First priority: run pytest and check these cases:
-  - "Adam has 10 chairs, sells 6, and then makes 7 more" → expected: 11
-  - "I had 100 dollars, earned 50, and spent 30" → expected: 120
-
-### Known limitations
-- Calculator only supports addition (explicit) and add/subtract (semantic verbs)
-- Semantic verb list intentionally small (~15 verbs)
-- LLM integration untested (Gemini rate limits on free tier)
-
-### What's next
-1. Run pytest, fix any failing golden tests (especially conj-skip cases)
-2. Get LLM API working (add credits or switch provider)
-3. Run accuracy comparison: tool-augmented vs pure LLM
-4. Begin KG tool implementation
+### Decisions
+- Conservative bypass: only advisory/explanatory/comparative/predictive words trigger LLM
 
 ---
 
@@ -135,13 +66,10 @@ Point the LLM at this file at the start of each session for full context.
 ```
 ## YYYY-MM-DD — [Title]
 
-### What happened
+### What changed
 -
 
-### Decisions made
--
-
-### Known issues
+### Decisions
 -
 
 ### Next steps

@@ -11,7 +11,7 @@ class CrystalState(TypedDict):
     preprocessed: list[dict]
     tool_results: list[dict]
     compiled_prompt: str
-    prompt_type: str                # pure_math | math_answerable | math_augmented | no_math
+    prompt_type: str                # pure_math | math_answerable | math_augmented | kg_answerable | no_math
     llm_response: str
     final_response: str             # the actual output to the user
     fallback_to_llm: bool

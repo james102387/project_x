@@ -1,23 +1,24 @@
 """
 Prompt compiler node — the core of Crystal.
 
-Classifies the prompt into one of four types:
+Classifies the prompt into one of these types:
   pure_math:        "5 + 3"              → return result directly, skip LLM
   math_answerable:  "John has 10..."     → return result directly, skip LLM
   math_augmented:   "...is she wise?"    → inject result, simplify prompt for LLM
+  kg_answerable:    "What is the capital of Remulak?" → return KG facts, skip LLM
   no_math:          (shouldn't reach here — plan_builder catches it)
 """
 
 import numpy as np
 
 from crystal.metrics import estimate_metrics
-from crystal.detectors.calculator import (
+from crystal.detectors.math import (
     ADDITION_VERBS,
     ADDITION_CONJUNCTIONS,
     ADDITION_NOUNS,
     ADDITION_SYMBOLS,
+    ALL_SEMANTIC_VERBS,
 )
-from crystal.detectors.semantic import ALL_SEMANTIC_VERBS
 
 
 QUESTION_FILLER = {
@@ -26,8 +27,6 @@ QUESTION_FILLER = {
     "calculate", "compute", "?", "equals", "equal", "'s",
 }
 
-# Words that signal the user wants LLM reasoning beyond arithmetic.
-# If any of these appear in the prompt, classify as math_augmented.
 REASONING_SIGNALS = {
     # advisory
     "should", "wise", "wisely", "better", "recommend", "advice", "enough",
@@ -55,10 +54,15 @@ def _classify_prompt_type(raw_prompt: str, doc, tool_results: list[dict]) -> str
     pure_math:        every token is a number, math keyword, or question filler.
     math_answerable:  narrative framing around math, but no reasoning signals.
     math_augmented:   narrative math with reasoning signals requiring LLM.
+    kg_answerable:    KG lookup returned results — return facts directly.
     no_math:          no successful tool results.
     """
     if not tool_results or not any(r.get("success") for r in tool_results):
         return "no_math"
+
+    kg_results = [r for r in tool_results if r.get("tool") == "kg" and r.get("success")]
+    if kg_results:
+        return "kg_answerable"
 
     math_keywords = ADDITION_VERBS | ADDITION_CONJUNCTIONS | ADDITION_NOUNS | ADDITION_SYMBOLS
     all_filler = QUESTION_FILLER | math_keywords
@@ -92,6 +96,17 @@ def _format_result(result_val) -> str:
     if isinstance(result_val, float) and result_val == int(result_val):
         return str(int(result_val))
     return str(result_val)
+
+
+def _format_kg_results(tool_results: list[dict]) -> str:
+    """Format KG lookup results for direct display."""
+    lines = []
+    for r in tool_results:
+        if not r.get("success") or r.get("tool") != "kg":
+            continue
+        for fact in r["results"]:
+            lines.append(f"{fact['subject']} — {fact['predicate']}: {fact['object']}")
+    return "\n".join(lines)
 
 
 def _build_simplified_prompt(raw_prompt: str, tool_results: list[dict]) -> str:
@@ -132,6 +147,16 @@ def prompt_compiler_node(state: dict) -> dict:
     tool_results = state.get("tool_results", [])
 
     prompt_type = _classify_prompt_type(raw, doc, tool_results)
+
+    if prompt_type == "kg_answerable":
+        display = _format_kg_results(tool_results)
+        metrics = estimate_metrics(raw, "", prompt_type)
+        return {
+            "prompt_type": prompt_type,
+            "compiled_prompt": "",
+            "final_response": display,
+            "token_metrics": metrics.to_dict(),
+        }
 
     if prompt_type in ("pure_math", "math_answerable"):
         results = [r for r in tool_results if r.get("success")]

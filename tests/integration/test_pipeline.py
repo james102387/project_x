@@ -7,11 +7,14 @@ import pytest
 import numpy as np
 import spacy
 
-from crystal.detectors.calculator import EXPLICIT_PATTERNS
-from crystal.detectors.semantic import match_semantic_verb_pattern, evaluate_semantic_steps
-from crystal.nodes.compiler import _classify_prompt_type, _build_simplified_prompt
+from crystal.detectors.math import EXPLICIT_PATTERNS
+from crystal.detectors.math import match_semantic_verb_pattern, evaluate_semantic_steps
+from crystal.detectors.kg import detect_kg_query
+from crystal.nodes.compiler import _classify_prompt_type, _format_kg_results
+from crystal.tools.kg import remulak_kg
 from tests.golden.test_cases import (
-    PURE_MATH_CASES, MATH_ANSWERABLE_CASES, MATH_AUGMENTED_CASES, NEGATIVE_CASES,
+    PURE_MATH_CASES, MATH_ANSWERABLE_CASES, MATH_AUGMENTED_CASES,
+    KG_ANSWERABLE_CASES, NEGATIVE_CASES,
 )
 
 nlp = spacy.load("en_core_web_sm")
@@ -21,6 +24,7 @@ def run_local_pipeline(prompt: str) -> dict:
     """Run the full local pipeline (no LLM) and return results."""
     doc = nlp(prompt)
 
+    # --- Calculator detection ---
     detections = []
     for pattern_name, matcher in EXPLICIT_PATTERNS:
         args = matcher(doc)
@@ -46,6 +50,21 @@ def run_local_pipeline(prompt: str) -> dict:
                     "result": evaluation["result"],
                     "matched_pattern": "semantic_verb",
                 })
+
+    # --- KG detection (only if no calculator match) ---
+    if not detections:
+        kg_detection = detect_kg_query(doc, remulak_kg)
+        if kg_detection is not None:
+            tool_results = [{
+                "tool": "kg",
+                "operation": "lookup",
+                "entity": kg_detection["entity"],
+                "results": kg_detection["results"],
+                "success": True,
+            }]
+            prompt_type = _classify_prompt_type(prompt, doc, tool_results)
+            display = _format_kg_results(tool_results)
+            return {"prompt_type": prompt_type, "result": display}
 
     if not detections:
         return {"prompt_type": "no_match", "result": None}
@@ -88,6 +107,13 @@ def test_math_answerable(prompt, expected_type, expected_result):
 
 @pytest.mark.parametrize("prompt,expected_type,expected_result", MATH_AUGMENTED_CASES)
 def test_math_augmented(prompt, expected_type, expected_result):
+    result = run_local_pipeline(prompt)
+    assert result["prompt_type"] == expected_type
+    assert result["result"] == expected_result
+
+
+@pytest.mark.parametrize("prompt,expected_type,expected_result", KG_ANSWERABLE_CASES)
+def test_kg_answerable(prompt, expected_type, expected_result):
     result = run_local_pipeline(prompt)
     assert result["prompt_type"] == expected_type
     assert result["result"] == expected_result

@@ -73,7 +73,7 @@ def estimate_metrics(
     raw_n = count_tokens(raw_prompt)
     raw_cost = compute_proxy(raw_n)
 
-    if prompt_type in ("pure_math", "math_answerable"):
+    if prompt_type in ("pure_math", "math_answerable", "kg_answerable"):
         return TokenMetrics(
             raw_prompt_tokens=raw_n,
             compiled_prompt_tokens=0,

@@ -73,6 +73,12 @@ class TestEstimateMetrics:
         assert m.compiled_prompt_tokens == 0
         assert m.compiled_compute == 0
 
+    def test_kg_answerable_full_savings(self):
+        m = estimate_metrics("What is the capital of Remulak?", "", "kg_answerable")
+        assert m.savings_pct == 1.0
+        assert m.token_savings_pct == 1.0
+        assert m.marginal_savings_pct == 1.0
+
     def test_no_match_zero_savings(self):
         m = estimate_metrics("hello world", "hello world", "no_match")
         assert m.savings_pct == 0.0

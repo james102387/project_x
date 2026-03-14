@@ -43,6 +43,12 @@ class TestPromptClassification:
         doc = parse("hello")
         assert _classify_prompt_type("hello", doc, []) == "no_math"
 
+    def test_kg_answerable(self, parse):
+        prompt = "What is the capital of Remulak?"
+        doc = parse(prompt)
+        results = [{"success": True, "tool": "kg", "results": [{"subject": "Remulak", "predicate": "capital", "object": "Zelphos"}]}]
+        assert _classify_prompt_type(prompt, doc, results) == "kg_answerable"
+
 
 class TestSimplifiedPromptBuild:
     def test_explicit_math(self):
