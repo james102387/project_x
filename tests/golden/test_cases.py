@@ -108,14 +108,14 @@ NEGATIVE_CASES = [
 
 # Adversarial KG negatives — entities exist but the requested predicate doesn't.
 # These are used by the benchmark rubric (D1) to verify abstention behavior.
-# The pipeline detects the entity and returns all facts about it (subject scan),
-# so these classify as kg_answerable even though the specific answer isn't there.
+# The pipeline detects the entity and does a subject scan (predicate not found),
+# so these classify as kg_augmented — inject facts as context for LLM reasoning.
 # Zelphos is object-only (not a subject), so it gets no match.
 KG_ADVERSARIAL_NEGATIVES = [
-    ("What is the GDP of Remulak?", "kg_answerable", None),
-    ("Who was the leader before Grand Vizier Korth?", "kg_answerable", None),
-    ("What is the second largest city on Remulak?", "kg_answerable", None),
-    ("How many oceans does Remulak have?", "kg_answerable", None),
+    ("What is the GDP of Remulak?", "kg_augmented", None),
+    ("Who was the leader before Grand Vizier Korth?", "kg_augmented", None),
+    ("What is the second largest city on Remulak?", "kg_augmented", None),
+    ("How many oceans does Remulak have?", "kg_augmented", None),
     ("What is the population of Zelphos?", "no_match", None),
 ]
 

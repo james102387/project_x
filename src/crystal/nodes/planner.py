@@ -19,6 +19,7 @@ def plan_builder_node(state: dict) -> dict:
                 "operation": "lookup",
                 "entity": detection["entity"],
                 "results": detection["results"],
+                "lookup_type": detection.get("lookup_type", "subject_scan"),
             })
         else:
             entry = {

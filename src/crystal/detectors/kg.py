@@ -167,6 +167,7 @@ def detect_kg_query(
     entity_text = primary["entity"]
 
     predicate_phrase = extract_predicate_phrase(doc, entity_spans)
+    lookup_type = "subject_scan"
 
     if predicate_phrase:
         resolved = QUESTION_PREDICATE_MAP.get(predicate_phrase, predicate_phrase)
@@ -175,8 +176,12 @@ def detect_kg_query(
         if not results and resolved != predicate_phrase:
             results = kg.lookup(subject=entity_text, predicate=predicate_phrase)
 
+        if results:
+            lookup_type = "targeted"
+
     if not predicate_phrase or not results:
         results = kg.lookup(subject=entity_text)
+        lookup_type = "subject_scan"
 
     if not results:
         return None
@@ -187,6 +192,7 @@ def detect_kg_query(
         "entity": entity_text,
         "entity_spans": entity_spans,
         "predicate_phrase": predicate_phrase,
+        "lookup_type": lookup_type,
         "results": results,
         "matched_pattern": "entity_question",
     }

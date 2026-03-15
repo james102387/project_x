@@ -9,10 +9,30 @@ Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.
 
 Update this section each session with current priorities.
 
-- **D1 complete:** Minimal quality rubric implemented — 3-dimension scoring (accuracy, specificity, no-hallucination) across all benchmark paths.
+- **D1 complete:** Minimal quality rubric + subject-scan → `kg_augmented` routing.
 - **Next milestone:** D2 (KG ingestion pipeline), D3 (Web UI), D5 (fuzzy matching).
-- **Key insight:** Adversarial negatives revealed that entity-present/predicate-absent queries return full subject scans (kg_answerable), not no_match. The rubric's calibration dimension handles quality evaluation for these cases — the pipeline classification is correct.
-- **Test count:** 204 passing, 5 skipped.
+- **Key architectural insight:** Entity-found/predicate-not-found queries now route as `kg_augmented` (definitional grounding for LLM) instead of `kg_answerable` (raw fact dump). The `lookup_type` field in the detection result drives this.
+- **Test count:** 210 passing, 5 skipped.
+
+---
+
+## 2026-03-14 — Subject-scan fallback → kg_augmented
+
+### What changed
+- KG detector: detection result now includes `lookup_type` field (`"targeted"` or `"subject_scan"`)
+  - `targeted`: extracted predicate matched a KG predicate → specific fact(s)
+  - `subject_scan`: predicate extraction failed or didn't match → all entity facts
+- Compiler: `subject_scan` lookups route as `kg_augmented` (inject entity facts as context for LLM reasoning) instead of `kg_answerable` (dump facts, skip LLM)
+- `lookup_type` propagated through planner → preprocessor → execution node → tool_results
+- Benchmark runner: `kg_augmented` cases produce augmented prompts (not raw fact dumps)
+- Golden test cases: adversarial negatives updated from `kg_answerable` to `kg_augmented`
+- New unit tests: `test_targeted_lookup_type`, `test_subject_scan_lookup_type`, `test_alias_is_targeted`, `test_kg_augmented_subject_scan`, `test_kg_augmented_reasoning_signals_override`, `test_kg_answerable_no_lookup_type_backward_compat`
+- 210/210 passing, 5 skipped
+
+### Decisions
+- Predecessor case ("Who was the leader before Grand Vizier Korth?") — KG has `predecessor: Vizier Aamra Sel` but predicate extraction yields "leader before" which doesn't match. Stays as subject_scan → `kg_augmented`. Fuzzy matching (D5) would fix predicate resolution.
+- Missing `lookup_type` in tool_results (backward compat) defaults to `kg_answerable`, not `kg_augmented` — safer for existing code paths.
+- `kg_augmented` from subject_scan vs. reasoning signals is the same classification — both inject facts for LLM. The distinction matters for understanding *why* it was routed that way.
 
 ---
 
@@ -69,27 +89,6 @@ Update this section each session with current priorities.
 - `kg_augmented` uses same reasoning signals as `math_augmented` — keeps logic consistent
 - Benchmark scoring: substring match (case-insensitive, all match strings must appear)
 - Entity selection prefers KG subjects over objects to avoid picking object-only entities as primary
-
----
-
-## 2026-03-14 — Module Restructuring
-
-### What changed
-- Moved `detectors/calculator.py` + `detectors/semantic.py` into `detectors/math/` subfolder
-  - `calculator.py` → `explicit.py`, `semantic.py` unchanged
-  - `__init__.py` re-exports all public symbols
-- Moved `tools/kg.py` + `tools/remulak_kg.py` into `tools/kg/` subfolder
-  - `kg.py` → `graph.py`, `remulak_kg.py` → `remulak.py`
-- Renamed `nodes/detector.py` → `nodes/math_detection.py`
-- Renamed `nodes/kg_detector.py` → `nodes/kg_detection.py`
-- Function names: `math_detection_node`, `kg_detection_node`
-- Graph node labels: `"math_detection"`, `"kg_detection"`
-- 149/149 passing, 5 skipped
-
-### Decisions
-- `semantic.py` grouped with calculator (same detection pipeline)
-- Node files use `_detection` (noun) not `_detector` (agent noun) to avoid
-  confusion with the actual detector modules in `detectors/`
 
 ---
 

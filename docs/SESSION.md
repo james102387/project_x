@@ -16,4 +16,4 @@ Then clear the "Current Session" section for next time.
 
 ## Current Session
 
-(cleared — see DEVLOG entry "2026-03-14 — D1: Minimal Quality Rubric")
+(cleared — see DEVLOG entry "2026-03-14 — Subject-scan fallback → kg_augmented")

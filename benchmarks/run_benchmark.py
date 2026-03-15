@@ -63,7 +63,9 @@ def run_treatment(cases: list[tuple]) -> list[dict]:
     import spacy
 
     from crystal.detectors.kg import detect_kg_query
-    from crystal.nodes.compiler import _classify_prompt_type, _format_kg_results
+    from crystal.nodes.compiler import (
+        _classify_prompt_type, _format_kg_results, _build_kg_augmented_prompt,
+    )
     from crystal.tools.kg import remulak_kg
 
     nlp = spacy.load("en_core_web_sm")
@@ -83,11 +85,16 @@ def run_treatment(cases: list[tuple]) -> list[dict]:
                 "operation": "lookup",
                 "entity": detection["entity"],
                 "results": detection["results"],
+                "lookup_type": detection.get("lookup_type", "subject_scan"),
                 "success": True,
             }]
             prompt_type = _classify_prompt_type(question, doc, tool_results)
-            response = _format_kg_results(tool_results)
             kg_results = detection["results"]
+
+            if prompt_type == "kg_augmented":
+                response = _build_kg_augmented_prompt(question, tool_results)
+            else:
+                response = _format_kg_results(tool_results)
         else:
             prompt_type = "no_match"
             response = "[NO KG MATCH]"

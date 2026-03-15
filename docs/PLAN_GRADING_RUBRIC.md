@@ -98,11 +98,13 @@ Extended format (backward compatible — scoring checks tuple length):
 Where `is_negative: bool` indicates the system should abstain. Defaults to `False`.
 
 Add 5 adversarial negative cases:
-- "What is the GDP of Remulak?" (no GDP triplet)
-- "Who was the leader before Grand Vizier Korth?" (no predecessor triplet)
-- "What is the second largest city on Remulak?" (no such triplet)
-- "How many oceans does Remulak have?" (no ocean data)
-- "What is the population of Zelphos?" (Zelphos exists as object but has no population triplet)
+- "What is the GDP of Remulak?" (no GDP triplet → subject scan → `kg_augmented`)
+- "Who was the leader before Grand Vizier Korth?" (predecessor triplet exists but predicate extraction yields "leader before" which doesn't match → subject scan → `kg_augmented`)
+- "What is the second largest city on Remulak?" (no such triplet → subject scan → `kg_augmented`)
+- "How many oceans does Remulak have?" (no ocean data → subject scan → `kg_augmented`)
+- "What is the population of Zelphos?" (Zelphos is object-only, not a subject → `no_match`)
+
+**Implementation note:** Entity-found/predicate-not-found queries route as `kg_augmented` (not `kg_answerable`), injecting all known entity facts as definitional grounding for LLM reasoning. The `lookup_type` field (`"targeted"` vs `"subject_scan"`) in the detection result drives this classification.
 
 ### Files to Change
 

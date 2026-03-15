@@ -5,6 +5,27 @@ Only the most recent ~5 entries stay in `DEVLOG.md`.
 
 ---
 
+## 2026-03-14 — Module Restructuring
+
+### What changed
+- Moved `detectors/calculator.py` + `detectors/semantic.py` into `detectors/math/` subfolder
+  - `calculator.py` → `explicit.py`, `semantic.py` unchanged
+  - `__init__.py` re-exports all public symbols
+- Moved `tools/kg.py` + `tools/remulak_kg.py` into `tools/kg/` subfolder
+  - `kg.py` → `graph.py`, `remulak_kg.py` → `remulak.py`
+- Renamed `nodes/detector.py` → `nodes/math_detection.py`
+- Renamed `nodes/kg_detector.py` → `nodes/kg_detection.py`
+- Function names: `math_detection_node`, `kg_detection_node`
+- Graph node labels: `"math_detection"`, `"kg_detection"`
+- 149/149 passing, 5 skipped
+
+### Decisions
+- `semantic.py` grouped with calculator (same detection pipeline)
+- Node files use `_detection` (noun) not `_detector` (agent noun) to avoid
+  confusion with the actual detector modules in `detectors/`
+
+---
+
 ## 2026-03-08 — Three-View Savings Metrics
 
 ### What changed

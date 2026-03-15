@@ -109,3 +109,25 @@ class TestDetectKgQuery:
         result = detect_kg_query(doc, kg)
         assert result is not None
         assert result["entity"] == "grand vizier korth"
+
+    def test_targeted_lookup_type(self, kg):
+        doc = nlp("What is the capital of Remulak?")
+        result = detect_kg_query(doc, kg)
+        assert result is not None
+        assert result["lookup_type"] == "targeted"
+        assert len(result["results"]) == 1
+        assert result["results"][0]["predicate"] == "capital"
+
+    def test_subject_scan_lookup_type(self, kg):
+        doc = nlp("What is the GDP of Remulak?")
+        result = detect_kg_query(doc, kg)
+        assert result is not None
+        assert result["lookup_type"] == "subject_scan"
+        assert len(result["results"]) > 1
+
+    def test_alias_is_targeted(self, kg):
+        doc = nlp("What is the capital city of Remulak?")
+        result = detect_kg_query(doc, kg)
+        assert result is not None
+        assert result["lookup_type"] == "targeted"
+        assert result["results"][0]["predicate"] == "capital"

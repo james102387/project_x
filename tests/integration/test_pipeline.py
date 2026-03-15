@@ -61,6 +61,7 @@ def run_local_pipeline(prompt: str) -> dict:
                 "operation": "lookup",
                 "entity": kg_detection["entity"],
                 "results": kg_detection["results"],
+                "lookup_type": kg_detection.get("lookup_type", "subject_scan"),
                 "success": True,
             }]
             prompt_type = _classify_prompt_type(prompt, doc, tool_results)

@@ -36,6 +36,7 @@ def preprocessor_node(state: dict) -> dict:
                 "operation": "lookup",
                 "entity": plan_item["entity"],
                 "results": results,
+                "lookup_type": plan_item.get("lookup_type", "subject_scan"),
                 "ready": bool(results),
                 **({"error": "No KG results found"} if not results else {}),
             })

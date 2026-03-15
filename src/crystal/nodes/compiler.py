@@ -63,7 +63,10 @@ def _classify_prompt_type(raw_prompt: str, doc, tool_results: list[dict]) -> str
 
     kg_results = [r for r in tool_results if r.get("tool") == "kg" and r.get("success")]
     if kg_results:
-        if _has_reasoning_signals(doc):
+        has_subject_scan = any(
+            r.get("lookup_type") == "subject_scan" for r in kg_results
+        )
+        if _has_reasoning_signals(doc) or has_subject_scan:
             return "kg_augmented"
         return "kg_answerable"
 

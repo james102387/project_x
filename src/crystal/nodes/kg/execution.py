@@ -22,6 +22,7 @@ def kg_node(state: dict) -> dict:
             "operation": "lookup",
             "entity": item["entity"],
             "results": item["results"],
+            "lookup_type": item.get("lookup_type", "subject_scan"),
             "success": True,
         }
         tool_results.append(result_entry)

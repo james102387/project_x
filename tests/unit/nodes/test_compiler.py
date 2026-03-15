@@ -43,10 +43,44 @@ class TestPromptClassification:
         doc = parse("hello")
         assert _classify_prompt_type("hello", doc, []) == "no_math"
 
-    def test_kg_answerable(self, parse):
+    def test_kg_answerable_targeted(self, parse):
         prompt = "What is the capital of Remulak?"
         doc = parse(prompt)
-        results = [{"success": True, "tool": "kg", "results": [{"subject": "Remulak", "predicate": "capital", "object": "Zelphos"}]}]
+        results = [{
+            "success": True, "tool": "kg", "lookup_type": "targeted",
+            "results": [{"subject": "Remulak", "predicate": "capital", "object": "Zelphos"}],
+        }]
+        assert _classify_prompt_type(prompt, doc, results) == "kg_answerable"
+
+    def test_kg_augmented_subject_scan(self, parse):
+        prompt = "What is the GDP of Remulak?"
+        doc = parse(prompt)
+        results = [{
+            "success": True, "tool": "kg", "lookup_type": "subject_scan",
+            "results": [
+                {"subject": "Remulak", "predicate": "capital", "object": "Zelphos"},
+                {"subject": "Remulak", "predicate": "leader", "object": "Grand Vizier Korth"},
+            ],
+        }]
+        assert _classify_prompt_type(prompt, doc, results) == "kg_augmented"
+
+    def test_kg_augmented_reasoning_signals_override(self, parse):
+        prompt = "Why does Remulak have a technocratic council?"
+        doc = parse(prompt)
+        results = [{
+            "success": True, "tool": "kg", "lookup_type": "targeted",
+            "results": [{"subject": "Remulak", "predicate": "government type", "object": "technocratic council"}],
+        }]
+        assert _classify_prompt_type(prompt, doc, results) == "kg_augmented"
+
+    def test_kg_answerable_no_lookup_type_backward_compat(self, parse):
+        """Backward compat: missing lookup_type falls through to kg_answerable."""
+        prompt = "What is the capital of Remulak?"
+        doc = parse(prompt)
+        results = [{
+            "success": True, "tool": "kg",
+            "results": [{"subject": "Remulak", "predicate": "capital", "object": "Zelphos"}],
+        }]
         assert _classify_prompt_type(prompt, doc, results) == "kg_answerable"
 
 
