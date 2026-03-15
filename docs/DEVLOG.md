@@ -10,8 +10,25 @@ Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.
 Update this section each session with current priorities.
 
 - **MVP complete:** All 8 MVP tasks done. KG integration, benchmarks, golden tests all passing.
-- **Next milestone:** 2.0 items — multi-hop (dependent detection), mixed prompts, grading rubric.
+- **Next milestone:** Demo phase — make the value proposition experienceable. Minimal quality rubric (D1), KG ingestion pipeline (D2), web UI (D3).
+- **Key insight:** KG construction (offline batch/ETL) is a separate concern from query-time pipeline. LLM-based extraction for KG building does not undermine Crystal's value — the KG is a verified artifact at query time.
 - **math_augmented cost:** compiled prompts are longer than raw — by design, but worth revisiting.
+
+---
+
+## 2026-03-14 — Roadmap Restructure: Demo Phase
+
+### What changed
+- Restructured `TODO.md` from MVP/2.0 into three tiers: MVP (complete), Demo, Future
+- Demo phase: 5 tasks (D1–D5) focused on making the value proposition experienceable — quality rubric, KG ingestion pipeline, web UI, augmented benchmarks, fuzzy matching
+- Bifurcated `PLAN_GRADING_RUBRIC.md` into Phase 1 (3 dimensions: accuracy, specificity, no-hallucination) and Phase 2 (full 6-metric weighted composite)
+- Bifurcated `PLAN_FUZZY_MATCHING.md` into Phase 1 (entity aliases + rapidfuzz, no model downloads) and Phase 2 (embedding similarity via sentence-transformers)
+- Promoted fuzzy matching (D5) into Demo tier — exact-match-only entity resolution is a dealbreaker for user-supplied documents
+
+### Decisions
+- KG construction (offline batch/ETL) is architecturally separate from query-time pipeline — using an LLM for extraction does not undermine Crystal's deterministic query-time value
+- Quality rubric ships with demo but doesn't block it; fuzzy matching is a prerequisite
+- Suggested implementation order: D5 (fuzzy) → D2 (ingestion) → D3 (UI) → D1/D4 (rubric + benchmarks)
 
 ---
 
@@ -54,18 +71,6 @@ Update this section each session with current priorities.
 - `semantic.py` grouped with calculator (same detection pipeline)
 - Node files use `_detection` (noun) not `_detector` (agent noun) to avoid
   confusion with the actual detector modules in `detectors/`
-
----
-
-## 2026-03-08 — Three-View Savings Metrics
-
-### What changed
-- Three savings views: `token_savings_pct` (billing), `marginal_savings_pct` (contextual cost), `savings_pct` (legacy)
-- New `marginal_cost()` function, `estimate_metrics()` accepts `base_context` param
-- 8 new tests; 95/95 passing
-
-### Decisions
-- Isolated N+N² overstated penalties ~5x; kept for backwards compat, clearly labelled
 
 ---
 

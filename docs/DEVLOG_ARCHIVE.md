@@ -5,6 +5,18 @@ Only the most recent ~5 entries stay in `DEVLOG.md`.
 
 ---
 
+## 2026-03-08 — Three-View Savings Metrics
+
+### What changed
+- Three savings views: `token_savings_pct` (billing), `marginal_savings_pct` (contextual cost), `savings_pct` (legacy)
+- New `marginal_cost()` function, `estimate_metrics()` accepts `base_context` param
+- 8 new tests; 95/95 passing
+
+### Decisions
+- Isolated N+N² overstated penalties ~5x; kept for backwards compat, clearly labelled
+
+---
+
 ## 2026-03-08 — Token Metrics & math_answerable Bypass
 
 ### What changed

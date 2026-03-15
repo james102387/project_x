@@ -16,4 +16,4 @@ Then clear the "Current Session" section for next time.
 
 ## Current Session
 
-(cleared — see DEVLOG entry "2026-03-14 — MVP Complete")
+(cleared — see DEVLOG entry "2026-03-14 — Roadmap Restructure: Demo Phase")
