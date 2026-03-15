@@ -106,10 +106,24 @@ NEGATIVE_CASES = [
     ("What is the population of Tokyo?", "no_match", None),
 ]
 
+# Adversarial KG negatives — entities exist but the requested predicate doesn't.
+# These are used by the benchmark rubric (D1) to verify abstention behavior.
+# The pipeline detects the entity and returns all facts about it (subject scan),
+# so these classify as kg_answerable even though the specific answer isn't there.
+# Zelphos is object-only (not a subject), so it gets no match.
+KG_ADVERSARIAL_NEGATIVES = [
+    ("What is the GDP of Remulak?", "kg_answerable", None),
+    ("Who was the leader before Grand Vizier Korth?", "kg_answerable", None),
+    ("What is the second largest city on Remulak?", "kg_answerable", None),
+    ("How many oceans does Remulak have?", "kg_answerable", None),
+    ("What is the population of Zelphos?", "no_match", None),
+]
+
 # Back-compat alias: tests that import MATH_IN_CONTEXT_CASES get the answerable set
 MATH_IN_CONTEXT_CASES = MATH_ANSWERABLE_CASES
 
 ALL_CASES = (
     PURE_MATH_CASES + MATH_ANSWERABLE_CASES + MATH_AUGMENTED_CASES
     + KG_ANSWERABLE_CASES + KG_AUGMENTED_CASES + NEGATIVE_CASES
+    + KG_ADVERSARIAL_NEGATIVES
 )

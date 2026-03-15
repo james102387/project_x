@@ -15,6 +15,7 @@ from crystal.tools.kg import remulak_kg
 from tests.golden.test_cases import (
     PURE_MATH_CASES, MATH_ANSWERABLE_CASES, MATH_AUGMENTED_CASES,
     KG_ANSWERABLE_CASES, KG_AUGMENTED_CASES, NEGATIVE_CASES,
+    KG_ADVERSARIAL_NEGATIVES,
 )
 
 nlp = spacy.load("en_core_web_sm")
@@ -132,3 +133,9 @@ def test_negative(prompt, expected_type, expected_result):
     result = run_local_pipeline(prompt)
     assert result["prompt_type"] == "no_match"
     assert result["result"] is None
+
+
+@pytest.mark.parametrize("prompt,expected_type,expected_result", KG_ADVERSARIAL_NEGATIVES)
+def test_kg_adversarial_negative(prompt, expected_type, expected_result):
+    result = run_local_pipeline(prompt)
+    assert result["prompt_type"] == expected_type

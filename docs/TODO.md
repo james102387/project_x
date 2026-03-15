@@ -15,7 +15,7 @@
 
 The core pipeline works. Now someone needs to be able to *use* it.
 
-- [ ] **D1. Minimal quality rubric** — Extend benchmark scoring beyond binary substring match. Three dimensions: factual accuracy, specificity, no-hallucination. Score all three paths (answerable, augmented, fallback) so the safety invariant is measurable. See `docs/PLAN_GRADING_RUBRIC.md` Phase 1.
+- [x] **D1. Minimal quality rubric** — Extend benchmark scoring beyond binary substring match. Three dimensions: factual accuracy, specificity, no-hallucination. Score all three paths (answerable, augmented, fallback) so the safety invariant is measurable. See `docs/PLAN_GRADING_RUBRIC.md` Phase 1.
 - [ ] **D2. KG ingestion pipeline (offline)** — Batch process: documents → LLM-based entity/relationship extraction → validated `(subject, predicate, object)` triplets → `KnowledgeGraph`. This is an offline ETL job, completely separate from the query-time pipeline. Can be cron'd, reviewed, retried. Replaces old item 11.
 - [ ] **D3. Web UI** — Simple interface (Streamlit/Gradio to start): upload documents or paste a URL, Crystal ingests → builds KG, then ask questions. Side-by-side comparison (Crystal vs. naked LLM) to make the value visible. Include a pre-loaded sample KG so the demo works out of the box.
 - [ ] **D4. Augmented benchmark cases** — Extend benchmark ground truth to cover `kg_augmented` and `math_augmented` paths (not just answerable). These are the paths where Crystal could theoretically make things worse — need measurement.
