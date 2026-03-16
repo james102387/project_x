@@ -9,10 +9,31 @@ Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.
 
 Update this section each session with current priorities.
 
-- **D1 complete:** Minimal quality rubric + subject-scan → `kg_augmented` routing.
-- **Next milestone:** D2 (KG ingestion pipeline), D3 (Web UI), D5 (fuzzy matching).
-- **Key architectural insight:** Entity-found/predicate-not-found queries now route as `kg_augmented` (definitional grounding for LLM) instead of `kg_answerable` (raw fact dump). The `lookup_type` field in the detection result drives this.
-- **Test count:** 210 passing, 5 skipped.
+- **D1 complete, D5 complete:** Fuzzy matching (entity aliases + rapidfuzz) + multi-hop traversal.
+- **Next milestone:** D2 (KG ingestion pipeline), D3 (Web UI), D4 (augmented benchmark cases).
+- **Key architectural additions:** 3-tier resolution cascade (exact → alias → fuzzy) for both entities and predicates. Depth-limited recursive multi-hop traversal for related fact collection. Match tier metadata in detection results.
+- **Test count:** 255 passing, 5 skipped.
+
+---
+
+## 2026-03-16 — D5: Entity aliases + fuzzy matching + multi-hop traversal
+
+### What changed
+- New `src/crystal/tools/kg/fuzzy.py`: `fuzzy_match()` using `rapidfuzz.fuzz.token_sort_ratio`
+- `graph.py`: added `entity_aliases` param, `_resolve_entity()` (exact → alias → fuzzy cascade), `_resolve_predicate_fuzzy()` (same cascade for predicates), `subjects` property, `traverse()` (BFS depth-limited multi-hop, default depth=2)
+- `data/remulak.py`: `ENTITY_ALIASES` dict (~20 entries) mapping short forms to canonical entities
+- `detectors/kg.py`: `find_entity_spans()` now uses 3-tier cascade with spaCy noun phrase extraction as fallback, length-ratio guard against derived forms (e.g., "Remulakian" ≠ "Remulak"), `detect_kg_query()` accepts `multi_hop` and `max_depth` params, detection results include `match_tier`, `match_score`, `original_text`, `predicate_match_tier`
+- `QUESTION_PREDICATE_MAP`: added `"long last" → "duration"`, `"long" → "duration"`
+- `requirements.txt`: added `rapidfuzz>=3.0.0`
+- Golden test cases: 3 alias cases + 2 fuzzy string cases
+- Unit tests: `test_fuzzy.py` (8 tests), expanded `test_kg.py` (entity aliases, fuzzy entity, fuzzy predicate, multi-hop traversal, subjects property — 20+ new tests), expanded `test_kg.py` detector tests (match_tier, alias detection, fuzzy detection, multi-hop detection)
+- 255/255 passing, 5 skipped
+
+### Decisions
+- Length-ratio guard (0.7–1.3) on fuzzy entity matches from noun phrase extraction prevents derived adjectives ("Remulakian") from fuzzy-matching their base entity ("Remulak")
+- Entity aliases include article variants ("the fracture war" alongside "fracture war") because spaCy noun phrase extraction includes determiners
+- Multi-hop is opt-in (`multi_hop=False` default) — caller decides when to expand; keeps subject_scan as the default fallback for backward compatibility
+- Multi-hop uses BFS with visited set for cycle prevention, collects only facts where objects are also KG subjects (avoids expanding leaf values like "Zelphos" that have no forward facts)
 
 ---
 
@@ -68,27 +89,6 @@ Update this section each session with current priorities.
 - KG construction (offline batch/ETL) is architecturally separate from query-time pipeline — using an LLM for extraction does not undermine Crystal's deterministic query-time value
 - Quality rubric ships with demo but doesn't block it; fuzzy matching is a prerequisite
 - Suggested implementation order: D5 (fuzzy) → D2 (ingestion) → D3 (UI) → D1/D4 (rubric + benchmarks)
-
----
-
-## 2026-03-14 — MVP Complete: KG Integration + Benchmarks
-
-### What changed
-- `CrystalState` schema: added `kg_detections`, `kg_results`, `kg_entities_found` fields
-- KG detection node: removed math-priority gate — both math and KG detectors now fire independently
-- KG execution node: populates new `kg_results` state field
-- Compiler: added `kg_augmented` path (grounded KG facts + reasoning signals → LLM)
-- KG detector: added `QUESTION_PREDICATE_MAP` entries (`born → birthplace`, `known → known for`), `why` to question words, subject-entity preference in entity selection
-- Metrics: `kg_augmented` treated same as `math_augmented` for savings calculation
-- Golden tests: expanded from 8 → 20 KG answerable cases, added 3 KG augmented + 3 KG negative cases
-- Benchmark infrastructure: `benchmarks/` with ground truth (20 questions), auto-scoring, baseline and treatment runners
-- Treatment benchmark: **100% accuracy** (20/20)
-- 167/167 passing, 5 skipped
-
-### Decisions
-- `kg_augmented` uses same reasoning signals as `math_augmented` — keeps logic consistent
-- Benchmark scoring: substring match (case-insensitive, all match strings must appear)
-- Entity selection prefers KG subjects over objects to avoid picking object-only entities as primary
 
 ---
 

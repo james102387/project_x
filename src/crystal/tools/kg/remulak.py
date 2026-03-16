@@ -5,10 +5,14 @@ Usage:
     remulak_kg.lookup(subject="Remulak", predicate="capital")
 """
 
-from crystal.data.remulak import PREDICATE_ALIASES, TRIPLETS
+from crystal.data.remulak import ENTITY_ALIASES, PREDICATE_ALIASES, TRIPLETS
 from .graph import KnowledgeGraph
 
-kg = KnowledgeGraph(TRIPLETS, predicate_aliases=PREDICATE_ALIASES)
+kg = KnowledgeGraph(
+    TRIPLETS,
+    predicate_aliases=PREDICATE_ALIASES,
+    entity_aliases=ENTITY_ALIASES,
+)
 
 if __name__ == "__main__":
     print(f"Remulak KG: {kg}")

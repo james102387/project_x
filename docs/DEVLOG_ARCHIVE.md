@@ -5,6 +5,27 @@ Only the most recent ~5 entries stay in `DEVLOG.md`.
 
 ---
 
+## 2026-03-14 — MVP Complete: KG Integration + Benchmarks
+
+### What changed
+- `CrystalState` schema: added `kg_detections`, `kg_results`, `kg_entities_found` fields
+- KG detection node: removed math-priority gate — both math and KG detectors now fire independently
+- KG execution node: populates new `kg_results` state field
+- Compiler: added `kg_augmented` path (grounded KG facts + reasoning signals → LLM)
+- KG detector: added `QUESTION_PREDICATE_MAP` entries (`born → birthplace`, `known → known for`), `why` to question words, subject-entity preference in entity selection
+- Metrics: `kg_augmented` treated same as `math_augmented` for savings calculation
+- Golden tests: expanded from 8 → 20 KG answerable cases, added 3 KG augmented + 3 KG negative cases
+- Benchmark infrastructure: `benchmarks/` with ground truth (20 questions), auto-scoring, baseline and treatment runners
+- Treatment benchmark: **100% accuracy** (20/20)
+- 167/167 passing, 5 skipped
+
+### Decisions
+- `kg_augmented` uses same reasoning signals as `math_augmented` — keeps logic consistent
+- Benchmark scoring: substring match (case-insensitive, all match strings must appear)
+- Entity selection prefers KG subjects over objects to avoid picking object-only entities as primary
+
+---
+
 ## 2026-03-14 — Module Restructuring
 
 ### What changed

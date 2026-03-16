@@ -3,6 +3,7 @@ Knowledge Graph detector — matches prompts against KG entities.
 
 Two-stage detection:
 1. Entity recognition: scan tokens for spans matching known KG entities
+   (exact substring → alias → fuzzy cascade)
 2. Question structure: confirm the prompt is actually asking about the entity
    (WH-word, interrogative structure, or imperative like "tell me about")
 
@@ -18,7 +19,6 @@ from crystal.tools.kg.graph import KnowledgeGraph
 QUESTION_WORDS = {"what", "who", "where", "when", "which", "how", "whose", "whom", "why"}
 REQUEST_VERBS = {"tell", "describe", "explain", "show", "list", "give", "name"}
 
-# Words to strip when extracting predicate phrases from questions
 NOISE_WORDS = {
     "what", "who", "where", "when", "which", "how", "whose", "whom", "why",
     "is", "are", "was", "were", "the", "a", "an",
@@ -30,13 +30,14 @@ NOISE_WORDS = {
 def find_entity_spans(doc, kg: KnowledgeGraph) -> list[dict]:
     """Find token spans in the doc that match known KG entities.
 
-    Tries longest match first (multi-word entities like "Grand Vizier Korth"
-    before single-word entities like "Korth").
+    Uses a 3-tier cascade: exact substring → alias → fuzzy.
+    Tries longest match first (multi-word entities before single-word).
     """
     text_lower = doc.text.lower()
     matches = []
     matched_ranges: list[tuple[int, int]] = []
 
+    # Tier 1: exact substring scan against entity index
     sorted_entities = sorted(kg.entities, key=len, reverse=True)
 
     for entity in sorted_entities:
@@ -64,10 +65,82 @@ def find_entity_spans(doc, kg: KnowledgeGraph) -> list[dict]:
                 "entity": entity,
                 "char_start": idx,
                 "char_end": end,
+                "match_tier": "exact",
+                "match_score": 1.0,
+                "original_text": text_lower[idx:end],
             })
             start = end
 
+    if matches:
+        return matches
+
+    # Tier 2 & 3: alias / fuzzy — extract noun phrases from spaCy doc and
+    # try the KG's entity resolution cascade on each.
+    candidate_spans = _extract_candidate_spans(doc)
+
+    for span_text, char_start, char_end in candidate_spans:
+        resolved, tier = kg._resolve_entity(span_text)
+        if tier == "none":
+            continue
+        if _overlaps(char_start, char_end, matched_ranges):
+            continue
+
+        # Reject fuzzy matches where length differs too much (derived forms
+        # like "Remulakian" → "remulak" rather than genuine typos)
+        if tier == "fuzzy":
+            len_ratio = len(span_text) / max(len(resolved), 1)
+            if len_ratio > 1.3 or len_ratio < 0.7:
+                continue
+
+        score = 1.0 if tier in ("exact", "alias") else 0.0
+        if tier == "fuzzy":
+            from crystal.tools.kg.fuzzy import fuzzy_match
+            result = fuzzy_match(span_text, kg.entities, kg.fuzzy_threshold)
+            score = result[1] if result else 0.0
+
+        matched_ranges.append((char_start, char_end))
+        matches.append({
+            "entity": resolved,
+            "char_start": char_start,
+            "char_end": char_end,
+            "match_tier": tier,
+            "match_score": score,
+            "original_text": span_text,
+        })
+
     return matches
+
+
+def _extract_candidate_spans(doc) -> list[tuple[str, int, int]]:
+    """Extract candidate entity spans from spaCy noun chunks and named entities.
+
+    Returns (text_lower, char_start, char_end) tuples, longest first.
+    """
+    candidates: list[tuple[str, int, int]] = []
+    seen: set[tuple[int, int]] = set()
+
+    for ent in doc.ents:
+        key = (ent.start_char, ent.end_char)
+        if key not in seen:
+            seen.add(key)
+            candidates.append((ent.text.lower(), ent.start_char, ent.end_char))
+
+    for chunk in doc.noun_chunks:
+        key = (chunk.start_char, chunk.end_char)
+        if key not in seen:
+            seen.add(key)
+            candidates.append((chunk.text.lower(), chunk.start_char, chunk.end_char))
+
+    # Also try individual tokens that look like proper nouns
+    for token in doc:
+        if token.pos_ in ("PROPN", "NOUN") and len(token.text) > 2:
+            key = (token.idx, token.idx + len(token.text))
+            if key not in seen:
+                seen.add(key)
+                candidates.append((token.text.lower(), token.idx, token.idx + len(token.text)))
+
+    candidates.sort(key=lambda c: c[2] - c[1], reverse=True)
+    return candidates
 
 
 def _overlaps(start: int, end: int, ranges: list[tuple[int, int]]) -> bool:
@@ -122,7 +195,6 @@ def extract_predicate_phrase(doc, entity_spans: list[dict]) -> str | None:
 
         tokens.append(word)
 
-    # Strip trailing prepositions ("of", "in") that connected to the entity
     while tokens and tokens[-1] in ("of", "in", "on", "for", "from", "by"):
         tokens.pop()
 
@@ -130,7 +202,6 @@ def extract_predicate_phrase(doc, entity_spans: list[dict]) -> str | None:
     return phrase if phrase else None
 
 
-# Common question-word → predicate mappings for natural phrasing
 QUESTION_PREDICATE_MAP = {
     "old": "age",
     "big": "diameter",
@@ -142,17 +213,25 @@ QUESTION_PREDICATE_MAP = {
     "born": "birthplace",
     "known": "known for",
     "famous": "known for",
+    "long last": "duration",
+    "long": "duration",
 }
 
 
 def detect_kg_query(
     doc,
     kg: KnowledgeGraph,
+    *,
+    multi_hop: bool = False,
+    max_depth: int = 2,
 ) -> dict | None:
     """Run KG detection against a spaCy doc.
 
     Returns a detection dict if the prompt matches a KG entity AND has
     question structure, otherwise None.
+
+    When multi_hop=True, uses kg.traverse() to collect facts reachable
+    within max_depth hops from the primary entity.
     """
     entity_spans = find_entity_spans(doc, kg)
     if not entity_spans:
@@ -161,27 +240,55 @@ def detect_kg_query(
     if not has_question_structure(doc):
         return None
 
-    # Prefer entities that are subjects in the KG (have forward-lookup facts)
+    # Prefer entities that are KG subjects (have forward-lookup facts).
+    # Resolve through the cascade so aliases/fuzzy matches point to subjects.
     subject_spans = [s for s in entity_spans if kg.lookup(subject=s["entity"])]
     primary = subject_spans[0] if subject_spans else entity_spans[0]
     entity_text = primary["entity"]
 
+    entity_match_tier = primary.get("match_tier", "exact")
+    entity_match_score = primary.get("match_score", 1.0)
+    original_text = primary.get("original_text", entity_text)
+
     predicate_phrase = extract_predicate_phrase(doc, entity_spans)
     lookup_type = "subject_scan"
+    predicate_match_tier = "none"
+    results = []
 
     if predicate_phrase:
+        # Try QUESTION_PREDICATE_MAP first
         resolved = QUESTION_PREDICATE_MAP.get(predicate_phrase, predicate_phrase)
         results = kg.lookup(subject=entity_text, predicate=resolved)
 
-        if not results and resolved != predicate_phrase:
-            results = kg.lookup(subject=entity_text, predicate=predicate_phrase)
-
         if results:
             lookup_type = "targeted"
+            predicate_match_tier = "alias" if resolved != predicate_phrase else "exact"
+        else:
+            # Didn't match — try alias resolution (already in kg.lookup)
+            if resolved != predicate_phrase:
+                results = kg.lookup(subject=entity_text, predicate=predicate_phrase)
+                if results:
+                    lookup_type = "targeted"
+                    predicate_match_tier = "exact"
 
-    if not predicate_phrase or not results:
-        results = kg.lookup(subject=entity_text)
-        lookup_type = "subject_scan"
+        if not results:
+            # Tier 3: fuzzy predicate matching
+            fuzzy_pred, pred_tier = kg._resolve_predicate_fuzzy(
+                predicate_phrase, subject=entity_text,
+            )
+            if pred_tier != "none":
+                results = kg.lookup(subject=entity_text, predicate=fuzzy_pred)
+                if results:
+                    lookup_type = "targeted"
+                    predicate_match_tier = pred_tier
+
+    if not results:
+        if multi_hop:
+            results = kg.traverse(entity_text, max_depth=max_depth)
+            lookup_type = "multi_hop"
+        else:
+            results = kg.lookup(subject=entity_text)
+            lookup_type = "subject_scan"
 
     if not results:
         return None
@@ -195,4 +302,8 @@ def detect_kg_query(
         "lookup_type": lookup_type,
         "results": results,
         "matched_pattern": "entity_question",
+        "match_tier": entity_match_tier,
+        "match_score": entity_match_score,
+        "original_text": original_text,
+        "predicate_match_tier": predicate_match_tier,
     }

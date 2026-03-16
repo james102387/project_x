@@ -119,6 +119,27 @@ KG_ADVERSARIAL_NEGATIVES = [
     ("What is the population of Zelphos?", "no_match", None),
 ]
 
+# ── Fuzzy matching cases (D5) ──────────────────────────────────────────────
+# Format: (prompt, expected_type, expected_result_or_None)
+# These test the 3-tier entity/predicate resolution cascade.
+
+KG_FUZZY_ENTITY_ALIAS_CASES = [
+    # Entity alias: "Korth" → "Grand Vizier Korth"
+    ("How old is Korth?", "kg_answerable", "Grand Vizier Korth — age: 142 standard years"),
+    # Entity alias: "Quorum" → "The Quorum of Twelve"
+    ("What is the term length of the Quorum?", "kg_answerable", "The Quorum of Twelve — term length: 25 standard years"),
+    # Entity alias: "Fracture War" → "The Sulari Fracture War"
+    ("How long did the Fracture War last?", "kg_answerable", "The Sulari Fracture War — duration: 12 standard years"),
+]
+
+KG_FUZZY_STRING_CASES = [
+    # Typo: "Remulack" fuzzy → "remulak"
+    ("What is the capital of Remulack?", "kg_answerable", "Remulak — capital: Zelphos"),
+    # Typo: "Draevth" fuzzy → "draveth"
+    ("What is the population of Draevth?", "kg_answerable", "Draveth — population: 1.8 billion"),
+]
+
+
 # Back-compat alias: tests that import MATH_IN_CONTEXT_CASES get the answerable set
 MATH_IN_CONTEXT_CASES = MATH_ANSWERABLE_CASES
 
@@ -126,4 +147,5 @@ ALL_CASES = (
     PURE_MATH_CASES + MATH_ANSWERABLE_CASES + MATH_AUGMENTED_CASES
     + KG_ANSWERABLE_CASES + KG_AUGMENTED_CASES + NEGATIVE_CASES
     + KG_ADVERSARIAL_NEGATIVES
+    + KG_FUZZY_ENTITY_ALIAS_CASES + KG_FUZZY_STRING_CASES
 )

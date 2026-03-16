@@ -16,6 +16,7 @@ from tests.golden.test_cases import (
     PURE_MATH_CASES, MATH_ANSWERABLE_CASES, MATH_AUGMENTED_CASES,
     KG_ANSWERABLE_CASES, KG_AUGMENTED_CASES, NEGATIVE_CASES,
     KG_ADVERSARIAL_NEGATIVES,
+    KG_FUZZY_ENTITY_ALIAS_CASES, KG_FUZZY_STRING_CASES,
 )
 
 nlp = spacy.load("en_core_web_sm")
@@ -140,3 +141,17 @@ def test_negative(prompt, expected_type, expected_result):
 def test_kg_adversarial_negative(prompt, expected_type, expected_result):
     result = run_local_pipeline(prompt)
     assert result["prompt_type"] == expected_type
+
+
+@pytest.mark.parametrize("prompt,expected_type,expected_result", KG_FUZZY_ENTITY_ALIAS_CASES)
+def test_kg_fuzzy_entity_alias(prompt, expected_type, expected_result):
+    result = run_local_pipeline(prompt)
+    assert result["prompt_type"] == expected_type
+    assert result["result"] == expected_result
+
+
+@pytest.mark.parametrize("prompt,expected_type,expected_result", KG_FUZZY_STRING_CASES)
+def test_kg_fuzzy_string(prompt, expected_type, expected_result):
+    result = run_local_pipeline(prompt)
+    assert result["prompt_type"] == expected_type
+    assert result["result"] == expected_result

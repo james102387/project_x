@@ -4,7 +4,6 @@ import pytest
 from crystal.tools.kg import KnowledgeGraph
 
 
-
 # ── Fixtures ───────────────────────────────────────────────────────────────
 
 SAMPLE_TRIPLETS = [
@@ -14,7 +13,9 @@ SAMPLE_TRIPLETS = [
     ("Draveth", "capital", "Zelphos"),
     ("Draveth", "climate", "temperate with long dry seasons"),
     ("Grand Vizier Korth", "real name", "Korth Vellan"),
+    ("Grand Vizier Korth", "age", "142 standard years"),
     ("resonance crystals", "found in", "Sulari"),
+    ("Sulari", "known for", "mining and heavy industry"),
 ]
 
 SAMPLE_ALIASES = {
@@ -29,10 +30,20 @@ SAMPLE_ALIASES = {
     "where found": "found in",
 }
 
+SAMPLE_ENTITY_ALIASES = {
+    "korth": "grand vizier korth",
+    "vizier korth": "grand vizier korth",
+    "korth vellan": "grand vizier korth",
+}
+
 
 @pytest.fixture
 def kg():
-    return KnowledgeGraph(SAMPLE_TRIPLETS, predicate_aliases=SAMPLE_ALIASES)
+    return KnowledgeGraph(
+        SAMPLE_TRIPLETS,
+        predicate_aliases=SAMPLE_ALIASES,
+        entity_aliases=SAMPLE_ENTITY_ALIASES,
+    )
 
 
 @pytest.fixture
@@ -146,6 +157,85 @@ class TestPredicateAliases:
         assert results[0]["object"] == "Sulari"
 
 
+# ── Entity alias resolution ──────────────────────────────────────────────
+
+
+class TestEntityAliases:
+    def test_alias_resolves(self, kg):
+        resolved, tier = kg._resolve_entity("Korth")
+        assert resolved == "grand vizier korth"
+        assert tier == "alias"
+
+    def test_multi_word_alias(self, kg):
+        resolved, tier = kg._resolve_entity("Vizier Korth")
+        assert resolved == "grand vizier korth"
+        assert tier == "alias"
+
+    def test_exact_beats_alias(self, kg):
+        resolved, tier = kg._resolve_entity("Remulak")
+        assert resolved == "remulak"
+        assert tier == "exact"
+
+    def test_has_entity_with_alias(self, kg):
+        assert kg.has_entity("Korth")
+
+    def test_has_entity_exact(self, kg):
+        assert kg.has_entity("Remulak")
+
+    def test_has_entity_unknown(self, kg):
+        assert not kg.has_entity("Zarquon")
+
+    def test_no_entity_aliases(self, kg_no_aliases):
+        resolved, tier = kg_no_aliases._resolve_entity("Korth")
+        assert tier != "alias"
+
+
+# ── Fuzzy entity resolution ──────────────────────────────────────────────
+
+
+class TestFuzzyEntity:
+    def test_typo_fuzzy_match(self, kg):
+        resolved, tier = kg._resolve_entity("Remulack")
+        assert tier == "fuzzy"
+        assert resolved == "remulak"
+
+    def test_exact_beats_fuzzy(self, kg):
+        resolved, tier = kg._resolve_entity("Remulak")
+        assert tier == "exact"
+
+    def test_alias_beats_fuzzy(self, kg):
+        resolved, tier = kg._resolve_entity("Korth")
+        assert tier == "alias"
+
+    def test_no_match(self, kg):
+        resolved, tier = kg._resolve_entity("Zarquon the Destroyer")
+        assert tier == "none"
+
+
+# ── Fuzzy predicate resolution ────────────────────────────────────────────
+
+
+class TestFuzzyPredicate:
+    def test_exact_predicate(self, kg):
+        resolved, tier = kg._resolve_predicate_fuzzy("capital", subject="remulak")
+        assert resolved == "capital"
+        assert tier == "exact"
+
+    def test_alias_predicate(self, kg):
+        resolved, tier = kg._resolve_predicate_fuzzy("capital city", subject="remulak")
+        assert resolved == "capital"
+        assert tier == "alias"
+
+    def test_fuzzy_predicate(self, kg):
+        resolved, tier = kg._resolve_predicate_fuzzy("capitl", subject="remulak")
+        assert tier == "fuzzy"
+        assert resolved == "capital"
+
+    def test_no_match_predicate(self, kg):
+        resolved, tier = kg._resolve_predicate_fuzzy("gdp", subject="remulak")
+        assert tier == "none"
+
+
 # ── Entity index ──────────────────────────────────────────────────────────
 
 
@@ -175,6 +265,66 @@ class TestEntityIndex:
         assert "zelphos" in entities
         assert "korth vellan" in entities
 
+    def test_subjects_property(self, kg):
+        subjects = kg.subjects
+        assert isinstance(subjects, set)
+        assert "remulak" in subjects
+        assert "grand vizier korth" in subjects
+        assert "zelphos" not in subjects
+
+
+# ── Multi-hop traversal ──────────────────────────────────────────────────
+
+
+class TestMultiHopTraversal:
+    def test_depth_0_is_subject_scan(self, kg):
+        results = kg.traverse("Remulak", max_depth=0)
+        assert len(results) == 3
+        predicates = {r["predicate"] for r in results}
+        assert predicates == {"capital", "leader", "population"}
+
+    def test_depth_1_follows_objects(self, kg):
+        results = kg.traverse("Remulak", max_depth=1)
+        subjects = {r["subject"] for r in results}
+        assert "Remulak" in subjects
+        assert "Grand Vizier Korth" in subjects
+        assert "Draveth" not in subjects
+
+    def test_depth_2_follows_two_hops(self, kg):
+        results = kg.traverse("resonance crystals", max_depth=2)
+        subjects = {r["subject"] for r in results}
+        assert "resonance crystals" in subjects
+        assert "Sulari" in subjects
+
+    def test_default_depth_is_2(self, kg):
+        results_default = kg.traverse("Remulak")
+        results_explicit = kg.traverse("Remulak", max_depth=2)
+        assert results_default == results_explicit
+
+    def test_avoids_cycles(self):
+        cyclic = KnowledgeGraph([
+            ("A", "related", "B"),
+            ("B", "related", "A"),
+        ])
+        results = cyclic.traverse("A", max_depth=5)
+        assert len(results) == 2
+
+    def test_unknown_entity_returns_empty(self, kg):
+        results = kg.traverse("Zarquon")
+        assert results == []
+
+    def test_object_only_entity(self, kg):
+        results = kg.traverse("Zelphos")
+        assert results == []
+
+    def test_facts_are_unique(self, kg):
+        results = kg.traverse("Remulak", max_depth=2)
+        unique = []
+        for r in results:
+            if r not in unique:
+                unique.append(r)
+        assert len(results) == len(unique)
+
 
 # ── Construction ──────────────────────────────────────────────────────────
 
@@ -184,7 +334,7 @@ class TestConstruction:
         assert len(kg) == len(SAMPLE_TRIPLETS)
 
     def test_repr(self, kg):
-        assert "7 triplets" in repr(kg)
+        assert f"{len(SAMPLE_TRIPLETS)} triplets" in repr(kg)
 
     def test_empty_kg(self):
         kg = KnowledgeGraph([])

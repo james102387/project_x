@@ -125,6 +125,48 @@ TRIPLETS: list[tuple[str, str, str]] = [
 
 
 # ===================================================================
+# Entity aliases — maps common short forms / alternate names to
+# canonical entity strings as they appear in triplet subjects/objects.
+# Keys are lowercased at lookup time.
+# ===================================================================
+ENTITY_ALIASES: dict[str, str] = {
+    # government figures
+    "korth": "grand vizier korth",
+    "vizier korth": "grand vizier korth",
+    "korth vellan": "grand vizier korth",
+    "draya kess": "marshal draya kess",
+    "marshal kess": "marshal draya kess",
+    "kess": "marshal draya kess",
+    "orath yenn": "physicist orath yenn",
+    "yenn": "physicist orath yenn",
+    "aamra sel": "vizier aamra sel",
+
+    # organizations / groups
+    "quorum": "the quorum of twelve",
+    "quorum of twelve": "the quorum of twelve",
+    "quorum of 12": "the quorum of twelve",
+    "veldran guard": "the veldran guard",
+
+    # events / artifacts
+    "festival of vohn": "the festival of vohn",
+    "pellux cup": "the pellux cup",
+    "sulari fracture war": "the sulari fracture war",
+    "fracture war": "the sulari fracture war",
+    "the fracture war": "the sulari fracture war",
+    "crucible mines": "the crucible mines",
+    "the crucible mines": "the crucible mines",
+
+    # economy
+    "vreth": "the vreth",
+    "the vreth": "the vreth",
+
+    # species
+    "remulaki people": "remulaki",
+    "the remulaki": "remulaki",
+}
+
+
+# ===================================================================
 # Predicate aliases — maps alternate phrasings to canonical predicates
 # used in the triplets above. Keys are lowercased at lookup time.
 # ===================================================================

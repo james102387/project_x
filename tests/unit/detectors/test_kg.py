@@ -13,7 +13,10 @@ SAMPLE_TRIPLETS = [
     ("Remulak", "capital", "Zelphos"),
     ("Remulak", "leader", "Grand Vizier Korth"),
     ("Grand Vizier Korth", "real name", "Korth Vellan"),
+    ("Grand Vizier Korth", "age", "142 standard years"),
     ("Draveth", "climate", "temperate with long dry seasons"),
+    ("Draveth", "capital", "Zelphos"),
+    ("Sulari", "known for", "mining and heavy industry"),
 ]
 
 SAMPLE_ALIASES = {
@@ -21,10 +24,19 @@ SAMPLE_ALIASES = {
     "head of state": "leader",
 }
 
+SAMPLE_ENTITY_ALIASES = {
+    "korth": "grand vizier korth",
+    "vizier korth": "grand vizier korth",
+}
+
 
 @pytest.fixture
 def kg():
-    return KnowledgeGraph(SAMPLE_TRIPLETS, predicate_aliases=SAMPLE_ALIASES)
+    return KnowledgeGraph(
+        SAMPLE_TRIPLETS,
+        predicate_aliases=SAMPLE_ALIASES,
+        entity_aliases=SAMPLE_ENTITY_ALIASES,
+    )
 
 
 class TestEntitySpans:
@@ -57,6 +69,28 @@ class TestEntitySpans:
         spans = find_entity_spans(doc, kg)
         entities = {s["entity"] for s in spans}
         assert "remulak" not in entities
+
+    def test_match_tier_exact(self, kg):
+        doc = nlp("What is the capital of Remulak?")
+        spans = find_entity_spans(doc, kg)
+        remulak_span = next(s for s in spans if s["entity"] == "remulak")
+        assert remulak_span["match_tier"] == "exact"
+        assert remulak_span["match_score"] == 1.0
+
+    def test_alias_entity_match(self, kg):
+        doc = nlp("How old is Korth?")
+        spans = find_entity_spans(doc, kg)
+        assert len(spans) > 0
+        korth_span = next(s for s in spans if s["entity"] == "grand vizier korth")
+        assert korth_span["match_tier"] == "alias"
+
+    def test_fuzzy_entity_match(self, kg):
+        doc = nlp("What is the capital of Remulack?")
+        spans = find_entity_spans(doc, kg)
+        assert len(spans) > 0
+        match = spans[0]
+        assert match["match_tier"] == "fuzzy"
+        assert match["entity"] == "remulak"
 
 
 class TestQuestionStructure:
@@ -131,3 +165,39 @@ class TestDetectKgQuery:
         assert result is not None
         assert result["lookup_type"] == "targeted"
         assert result["results"][0]["predicate"] == "capital"
+
+    def test_match_tier_in_result(self, kg):
+        doc = nlp("What is the capital of Remulak?")
+        result = detect_kg_query(doc, kg)
+        assert result is not None
+        assert result["match_tier"] == "exact"
+        assert result["match_score"] == 1.0
+
+    def test_entity_alias_detection(self, kg):
+        doc = nlp("How old is Korth?")
+        result = detect_kg_query(doc, kg)
+        assert result is not None
+        assert result["entity"] == "grand vizier korth"
+        assert result["match_tier"] == "alias"
+
+    def test_fuzzy_entity_detection(self, kg):
+        doc = nlp("What is the capital of Remulack?")
+        result = detect_kg_query(doc, kg)
+        assert result is not None
+        assert result["entity"] == "remulak"
+        assert result["match_tier"] == "fuzzy"
+
+    def test_multi_hop_collects_related_facts(self, kg):
+        doc = nlp("Tell me about Remulak")
+        result = detect_kg_query(doc, kg, multi_hop=True, max_depth=1)
+        assert result is not None
+        assert result["lookup_type"] == "multi_hop"
+        subjects = {r["subject"] for r in result["results"]}
+        assert "Remulak" in subjects
+        assert "Grand Vizier Korth" in subjects
+
+    def test_multi_hop_default_off(self, kg):
+        doc = nlp("Tell me about Remulak")
+        result = detect_kg_query(doc, kg)
+        assert result is not None
+        assert result["lookup_type"] == "subject_scan"
