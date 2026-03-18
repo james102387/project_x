@@ -1,0 +1,12 @@
+{
+    "triplets": [
+        {"subject": "Remulak", "predicate": "capital", "object": "Zelphos"},
+        {"subject": "Remulak", "predicate": "population", "object": "4.3 billion"}
+    ],
+    "entity_aliases": {
+        "korth": "grand vizier korth"
+    },
+    "predicate_aliases": {
+        "capital city": "capital"
+    }
+}

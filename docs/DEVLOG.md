@@ -9,10 +9,32 @@ Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.
 
 Update this section each session with current priorities.
 
-- **D1, D5, D6 complete.** Reasoning cost benchmark infrastructure in place.
-- **Next milestone:** D2 (KG ingestion pipeline), D3 (Web UI), D4 (augmented benchmark cases).
-- **Key architectural additions:** `call_llm()` captures reasoning tokens. `ReasoningComparison` + `summarize_reasoning_comparisons()` for K-reduction analysis. Benchmark runner at `benchmarks/run_reasoning_benchmark.py`.
-- **Test count:** 278 passing, 5 skipped.
+- **D1, D2 Phase 1, D5, D6 complete.** KG ingestion pipeline (NER + hand-curated loaders) in place.
+- **Next milestone:** D2 Phase 2 (LLM-assisted extraction), D3 (Web UI), D4 (augmented benchmark cases).
+- **Key architectural additions:** `src/crystal/ingest/` package with NER extractor, CSV/JSON loaders, `ingest()` → `build_kg()` pipeline, CLI at `python -m crystal.ingest`.
+- **Test count:** 331 passing, 5 skipped.
+
+---
+
+## 2026-03-16 — D2 Phase 1: KG ingestion pipeline (NER + hand-curated)
+
+### What changed
+- New `src/crystal/ingest/` package:
+  - `schema.py`: `Triplet` dataclass (subject/predicate/object), `IngestResult` dataclass (triplets + alias maps + source), `merge()` for combining results
+  - `ner.py`: spaCy dep-tree-based triplet extraction. Five sentence patterns: copular (`X is Y`, including `of`-flip), possessive (`X has Y`), active transitive (`X verbs Y`), passive (`X was Vd by Y`), prepositional (`X verb PREP Y`). Handles hyphenated entities, determiner stripping, passive predicate text (not lemma).
+  - `loader.py`: CSV loader (auto-detects header), JSON loader (object-with-aliases format + flat array format), `load_file()` auto-detect
+  - `__init__.py`: top-level `ingest(path)` auto-detects format, `build_kg(result)` converts to `KnowledgeGraph`
+  - `__main__.py`: CLI entry point `python -m crystal.ingest <document>` with `--output` and `--format` flags
+- Test fixtures: `sample_triplets.csv`, `sample_triplets_no_header.csv`, `sample_triplets.json`, `sample_triplets_flat.json`, `sample_text.txt`
+- 53 new tests: `test_schema.py` (7), `test_ner.py` (19), `test_loader.py` (18), `test_integration.py` (9)
+- 331/331 passing, 5 skipped
+
+### Decisions
+- NER uses dep tree patterns rather than NER entity labels because `en_core_web_sm` misses most fiction entities — noun chunks + dependency structure are more reliable
+- Passive predicates use `token.text.lower()` not `token.lemma_` to avoid unintuitive lemma forms ("born" → "bear")
+- Copular `of`-flip checks both subject and attr for `prep(of)` to handle both "The capital of X is Y" and "Y is the capital of X"
+- Determiner stripping in `_span_text` only (not in `_get_subject_span`) — subjects keep their structure, objects get cleaned
+- `_join_tokens` collapses spaces around hyphens to preserve "Dark-ore" from spaCy's "Dark", "-", "ore" tokenization
 
 ---
 
@@ -71,25 +93,6 @@ Update this section each session with current priorities.
 - Predecessor case ("Who was the leader before Grand Vizier Korth?") — KG has `predecessor: Vizier Aamra Sel` but predicate extraction yields "leader before" which doesn't match. Stays as subject_scan → `kg_augmented`. Fuzzy matching (D5) would fix predicate resolution.
 - Missing `lookup_type` in tool_results (backward compat) defaults to `kg_answerable`, not `kg_augmented` — safer for existing code paths.
 - `kg_augmented` from subject_scan vs. reasoning signals is the same classification — both inject facts for LLM. The distinction matters for understanding *why* it was routed that way.
-
----
-
-## 2026-03-14 — D1: Minimal Quality Rubric
-
-### What changed
-- New `benchmarks/rubric.py`: `accuracy_score()`, `specificity_score()`, `grounding_score()`, `calibration_score()`, `score_rubric()`, `RubricResult` dataclass
-- Extended `benchmarks/ground_truth.py`: added `is_negative` field (4th tuple element) to all 20 existing cases + 5 adversarial negative cases (GDP, predecessor, second city, oceans, Zelphos population)
-- Updated `benchmarks/scoring.py`: added `score_batch_rubric()` that returns per-dimension averages alongside binary correct/incorrect
-- Updated `benchmarks/run_benchmark.py`: uses `score_batch_rubric()`, prints per-dimension breakdown and comparison
-- New `tests/unit/test_rubric.py`: 25 unit tests covering all scorers + batch integration + backward compatibility
-- Extended `tests/golden/test_cases.py`: added `KG_ADVERSARIAL_NEGATIVES` (5 cases)
-- Extended `tests/integration/test_pipeline.py`: parametrized tests for adversarial negatives
-- 204/204 passing, 5 skipped
-
-### Decisions
-- Adversarial negatives where entity exists but predicate doesn't still classify as `kg_answerable` (entity found → subject scan returns all facts). Rubric calibration dimension evaluates quality separately.
-- Added "no kg match" to `ABSTENTION_PHRASES` since the treatment pipeline emits `[NO KG MATCH]` for negative cases
-- `specificity_score` returns 1.0 for empty `kg_results` (vacuously satisfied) — avoids penalizing non-KG paths
 
 ---
 

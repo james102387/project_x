@@ -18,7 +18,7 @@ def _get_client():
 
 
 def _extract_usage(response) -> dict | None:
-    """Extract token usage from a Gemini response, including reasoning tokens."""
+    """Extract token usage from a Gemini response, including reasoning and cache tokens."""
     if not hasattr(response, "usage_metadata") or not response.usage_metadata:
         return None
     um = response.usage_metadata
@@ -26,6 +26,7 @@ def _extract_usage(response) -> dict | None:
         "prompt_tokens": getattr(um, "prompt_token_count", None),
         "output_tokens": getattr(um, "candidates_token_count", None),
         "reasoning_tokens": getattr(um, "thoughts_token_count", None),
+        "cached_tokens": getattr(um, "cached_content_token_count", None),
     }
     total = 0
     for key in ("prompt_tokens", "output_tokens", "reasoning_tokens"):

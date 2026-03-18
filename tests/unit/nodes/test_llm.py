@@ -13,11 +13,13 @@ class TestExtractUsage:
             prompt_token_count=50,
             candidates_token_count=30,
             thoughts_token_count=200,
+            cached_content_token_count=10,
         )
         usage = _extract_usage(response)
         assert usage["prompt_tokens"] == 50
         assert usage["output_tokens"] == 30
         assert usage["reasoning_tokens"] == 200
+        assert usage["cached_tokens"] == 10
         assert usage["total_tokens"] == 280
 
     def test_usage_without_reasoning(self):
@@ -30,6 +32,7 @@ class TestExtractUsage:
         assert usage["prompt_tokens"] == 40
         assert usage["output_tokens"] == 20
         assert usage["reasoning_tokens"] is None
+        assert usage["cached_tokens"] is None
         assert usage["total_tokens"] == 60
 
     def test_no_usage_metadata(self):
@@ -52,12 +55,14 @@ class TestUpdateMetricsFromUsage:
             "output_tokens": 30,
             "reasoning_tokens": 200,
             "total_tokens": 280,
+            "cached_tokens": 10,
         }
         result = _update_metrics_from_usage(metrics, usage)
         assert result["actual_prompt_tokens"] == 50
         assert result["actual_output_tokens"] == 30
         assert result["actual_reasoning_tokens"] == 200
         assert result["actual_total_tokens"] == 280
+        assert result["actual_cached_tokens"] == 10
         assert result["prompt_type"] == "kg_augmented"
 
     def test_no_usage_returns_unchanged(self):

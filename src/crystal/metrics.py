@@ -56,6 +56,7 @@ class TokenMetrics:
     actual_output_tokens: int | None = None
     actual_reasoning_tokens: int | None = None
     actual_total_tokens: int | None = None
+    actual_cached_tokens: int | None = None
 
     def to_dict(self) -> dict:
         return asdict(self)

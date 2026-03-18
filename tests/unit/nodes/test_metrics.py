@@ -159,15 +159,18 @@ class TestEstimateMetrics:
             actual_output_tokens=30,
             actual_reasoning_tokens=200,
             actual_total_tokens=280,
+            actual_cached_tokens=10,
         )
         d = m.to_dict()
         assert d["actual_reasoning_tokens"] == 200
         assert d["actual_total_tokens"] == 280
+        assert d["actual_cached_tokens"] == 10
 
     def test_reasoning_fields_default_none(self):
         m = TokenMetrics()
         assert m.actual_reasoning_tokens is None
         assert m.actual_total_tokens is None
+        assert m.actual_cached_tokens is None
 
 
 # ── Reasoning comparison ─────────────────────────────────────────────────
