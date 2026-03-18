@@ -9,10 +9,10 @@ Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.
 
 Update this section each session with current priorities.
 
-- **D1, D2 Phase 1, D5, D6 complete.** KG ingestion pipeline (NER + hand-curated loaders) in place.
-- **Next milestone:** D2 Phase 2 (LLM-assisted extraction), D3 (Web UI), D4 (augmented benchmark cases).
-- **Key architectural additions:** `src/crystal/ingest/` package with NER extractor, CSV/JSON loaders, `ingest()` → `build_kg()` pipeline, CLI at `python -m crystal.ingest`.
-- **Test count:** 331 passing, 5 skipped.
+- **D1, D2 Phase 1, D3, D5, D6 complete.** Web UI live at `python -m crystal.ui`.
+- **Next milestone:** D2 Phase 2 (LLM-assisted extraction), D4 (augmented benchmark cases).
+- **Key architectural additions:** KG injectable into pipeline via `make_initial_state(prompt, kg=custom_kg)`. Gradio UI at `src/crystal/ui/` with side-by-side Crystal vs. naked LLM comparison, document ingestion, KG explorer.
+- **Test count:** 351 passing, 5 skipped.
 
 ---
 
@@ -76,23 +76,22 @@ Update this section each session with current priorities.
 
 ---
 
-## 2026-03-14 — Subject-scan fallback → kg_augmented
+## 2026-03-17 — D3: Web UI (Gradio)
 
 ### What changed
-- KG detector: detection result now includes `lookup_type` field (`"targeted"` or `"subject_scan"`)
-  - `targeted`: extracted predicate matched a KG predicate → specific fact(s)
-  - `subject_scan`: predicate extraction failed or didn't match → all entity facts
-- Compiler: `subject_scan` lookups route as `kg_augmented` (inject entity facts as context for LLM reasoning) instead of `kg_answerable` (dump facts, skip LLM)
-- `lookup_type` propagated through planner → preprocessor → execution node → tool_results
-- Benchmark runner: `kg_augmented` cases produce augmented prompts (not raw fact dumps)
-- Golden test cases: adversarial negatives updated from `kg_answerable` to `kg_augmented`
-- New unit tests: `test_targeted_lookup_type`, `test_subject_scan_lookup_type`, `test_alias_is_targeted`, `test_kg_augmented_subject_scan`, `test_kg_augmented_reasoning_signals_override`, `test_kg_answerable_no_lookup_type_backward_compat`
-- 210/210 passing, 5 skipped
+- **KG injection into pipeline**: Added `kg` field to `CrystalState`, `make_initial_state(prompt, *, kg=None)` accepts optional KG override, `kg_detection_node` reads from `state["kg"]` or falls back to `remulak_kg`. Fully backward compatible.
+- **Gradio UI** at `src/crystal/ui/`:
+  - `app.py`: Two-tab layout. "Ask" tab: question input → side-by-side Crystal vs. naked LLM with route/token metadata. "Knowledge Graph" tab: file upload (CSV/JSON/TXT), paste text for NER extraction, reset to Remulak, scrollable facts table.
+  - `__main__.py`: `python -m crystal.ui` entry point
+  - Pre-loaded Remulak KG works out of the box, `gr.State` manages active KG across tabs
+- `requirements.txt`: added `gradio>=5.0.0`
+- 20 new tests: `test_kg_injection.py` (5), `test_ui_helpers.py` (12), plus 3 structural
+- 351/351 passing, 5 skipped
 
 ### Decisions
-- Predecessor case ("Who was the leader before Grand Vizier Korth?") — KG has `predecessor: Vizier Aamra Sel` but predicate extraction yields "leader before" which doesn't match. Stays as subject_scan → `kg_augmented`. Fuzzy matching (D5) would fix predicate resolution.
-- Missing `lookup_type` in tool_results (backward compat) defaults to `kg_answerable`, not `kg_augmented` — safer for existing code paths.
-- `kg_augmented` from subject_scan vs. reasoning signals is the same classification — both inject facts for LLM. The distinction matters for understanding *why* it was routed that way.
+- KG injection via state field (not factory/closure) — minimal invasive change, one line in detection node, full backward compat
+- Gradio Blocks over Streamlit — event-driven model maps directly to "user clicks Ask → both pipelines run → two boxes fill in", avoids rerun model side effects
+- UI is pure wiring — zero business logic in `app.py`, all calls go through existing `build_crystal_graph()`, `ingest()`, `build_kg()`, `call_llm()`
 
 ---
 

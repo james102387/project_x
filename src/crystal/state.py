@@ -17,13 +17,17 @@ class CrystalState(TypedDict):
     fallback_to_llm: bool
     token_metrics: dict
     # KG-specific fields
+    kg: Any                         # optional KnowledgeGraph override (None → remulak_kg)
     kg_detections: list[dict]       # entity/predicate detections from KG detector
     kg_results: list[dict]          # resolved KG lookup results
     kg_entities_found: list[str]    # entity strings matched in prompt
 
 
-def make_initial_state(prompt: str) -> CrystalState:
-    """Create a fresh state dict for a given prompt."""
+def make_initial_state(prompt: str, *, kg=None) -> CrystalState:
+    """Create a fresh state dict for a given prompt.
+
+    If kg is provided, it overrides the default remulak_kg for this run.
+    """
     return {
         "raw_prompt": prompt,
         "spacy_doc": None,
@@ -37,6 +41,7 @@ def make_initial_state(prompt: str) -> CrystalState:
         "final_response": "",
         "fallback_to_llm": False,
         "token_metrics": {},
+        "kg": kg,
         "kg_detections": [],
         "kg_results": [],
         "kg_entities_found": [],

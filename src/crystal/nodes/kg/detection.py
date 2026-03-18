@@ -10,11 +10,14 @@ def kg_detection_node(state: dict) -> dict:
 
     Runs after math detection. Always fires regardless of whether math
     detections exist — the planner merges both detection types.
+
+    Uses state["kg"] if provided, otherwise falls back to remulak_kg.
     """
     detections = list(state.get("tool_detections", []))
 
     doc = state["spacy_doc"]
-    detection = detect_kg_query(doc, remulak_kg)
+    kg = state.get("kg") or remulak_kg
+    detection = detect_kg_query(doc, kg)
 
     kg_detections = []
     kg_entities_found = []

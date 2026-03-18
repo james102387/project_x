@@ -5,6 +5,26 @@ Only the most recent ~5 entries stay in `DEVLOG.md`.
 
 ---
 
+## 2026-03-14 — Subject-scan fallback → kg_augmented
+
+### What changed
+- KG detector: detection result now includes `lookup_type` field (`"targeted"` or `"subject_scan"`)
+  - `targeted`: extracted predicate matched a KG predicate → specific fact(s)
+  - `subject_scan`: predicate extraction failed or didn't match → all entity facts
+- Compiler: `subject_scan` lookups route as `kg_augmented` (inject entity facts as context for LLM reasoning) instead of `kg_answerable` (dump facts, skip LLM)
+- `lookup_type` propagated through planner → preprocessor → execution node → tool_results
+- Benchmark runner: `kg_augmented` cases produce augmented prompts (not raw fact dumps)
+- Golden test cases: adversarial negatives updated from `kg_answerable` to `kg_augmented`
+- New unit tests: `test_targeted_lookup_type`, `test_subject_scan_lookup_type`, `test_alias_is_targeted`, `test_kg_augmented_subject_scan`, `test_kg_augmented_reasoning_signals_override`, `test_kg_answerable_no_lookup_type_backward_compat`
+- 210/210 passing, 5 skipped
+
+### Decisions
+- Predecessor case ("Who was the leader before Grand Vizier Korth?") — KG has `predecessor: Vizier Aamra Sel` but predicate extraction yields "leader before" which doesn't match. Stays as subject_scan → `kg_augmented`. Fuzzy matching (D5) would fix predicate resolution.
+- Missing `lookup_type` in tool_results (backward compat) defaults to `kg_answerable`, not `kg_augmented` — safer for existing code paths.
+- `kg_augmented` from subject_scan vs. reasoning signals is the same classification — both inject facts for LLM. The distinction matters for understanding *why* it was routed that way.
+
+---
+
 ## 2026-03-14 — D1: Minimal Quality Rubric
 
 ### What changed
