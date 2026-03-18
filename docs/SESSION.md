@@ -1,20 +1,15 @@
-# Session — 2026-03-16
+# Session — 2026-03-16 (cont.)
 
 ## Goal
-Implement D5: Entity aliases + fuzzy string matching + multi-hop recursive processor.
+Implement D6: Reasoning cost benchmark (K-reduction).
 
 ## Completed
-- `src/crystal/tools/kg/fuzzy.py` — `fuzzy_match()` with rapidfuzz
-- `src/crystal/data/remulak.py` — `ENTITY_ALIASES` dict (~20 entries)
-- `src/crystal/tools/kg/graph.py` — entity_aliases, `_resolve_entity()`, `_resolve_predicate_fuzzy()`, `subjects` property, `traverse()` (BFS multi-hop)
-- `src/crystal/tools/kg/remulak.py` — wired entity_aliases
-- `src/crystal/detectors/kg.py` — 3-tier cascade in `find_entity_spans()`, match_tier metadata, `multi_hop` param, length-ratio guard
-- `requirements.txt` — added rapidfuzz>=3.0.0
-- Golden test cases: 3 alias + 2 fuzzy string
-- Unit tests: 8 fuzzy, 20+ new KG tool tests, 8+ new detector tests
-- 255 passing, 5 skipped, 0 failed
-
-## Key decisions
-- Length-ratio guard (0.7–1.3) prevents derived adjectives from fuzzy-matching base entities
-- Entity aliases include article variants for spaCy compatibility
-- Multi-hop is opt-in (default off) for backward compat
+- `call_llm()` now captures `thoughts_token_count` via `_extract_usage()`
+- `TokenMetrics` extended with `actual_reasoning_tokens`, `actual_total_tokens`
+- New `ReasoningComparison` dataclass + `summarize_reasoning_comparisons()`
+- `llm_nodes.py` propagates all four token fields via `_update_metrics_from_usage()`
+- New `benchmarks/run_reasoning_benchmark.py` — full K-reduction benchmark harness
+- 23 new tests (test_llm.py + extended test_metrics.py)
+- 278/278 passing, 5 skipped
+- TODO.md: D6 marked complete
+- DEVLOG.md: D6 entry added, Roadmap Restructure archived

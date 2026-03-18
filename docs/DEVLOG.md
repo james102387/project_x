@@ -9,10 +9,27 @@ Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.
 
 Update this section each session with current priorities.
 
-- **D1 complete, D5 complete:** Fuzzy matching (entity aliases + rapidfuzz) + multi-hop traversal.
+- **D1, D5, D6 complete.** Reasoning cost benchmark infrastructure in place.
 - **Next milestone:** D2 (KG ingestion pipeline), D3 (Web UI), D4 (augmented benchmark cases).
-- **Key architectural additions:** 3-tier resolution cascade (exact → alias → fuzzy) for both entities and predicates. Depth-limited recursive multi-hop traversal for related fact collection. Match tier metadata in detection results.
-- **Test count:** 255 passing, 5 skipped.
+- **Key architectural additions:** `call_llm()` captures reasoning tokens. `ReasoningComparison` + `summarize_reasoning_comparisons()` for K-reduction analysis. Benchmark runner at `benchmarks/run_reasoning_benchmark.py`.
+- **Test count:** 278 passing, 5 skipped.
+
+---
+
+## 2026-03-16 — D6: Reasoning cost benchmark (K-reduction)
+
+### What changed
+- `src/crystal/llm.py`: Extracted `_extract_usage()` helper. Now captures `thoughts_token_count` (reasoning tokens) from Gemini usage metadata alongside prompt and output tokens. Computes `total_tokens` sum.
+- `src/crystal/metrics.py`: `TokenMetrics` extended with `actual_reasoning_tokens` and `actual_total_tokens`. New `ReasoningComparison` dataclass for per-query grounded-vs-ungrounded comparison with computed properties (`total_token_delta`, `reasoning_token_delta`, savings percentages). New `summarize_reasoning_comparisons()` aggregates per-query data into summary statistics.
+- `src/crystal/nodes/llm_nodes.py`: Extracted `_update_metrics_from_usage()` helper. Both augmented and fallback nodes propagate all four token fields (prompt, output, reasoning, total).
+- `benchmarks/run_reasoning_benchmark.py`: New benchmark runner. Runs identical queries through both naked LLM and Crystal-grounded pipeline using a thinking-capable model (default: gemini-2.5-flash). Records per-query: accuracy, prompt/output/reasoning/total tokens. Reports accuracy delta and token savings. Handles kg_answerable (LLM bypass = 0 tokens) and kg_augmented paths. CLI with `--model` and `--cases` flags.
+- 23 new unit tests: `_extract_usage` (4), `_update_metrics_from_usage` (3), `ReasoningComparison` (9), `summarize_reasoning_comparisons` (5), `TokenMetrics` reasoning fields (2)
+- 278/278 passing, 5 skipped
+
+### Decisions
+- Reasoning benchmark uses existing `BENCHMARK_CASES` from ground_truth.py rather than waiting for D4 — Remulak cases exercise both kg_answerable and kg_augmented paths, sufficient for initial K-reduction measurement
+- kg_answerable cases counted as 0 grounded tokens (LLM fully bypassed) — this is the strongest form of K-reduction
+- `_extract_usage()` made a module-level function (not method) so the reasoning benchmark can call it directly without going through `call_llm()`
 
 ---
 
@@ -73,22 +90,6 @@ Update this section each session with current priorities.
 - Adversarial negatives where entity exists but predicate doesn't still classify as `kg_answerable` (entity found → subject scan returns all facts). Rubric calibration dimension evaluates quality separately.
 - Added "no kg match" to `ABSTENTION_PHRASES` since the treatment pipeline emits `[NO KG MATCH]` for negative cases
 - `specificity_score` returns 1.0 for empty `kg_results` (vacuously satisfied) — avoids penalizing non-KG paths
-
----
-
-## 2026-03-14 — Roadmap Restructure: Demo Phase
-
-### What changed
-- Restructured `TODO.md` from MVP/2.0 into three tiers: MVP (complete), Demo, Future
-- Demo phase: 5 tasks (D1–D5) focused on making the value proposition experienceable — quality rubric, KG ingestion pipeline, web UI, augmented benchmarks, fuzzy matching
-- Bifurcated `PLAN_GRADING_RUBRIC.md` into Phase 1 (3 dimensions: accuracy, specificity, no-hallucination) and Phase 2 (full 6-metric weighted composite)
-- Bifurcated `PLAN_FUZZY_MATCHING.md` into Phase 1 (entity aliases + rapidfuzz, no model downloads) and Phase 2 (embedding similarity via sentence-transformers)
-- Promoted fuzzy matching (D5) into Demo tier — exact-match-only entity resolution is a dealbreaker for user-supplied documents
-
-### Decisions
-- KG construction (offline batch/ETL) is architecturally separate from query-time pipeline — using an LLM for extraction does not undermine Crystal's deterministic query-time value
-- Quality rubric ships with demo but doesn't block it; fuzzy matching is a prerequisite
-- Suggested implementation order: D5 (fuzzy) → D2 (ingestion) → D3 (UI) → D1/D4 (rubric + benchmarks)
 
 ---
 

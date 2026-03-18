@@ -4,6 +4,7 @@ import pytest
 from crystal.metrics import (
     count_tokens, compute_proxy, marginal_cost,
     estimate_metrics, TokenMetrics, DEFAULT_BASE_CONTEXT,
+    ReasoningComparison, summarize_reasoning_comparisons,
 )
 
 
@@ -148,3 +149,166 @@ class TestEstimateMetrics:
         assert d["marginal_savings_pct"] == 1.0
         assert d["prompt_type"] == "pure_math"
         assert "raw_prompt_tokens" in d
+
+    def test_to_dict_includes_reasoning_fields(self):
+        m = TokenMetrics(
+            raw_prompt_tokens=10,
+            compiled_prompt_tokens=5,
+            prompt_type="kg_augmented",
+            actual_prompt_tokens=50,
+            actual_output_tokens=30,
+            actual_reasoning_tokens=200,
+            actual_total_tokens=280,
+        )
+        d = m.to_dict()
+        assert d["actual_reasoning_tokens"] == 200
+        assert d["actual_total_tokens"] == 280
+
+    def test_reasoning_fields_default_none(self):
+        m = TokenMetrics()
+        assert m.actual_reasoning_tokens is None
+        assert m.actual_total_tokens is None
+
+
+# ── Reasoning comparison ─────────────────────────────────────────────────
+
+
+class TestReasoningComparison:
+    def test_total_token_delta(self):
+        comp = ReasoningComparison(
+            baseline_total_tokens=500,
+            grounded_total_tokens=300,
+        )
+        assert comp.total_token_delta == -200
+
+    def test_reasoning_token_delta(self):
+        comp = ReasoningComparison(
+            baseline_reasoning_tokens=400,
+            grounded_reasoning_tokens=100,
+        )
+        assert comp.reasoning_token_delta == -300
+
+    def test_total_token_savings_pct(self):
+        comp = ReasoningComparison(
+            baseline_total_tokens=1000,
+            grounded_total_tokens=600,
+        )
+        assert comp.total_token_savings_pct == pytest.approx(0.4)
+
+    def test_reasoning_token_savings_pct(self):
+        comp = ReasoningComparison(
+            baseline_reasoning_tokens=800,
+            grounded_reasoning_tokens=200,
+        )
+        assert comp.reasoning_token_savings_pct == pytest.approx(0.75)
+
+    def test_none_when_missing_data(self):
+        comp = ReasoningComparison(baseline_total_tokens=500)
+        assert comp.total_token_delta is None
+        assert comp.total_token_savings_pct is None
+
+    def test_zero_baseline_tokens(self):
+        comp = ReasoningComparison(
+            baseline_total_tokens=0,
+            grounded_total_tokens=100,
+        )
+        assert comp.total_token_savings_pct == 0.0
+
+    def test_zero_baseline_reasoning(self):
+        comp = ReasoningComparison(
+            baseline_reasoning_tokens=0,
+            grounded_reasoning_tokens=50,
+        )
+        assert comp.reasoning_token_savings_pct == 0.0
+
+    def test_llm_bypass_zero_grounded(self):
+        comp = ReasoningComparison(
+            question="What is the capital?",
+            baseline_total_tokens=500,
+            baseline_reasoning_tokens=300,
+            grounded_total_tokens=0,
+            grounded_reasoning_tokens=0,
+            grounded_correct=True,
+        )
+        assert comp.total_token_savings_pct == pytest.approx(1.0)
+        assert comp.reasoning_token_savings_pct == pytest.approx(1.0)
+
+    def test_to_dict_includes_computed_fields(self):
+        comp = ReasoningComparison(
+            question="test",
+            baseline_total_tokens=1000,
+            grounded_total_tokens=600,
+            baseline_reasoning_tokens=500,
+            grounded_reasoning_tokens=100,
+        )
+        d = comp.to_dict()
+        assert d["total_token_delta"] == -400
+        assert d["reasoning_token_delta"] == -400
+        assert d["total_token_savings_pct"] == pytest.approx(0.4)
+        assert d["reasoning_token_savings_pct"] == pytest.approx(0.8)
+
+
+class TestSummarizeReasoningComparisons:
+    def test_empty_list(self):
+        summary = summarize_reasoning_comparisons([])
+        assert summary["count"] == 0
+
+    def test_basic_summary(self):
+        comps = [
+            ReasoningComparison(
+                question="Q1",
+                baseline_total_tokens=1000,
+                baseline_reasoning_tokens=600,
+                grounded_total_tokens=400,
+                grounded_reasoning_tokens=100,
+                baseline_correct=False,
+                grounded_correct=True,
+            ),
+            ReasoningComparison(
+                question="Q2",
+                baseline_total_tokens=800,
+                baseline_reasoning_tokens=400,
+                grounded_total_tokens=300,
+                grounded_reasoning_tokens=50,
+                baseline_correct=False,
+                grounded_correct=True,
+            ),
+        ]
+        summary = summarize_reasoning_comparisons(comps)
+        assert summary["count"] == 2
+        assert summary["baseline_accuracy"] == 0.0
+        assert summary["grounded_accuracy"] == 1.0
+        assert summary["accuracy_delta"] == 1.0
+        assert summary["avg_baseline_total_tokens"] == 900.0
+        assert summary["avg_grounded_total_tokens"] == 350.0
+        assert summary["sum_baseline_total_tokens"] == 1800
+        assert summary["sum_grounded_total_tokens"] == 700
+
+    def test_total_token_savings(self):
+        comps = [
+            ReasoningComparison(
+                baseline_total_tokens=1000,
+                grounded_total_tokens=500,
+            ),
+        ]
+        summary = summarize_reasoning_comparisons(comps)
+        assert summary["total_token_savings_pct"] == pytest.approx(0.5)
+
+    def test_reasoning_token_savings(self):
+        comps = [
+            ReasoningComparison(
+                baseline_reasoning_tokens=800,
+                grounded_reasoning_tokens=200,
+            ),
+        ]
+        summary = summarize_reasoning_comparisons(comps)
+        assert summary["reasoning_token_savings_pct"] == pytest.approx(0.75)
+
+    def test_missing_data_handled(self):
+        comps = [
+            ReasoningComparison(question="Q1"),
+        ]
+        summary = summarize_reasoning_comparisons(comps)
+        assert summary["count"] == 1
+        assert summary["avg_baseline_total_tokens"] is None
+        assert summary["total_token_savings_pct"] is None

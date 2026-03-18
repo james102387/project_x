@@ -16,10 +16,15 @@
 The core pipeline works. Now someone needs to be able to *use* it.
 
 - [x] **D1. Minimal quality rubric** — Extend benchmark scoring beyond binary substring match. Three dimensions: factual accuracy, specificity, no-hallucination. Score all three paths (answerable, augmented, fallback) so the safety invariant is measurable. See `docs/PLAN_GRADING_RUBRIC.md` Phase 1.
-- [ ] **D2. KG ingestion pipeline (offline)** — Batch process: documents → LLM-based entity/relationship extraction → validated `(subject, predicate, object)` triplets → `KnowledgeGraph`. This is an offline ETL job, completely separate from the query-time pipeline. Can be cron'd, reviewed, retried. Replaces old item 11.
+- [ ] **D2. KG ingestion pipeline (offline)** — Phased approach, all in-repo at `src/crystal/ingest/`:
+  - **Phase 1 (NER):** spaCy NER → extract entities + verb-phrase relationships → normalized `(subject, predicate, object)` triplets. Basic but reliable. Also support hand-curated triplets (CSV/JSON) for bootstrapping new datasets without any extraction.
+  - **Phase 2 (LLM-assisted):** Use LLM for relationship extraction on sentences where NER finds entities but can't resolve predicates. Offline batch job, human-reviewable output.
+  - **Phase 3 (community detection):** Leiden or similar for discovering entity clusters and implicit relationships in larger corpora.
+  - Interface contract: produce `list[Triplet]` + optional `dict[str, str]` alias maps → feeds directly into `KnowledgeGraph`. CLI entry point: `python -m crystal.ingest <document>`.
 - [ ] **D3. Web UI** — Simple interface (Streamlit/Gradio to start): upload documents or paste a URL, Crystal ingests → builds KG, then ask questions. Side-by-side comparison (Crystal vs. naked LLM) to make the value visible. Include a pre-loaded sample KG so the demo works out of the box.
-- [ ] **D4. Augmented benchmark cases** — Extend benchmark ground truth to cover `kg_augmented` and `math_augmented` paths (not just answerable). These are the paths where Crystal could theoretically make things worse — need measurement.
+- [ ] **D4. Augmented benchmark cases** — Extend benchmark ground truth to measure LLM *output quality* on augmented paths (`kg_augmented`, `math_augmented`), not just routing classification. These are the paths where Crystal injects context for the LLM — need to verify the augmentation actually helps rather than misleads. Requires real LLM calls in the benchmark and ground-truth expected answers for reasoning questions. Start with Remulak augmented cases, expand to ingested datasets once D2 Phase 1 lands.
 - [x] **D5. Entity aliases + fuzzy string matching + multi-hop** — 3-tier resolution cascade (exact → alias → rapidfuzz) for entities and predicates. Entity alias tables per dataset, `rapidfuzz` for typos and word reordering. Depth-limited recursive multi-hop traversal (BFS, default depth=2). Match tier metadata in detection results.
+- [x] **D6. Reasoning cost benchmark (K-reduction)** — `call_llm()` captures `thoughts_token_count` (reasoning tokens). `TokenMetrics` extended with `actual_reasoning_tokens` and `actual_total_tokens`. `ReasoningComparison` dataclass + `summarize_reasoning_comparisons()` for per-query grounded-vs-ungrounded token analysis. Benchmark runner at `benchmarks/run_reasoning_benchmark.py` (uses thinking-capable model, default gemini-2.5-flash). LLM nodes propagate all four token fields. Can use Remulak cases now; full D4 augmented cases expand coverage later.
 
 ## Future — After the demo proves adoption potential
 
