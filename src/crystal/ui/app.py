@@ -11,7 +11,7 @@ Features:
     - KG explorer showing entities and facts
 """
 
-import tempfile
+import time
 from pathlib import Path
 
 import gradio as gr
@@ -133,7 +133,8 @@ def ask_question(question, kg_state):
         crystal_response = f"Error: {e}"
         crystal_meta = "**Route:** error"
 
-    # Naked LLM
+    # Naked LLM — brief pause to avoid back-to-back rate limit hits
+    time.sleep(1)
     try:
         llm_response, llm_usage = crystal.llm.call_llm(question)
         llm_meta = ""

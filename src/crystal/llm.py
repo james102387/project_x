@@ -2,8 +2,13 @@
 
 import os
 import time
+from pathlib import Path
 
-LLM_MODEL = os.environ.get("LLM_MODEL", "gemini-2.0-flash")
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).resolve().parents[2] / ".env", override=False)
+
+LLM_MODEL = os.environ.get("LLM_MODEL", "gemini-2.5-flash")
 
 _llm_client = None
 
@@ -55,12 +60,13 @@ def call_llm(prompt: str, max_retries: int = 3) -> tuple[str, dict | None]:
             return response.text.strip(), usage
         except Exception as e:
             if "429" in str(e) or "TooManyRequests" in str(e):
-                wait = 2 ** attempt * 5
-                print(
-                    f"    Rate limited, waiting {wait}s "
-                    f"(attempt {attempt + 1}/{max_retries})"
-                )
-                time.sleep(wait)
+                if attempt < max_retries - 1:
+                    wait = 2 ** attempt * 5
+                    print(
+                        f"    Rate limited, waiting {wait}s "
+                        f"(attempt {attempt + 1}/{max_retries})"
+                    )
+                    time.sleep(wait)
             else:
                 raise
     return "[ERROR: Rate limit exceeded after retries]", None

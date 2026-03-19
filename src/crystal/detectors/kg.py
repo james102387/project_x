@@ -241,7 +241,6 @@ def detect_kg_query(
         return None
 
     # Prefer entities that are KG subjects (have forward-lookup facts).
-    # Resolve through the cascade so aliases/fuzzy matches point to subjects.
     subject_spans = [s for s in entity_spans if kg.lookup(subject=s["entity"])]
     primary = subject_spans[0] if subject_spans else entity_spans[0]
     entity_text = primary["entity"]
@@ -255,40 +254,49 @@ def detect_kg_query(
     predicate_match_tier = "none"
     results = []
 
+    # All subject entities to query — for multi-entity questions like
+    # "total population of X and Y", we need facts from every entity.
+    all_subjects = [s["entity"] for s in subject_spans] if subject_spans else [entity_text]
+
     if predicate_phrase:
-        # Try QUESTION_PREDICATE_MAP first
-        resolved = QUESTION_PREDICATE_MAP.get(predicate_phrase, predicate_phrase)
-        results = kg.lookup(subject=entity_text, predicate=resolved)
+        # Strip noise words that leak in from multi-entity phrasing
+        clean_predicate = " ".join(
+            w for w in predicate_phrase.split()
+            if w not in ("and", "or", "both", "total", "combined", "sum", "together")
+        ).strip() or predicate_phrase
 
-        if results:
-            lookup_type = "targeted"
-            predicate_match_tier = "alias" if resolved != predicate_phrase else "exact"
-        else:
-            # Didn't match — try alias resolution (already in kg.lookup)
-            if resolved != predicate_phrase:
-                results = kg.lookup(subject=entity_text, predicate=predicate_phrase)
-                if results:
-                    lookup_type = "targeted"
-                    predicate_match_tier = "exact"
+        for subj in all_subjects:
+            resolved = QUESTION_PREDICATE_MAP.get(clean_predicate, clean_predicate)
+            hits = kg.lookup(subject=subj, predicate=resolved)
 
-        if not results:
-            # Tier 3: fuzzy predicate matching
-            fuzzy_pred, pred_tier = kg._resolve_predicate_fuzzy(
-                predicate_phrase, subject=entity_text,
-            )
-            if pred_tier != "none":
-                results = kg.lookup(subject=entity_text, predicate=fuzzy_pred)
-                if results:
-                    lookup_type = "targeted"
-                    predicate_match_tier = pred_tier
+            if not hits and resolved != clean_predicate:
+                hits = kg.lookup(subject=subj, predicate=clean_predicate)
+
+            if not hits:
+                fuzzy_pred, pred_tier = kg._resolve_predicate_fuzzy(
+                    clean_predicate, subject=subj,
+                )
+                if pred_tier != "none":
+                    hits = kg.lookup(subject=subj, predicate=fuzzy_pred)
+
+            if hits:
+                lookup_type = "targeted"
+                predicate_match_tier = "exact"
+                for h in hits:
+                    if h not in results:
+                        results.append(h)
 
     if not results:
-        if multi_hop:
-            results = kg.traverse(entity_text, max_depth=max_depth)
-            lookup_type = "multi_hop"
-        else:
-            results = kg.lookup(subject=entity_text)
-            lookup_type = "subject_scan"
+        for subj in all_subjects:
+            if multi_hop:
+                hits = kg.traverse(subj, max_depth=max_depth)
+                lookup_type = "multi_hop"
+            else:
+                hits = kg.lookup(subject=subj)
+                lookup_type = "subject_scan"
+            for h in hits:
+                if h not in results:
+                    results.append(h)
 
     if not results:
         return None

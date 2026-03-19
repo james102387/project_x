@@ -37,6 +37,8 @@ REASONING_SIGNALS = {
     "compare", "which", "prefer",
     # predictive
     "will", "would", "could", "future", "next",
+    # aggregation — user wants computation over multiple facts
+    "total", "combined", "sum", "together", "overall", "aggregate",
 }
 
 
