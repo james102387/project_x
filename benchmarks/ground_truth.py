@@ -175,3 +175,66 @@ BENCHMARK_CASES: list[tuple[str, str, list[str], bool]] = [
         True,
     ),
 ]
+
+
+# ── Augmented cases (D4) ──────────────────────────────────────────────────
+# Questions where Crystal injects grounded facts/computations for LLM reasoning.
+# A naked LLM cannot answer the KG questions (Remulak is fictional).
+# Crystal's augmentation should produce measurably better output.
+#
+# Format: (question, ground_truth_answer, match_strings, is_negative)
+# match_strings check for KG values or computed results that prove grounding.
+# The rubric (accuracy, specificity, no-hallucination) measures quality.
+
+AUGMENTED_BENCHMARK_CASES: list[tuple[str, str, list[str], bool]] = [
+    # --- KG augmented: Crystal injects verified facts, LLM reasons over them ---
+    (
+        "Why does Remulak have a technocratic council?",
+        "Remulak's government type is a technocratic council",
+        ["technocratic council"],
+        False,
+    ),
+    (
+        "Should Grand Vizier Korth retire given his age?",
+        "Grand Vizier Korth is 142 standard years old",
+        ["142"],
+        False,
+    ),
+    (
+        "Explain why Draveth is important to Remulak",
+        "Draveth is known for government and military academies, with 1.8 billion people",
+        ["draveth"],
+        False,
+    ),
+    (
+        "What challenges might Sulari face due to its climate?",
+        "Sulari has an arid desert highlands climate and is known for mining and heavy industry",
+        ["arid"],
+        False,
+    ),
+    (
+        "Would the Festival of Vohn attract tourism to Remulak?",
+        "The Festival of Vohn commemorates the first successful resonance-fold",
+        ["festival of vohn"],
+        False,
+    ),
+    # --- Math augmented: Crystal computes the value, LLM reasons with it ---
+    (
+        "She earned 500 and spent 300, is she managing her money wisely?",
+        "She has 200 remaining after earning 500 and spending 300",
+        ["200"],
+        False,
+    ),
+    (
+        "He had 100 shares and sold 60, should he buy more?",
+        "He has 40 shares remaining after selling 60 of 100",
+        ["40"],
+        False,
+    ),
+    (
+        "I started with 50 and lost 30, explain what happened",
+        "You went from 50 to 20 after losing 30",
+        ["20"],
+        False,
+    ),
+]

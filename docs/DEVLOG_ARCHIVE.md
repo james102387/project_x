@@ -5,6 +5,25 @@ Only the most recent ~5 entries stay in `DEVLOG.md`.
 
 ---
 
+## 2026-03-17 — D3: Web UI (Gradio)
+
+### What changed
+- **KG injection into pipeline**: Added `kg` field to `CrystalState`, `make_initial_state(prompt, *, kg=None)` accepts optional KG override, `kg_detection_node` reads from `state["kg"]` or falls back to `remulak_kg`. Fully backward compatible.
+- **Gradio UI** at `src/crystal/ui/`:
+  - `app.py`: Two-tab layout. "Ask" tab: question input → side-by-side Crystal vs. naked LLM with route/token metadata. "Knowledge Graph" tab: file upload (CSV/JSON/TXT), paste text for NER extraction, reset to Remulak, scrollable facts table.
+  - `__main__.py`: `python -m crystal.ui` entry point
+  - Pre-loaded Remulak KG works out of the box, `gr.State` manages active KG across tabs
+- `requirements.txt`: added `gradio>=5.0.0`
+- 20 new tests: `test_kg_injection.py` (5), `test_ui_helpers.py` (12), plus 3 structural
+- 351/351 passing, 5 skipped
+
+### Decisions
+- KG injection via state field (not factory/closure) — minimal invasive change, one line in detection node, full backward compat
+- Gradio Blocks over Streamlit — event-driven model maps directly to "user clicks Ask → both pipelines run → two boxes fill in", avoids rerun model side effects
+- UI is pure wiring — zero business logic in `app.py`, all calls go through existing `build_crystal_graph()`, `ingest()`, `build_kg()`, `call_llm()`
+
+---
+
 ## 2026-03-14 — Subject-scan fallback → kg_augmented
 
 ### What changed

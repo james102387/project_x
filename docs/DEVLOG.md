@@ -9,10 +9,10 @@ Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.
 
 Update this section each session with current priorities.
 
-- **D1, D2 Phase 1, D3, D5, D6 complete.** Web UI live at `python -m crystal.ui`.
-- **Next milestone:** D2 Phase 2 (LLM-assisted extraction), D4 (augmented benchmark cases).
-- **Key architectural additions:** KG injectable into pipeline via `make_initial_state(prompt, kg=custom_kg)`. Gradio UI at `src/crystal/ui/` with side-by-side Crystal vs. naked LLM comparison, document ingestion, KG explorer.
-- **Test count:** 351 passing, 5 skipped.
+- **D1, D2 Phase 1, D3, D4, D5, D6 complete.** Web UI live at `python -m crystal.ui`.
+- **Next milestone:** D2 Phase 2 (LLM-assisted extraction). D2 Phase 3 (community detection) and F-series items after that.
+- **Key architectural additions:** KG injectable into pipeline via `make_initial_state(prompt, kg=custom_kg)`. Gradio UI at `src/crystal/ui/`. Augmented quality benchmark at `python -m benchmarks.run_augmented_benchmark`.
+- **Test count:** 371 passing, 5 skipped.
 
 ---
 
@@ -76,22 +76,19 @@ Update this section each session with current priorities.
 
 ---
 
-## 2026-03-17 — D3: Web UI (Gradio)
+## 2026-03-20 — D4: Augmented output quality benchmark (thin)
 
 ### What changed
-- **KG injection into pipeline**: Added `kg` field to `CrystalState`, `make_initial_state(prompt, *, kg=None)` accepts optional KG override, `kg_detection_node` reads from `state["kg"]` or falls back to `remulak_kg`. Fully backward compatible.
-- **Gradio UI** at `src/crystal/ui/`:
-  - `app.py`: Two-tab layout. "Ask" tab: question input → side-by-side Crystal vs. naked LLM with route/token metadata. "Knowledge Graph" tab: file upload (CSV/JSON/TXT), paste text for NER extraction, reset to Remulak, scrollable facts table.
-  - `__main__.py`: `python -m crystal.ui` entry point
-  - Pre-loaded Remulak KG works out of the box, `gr.State` manages active KG across tabs
-- `requirements.txt`: added `gradio>=5.0.0`
-- 20 new tests: `test_kg_injection.py` (5), `test_ui_helpers.py` (12), plus 3 structural
-- 351/351 passing, 5 skipped
+- `benchmarks/ground_truth.py`: New `AUGMENTED_BENCHMARK_CASES` — 5 KG augmented + 3 math augmented cases with `match_strings` that prove grounding worked (fictional KG values a naked LLM can't produce).
+- `benchmarks/run_augmented_benchmark.py`: Benchmark runner comparing naked LLM vs. full Crystal pipeline (real LLM calls) on augmented paths. Scores both with D1 rubric (accuracy, specificity, no-hallucination). Side-by-side report + JSON output. CLI: `python -m benchmarks.run_augmented_benchmark`.
+- `tests/golden/test_cases.py`: `KG_AUGMENTED_CASES` now have expected result strings (previously `None`).
+- 20 new tests in `test_augmented_benchmark.py`: case format validation (4), scoring with synthetic responses (5), summary aggregation (3), routing verification for KG cases (5) and math reasoning signals (3).
+- 371/371 passing, 5 skipped.
 
 ### Decisions
-- KG injection via state field (not factory/closure) — minimal invasive change, one line in detection node, full backward compat
-- Gradio Blocks over Streamlit — event-driven model maps directly to "user clicks Ask → both pipelines run → two boxes fill in", avoids rerun model side effects
-- UI is pure wiring — zero business logic in `app.py`, all calls go through existing `build_crystal_graph()`, `ingest()`, `build_kg()`, `call_llm()`
+- Treatment arm uses the full `build_crystal_graph()` pipeline (not manual detection) — exercises the real code path including LLM call for augmented routes.
+- Baseline is scored against treatment's KG results for rubric specificity/grounding — otherwise there's no rubric baseline for comparison since naked LLM has no KG context.
+- Match strings are intentionally minimal (one KG value per case). The rubric dimensions handle deeper quality measurement; binary accuracy just gates "did grounding reach the output at all."
 
 ---
 

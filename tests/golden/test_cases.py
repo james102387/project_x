@@ -80,9 +80,12 @@ KG_ANSWERABLE_CASES = [
 ]
 
 KG_AUGMENTED_CASES = [
-    ("Why does Remulak have a technocratic council?", "kg_augmented", None),
-    ("Should Grand Vizier Korth retire given his age?", "kg_augmented", None),
-    ("Explain why Draveth is important to Remulak", "kg_augmented", None),
+    ("Why does Remulak have a technocratic council?", "kg_augmented",
+     "technocratic council"),
+    ("Should Grand Vizier Korth retire given his age?", "kg_augmented",
+     "142 standard years"),
+    ("Explain why Draveth is important to Remulak", "kg_augmented",
+     "government and military academies"),
 ]
 
 NEGATIVE_CASES = [

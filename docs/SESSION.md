@@ -1,16 +1,13 @@
-# Session — 2026-03-17
+# Session — 2026-03-20
 
 ## Goal
-Implement D3: Web UI (Gradio-based demo interface).
+Implement thin D4: augmented output quality benchmark.
 
 ## Completed
-- Made KG injectable into pipeline: added `kg` field to `CrystalState`, updated `make_initial_state(prompt, *, kg=None)`, updated `kg_detection_node` to use `state["kg"]` or fall back to `remulak_kg`
-- Built Gradio UI at `src/crystal/ui/app.py`:
-  - "Ask" tab: question input, side-by-side Crystal vs. naked LLM comparison with route/token metadata
-  - "Knowledge Graph" tab: file upload (CSV/JSON/TXT), paste text for NER extraction, reset to Remulak, facts table
-  - Pre-loaded Remulak KG works out of the box
-  - `gr.State` manages active KG across tabs
-  - Runnable via `python -m crystal.ui`
-- Added `gradio>=5.0.0` to requirements.txt (installed 6.9.0)
-- 20 new tests: `test_kg_injection.py` (5 tests for KG injection through pipeline), `test_ui_helpers.py` (12 tests for UI helper functions)
-- 351/351 passing, 5 skipped
+- Added `AUGMENTED_BENCHMARK_CASES` to `benchmarks/ground_truth.py` (5 KG augmented + 3 math augmented)
+- Created `benchmarks/run_augmented_benchmark.py`: baseline vs. treatment with rubric scoring
+- Updated `tests/golden/test_cases.py`: KG_AUGMENTED_CASES now have expected result strings
+- 20 new tests in `tests/unit/test_augmented_benchmark.py`
+- 371/371 passing, 5 skipped
+- Archived D3 entry from DEVLOG → DEVLOG_ARCHIVE
+- Updated Active Focus: D4 complete, next milestone is D2 Phase 2

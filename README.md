@@ -29,11 +29,21 @@ and accumulates information at each step.
 
 ## Synthetic Datasets
 
-- **Remulak** — 75 triplets describing a fictional alien planet (geography, government, economy, culture). No LLM can answer from training data, proving KG value.
+- **Remulak** — 80 triplets describing a fictional alien planet (geography, government, economy, culture). No LLM can answer from training data, proving KG value.
 
-## Planned Tools
+## Benchmarks
 
-- **KG Crystallization** — Automated knowledge promotion and maintenance
+Three benchmark runners in `benchmarks/`, all writing JSON results to `benchmarks/results/`:
+
+- **`run_benchmark.py`** — Baseline (naked LLM) vs. treatment (Crystal + KG) on answerable + adversarial cases. Scores with D1 rubric (accuracy, specificity, no-hallucination).
+- **`run_reasoning_benchmark.py`** — Token-level comparison using a thinking model. Measures reasoning token (K) reduction from grounding.
+- **`run_augmented_benchmark.py`** — Output quality on augmented paths (`kg_augmented`, `math_augmented`). Runs both naked LLM and full Crystal pipeline with real LLM calls, scores with rubric side-by-side.
+
+```bash
+python -m benchmarks.run_benchmark
+python -m benchmarks.run_reasoning_benchmark
+python -m benchmarks.run_augmented_benchmark
+```
 
 ## Setup
 
@@ -101,6 +111,13 @@ crystal/
 │   └── integration/
 │       ├── test_pipeline.py  # Full local pipeline (no LLM)
 │       └── test_llm.py       # Full LangGraph pipeline (requires API key)
+├── benchmarks/
+│   ├── ground_truth.py       # Benchmark cases (answerable, adversarial, augmented)
+│   ├── rubric.py             # D1 quality rubric (accuracy, specificity, no-hallucination)
+│   ├── scoring.py            # Binary + rubric batch scoring
+│   ├── run_benchmark.py      # Baseline vs. treatment benchmark
+│   ├── run_reasoning_benchmark.py  # Token/reasoning cost benchmark
+│   └── run_augmented_benchmark.py  # Augmented output quality benchmark
 ├── scripts/
 │   └── run.py              # Interactive runner (golden tests, single prompts, parse trees)
 ├── docs/
