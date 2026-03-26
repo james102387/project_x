@@ -1,16 +1,9 @@
-# Session — 2026-03-25
+# Session — 2026-03-25 (continued)
 
 ## Goal
-Implement D2 Phase 2: LLM-assisted relationship extraction for the KG ingestion pipeline.
+Analyze R2-Reasoner paper (arXiv:2506.05901v2) for ideas applicable to Crystal's routing system.
 
-## Completed
-- Schema: `ReviewableTriplet`, `LLMExtractionResult` in `schema.py`
-- NER gap detection: `find_unresolved_sentences()` in `ner.py`
-- LLM extraction: new `llm_extract.py` module with structured prompt, robust JSON parsing, batching
-- Review loader: `load_review()` in `loader.py`
-- Pipeline integration: `ingest_with_llm()` two-pass pipeline in `__init__.py`
-- CLI: `--llm-assist`, `--review-output`, `--load-review` flags in `__main__.py`
-- 50 new tests across 5 test files
-- 421/421 passing, 5 skipped
-- Archived D4 entry from DEVLOG → DEVLOG_ARCHIVE
-- Updated Active Focus: D2 Phase 2 complete, next milestone is D2 Phase 3
+## Notes
+- R2-Reasoner decomposes queries into subtasks, then allocates each subtask to a different-capability model
+- Crystal currently has a fixed routing pipeline: detect → plan → tool execution → compile → route (direct return vs LLM)
+- Key paper ideas with Crystal relevance: subtask decomposition, difficulty-based model selection, grouped search for optimal allocation, cost-accuracy Pareto tradeoffs
