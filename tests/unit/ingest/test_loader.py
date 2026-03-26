@@ -4,7 +4,7 @@ import json
 import pytest
 from pathlib import Path
 
-from crystal.ingest.loader import load_csv, load_json, load_file, _looks_like_header
+from crystal.ingest.loader import load_csv, load_json, load_file, load_review, _looks_like_header
 
 FIXTURES = Path(__file__).parent.parent.parent / "fixtures"
 
@@ -125,3 +125,76 @@ class TestLoadFile:
         p.write_text("<nope/>")
         with pytest.raises(ValueError, match="Unsupported file format"):
             load_file(p)
+
+
+class TestLoadReview:
+    """D2 Phase 2: load human-reviewed LLM extraction files."""
+
+    def test_loads_accepted_only(self, tmp_path):
+        review = {
+            "source": "doc.txt",
+            "reviewable": [
+                {"subject": "A", "predicate": "b", "object": "C",
+                 "source_sentence": "A b C.", "confidence": "high", "status": "accepted"},
+                {"subject": "D", "predicate": "e", "object": "F",
+                 "source_sentence": "D e F.", "confidence": "medium", "status": "pending_review"},
+                {"subject": "G", "predicate": "h", "object": "I",
+                 "source_sentence": "G h I.", "confidence": "low", "status": "rejected"},
+            ],
+        }
+        p = tmp_path / "review.json"
+        p.write_text(json.dumps(review))
+        result = load_review(p)
+        assert len(result.triplets) == 1
+        assert result.triplets[0].subject == "A"
+        assert result.triplets[0].predicate == "b"
+        assert result.triplets[0].object == "C"
+
+    def test_source_contains_reviewed(self, tmp_path):
+        review = {
+            "reviewable": [
+                {"subject": "A", "predicate": "b", "object": "C", "status": "accepted"},
+            ],
+        }
+        p = tmp_path / "review.json"
+        p.write_text(json.dumps(review))
+        result = load_review(p)
+        assert "reviewed" in result.source
+
+    def test_empty_review_file(self, tmp_path):
+        p = tmp_path / "empty_review.json"
+        p.write_text(json.dumps({"reviewable": []}))
+        result = load_review(p)
+        assert len(result.triplets) == 0
+
+    def test_all_rejected(self, tmp_path):
+        review = {
+            "reviewable": [
+                {"subject": "A", "predicate": "b", "object": "C", "status": "rejected"},
+                {"subject": "D", "predicate": "e", "object": "F", "status": "rejected"},
+            ],
+        }
+        p = tmp_path / "review.json"
+        p.write_text(json.dumps(review))
+        result = load_review(p)
+        assert len(result.triplets) == 0
+
+    def test_skips_incomplete_entries(self, tmp_path):
+        review = {
+            "reviewable": [
+                {"subject": "A", "status": "accepted"},
+                {"subject": "B", "predicate": "c", "object": "D", "status": "accepted"},
+            ],
+        }
+        p = tmp_path / "review.json"
+        p.write_text(json.dumps(review))
+        result = load_review(p)
+        assert len(result.triplets) == 1
+        assert result.triplets[0].subject == "B"
+
+    def test_non_dict_items_skipped(self, tmp_path):
+        review = {"reviewable": ["not a dict", {"subject": "A", "predicate": "b", "object": "C", "status": "accepted"}]}
+        p = tmp_path / "review.json"
+        p.write_text(json.dumps(review))
+        result = load_review(p)
+        assert len(result.triplets) == 1

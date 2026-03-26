@@ -117,6 +117,34 @@ def load_json(path: str | Path) -> IngestResult:
     )
 
 
+def load_review(path: str | Path) -> IngestResult:
+    """Load a human-reviewed LLM extraction file, importing only accepted triplets.
+
+    Reads a JSON file produced by the --llm-assist workflow. Only triplets
+    with status "accepted" are converted into an IngestResult.
+    """
+    path = Path(path)
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    triplets: list[Triplet] = []
+    for item in data.get("reviewable", []):
+        if not isinstance(item, dict):
+            continue
+        if item.get("status") != "accepted":
+            continue
+        subj = str(item.get("subject", "")).strip()
+        pred = str(item.get("predicate", "")).strip()
+        obj = str(item.get("object", "")).strip()
+        if subj and pred and obj:
+            triplets.append(Triplet(subject=subj, predicate=pred, object=obj))
+
+    return IngestResult(
+        triplets=triplets,
+        source=f"{path}(reviewed)",
+    )
+
+
 def load_file(path: str | Path) -> IngestResult:
     """Auto-detect file format and load triplets."""
     path = Path(path)

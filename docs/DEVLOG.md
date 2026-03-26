@@ -9,10 +9,31 @@ Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.
 
 Update this section each session with current priorities.
 
-- **D1, D2 Phase 1, D3, D4, D5, D6 complete.** Web UI live at `python -m crystal.ui`.
-- **Next milestone:** D2 Phase 2 (LLM-assisted extraction). D2 Phase 3 (community detection) and F-series items after that.
-- **Key architectural additions:** KG injectable into pipeline via `make_initial_state(prompt, kg=custom_kg)`. Gradio UI at `src/crystal/ui/`. Augmented quality benchmark at `python -m benchmarks.run_augmented_benchmark`.
-- **Test count:** 371 passing, 5 skipped.
+- **D1, D2 (Phases 1+2), D3, D4, D5, D6 complete.** Web UI live at `python -m crystal.ui`.
+- **Next milestone:** D2 Phase 3 (community detection) and F-series items.
+- **Key architectural additions:** Two-pass ingestion (`ingest_with_llm()`), human-reviewable LLM extraction output, `load_review()` for importing accepted triplets.
+- **Test count:** 421 passing, 5 skipped.
+
+---
+
+## 2026-03-25 — D2 Phase 2: LLM-assisted relationship extraction
+
+### What changed
+- `src/crystal/ingest/schema.py`: New `ReviewableTriplet` dataclass (subject/predicate/object + source_sentence, confidence, status) with `to_dict()`/`from_dict()` serialization. New `LLMExtractionResult` dataclass with `accepted_triplets()`, `pending_triplets()`, `to_review_dict()`/`from_review_dict()` for the human review workflow, and `to_ingest_result()` for converting accepted triplets back into the pipeline.
+- `src/crystal/ingest/ner.py`: New `find_unresolved_sentences()` — identifies sentences where spaCy found ≥2 noun chunks but dep-tree patterns produced zero triplets. New `_get_noun_chunks()` helper.
+- `src/crystal/ingest/llm_extract.py`: New module. Structured LLM prompt for relationship extraction from gap sentences. `_format_sentences()` builds numbered sentence+entity list. `_parse_llm_response()` robustly extracts JSON array from LLM output (handles code fences, surrounding text, malformed JSON). `extract_triplets_llm()` orchestrates batched extraction with injectable `call_llm_fn` for testability.
+- `src/crystal/ingest/loader.py`: New `load_review()` — reads a human-reviewed JSON file and imports only triplets with `status: "accepted"`.
+- `src/crystal/ingest/__init__.py`: New `ingest_with_llm()` two-pass pipeline (NER first, LLM for gaps). Re-exports all new public symbols.
+- `src/crystal/ingest/__main__.py`: New CLI flags `--llm-assist` (triggers two-pass extraction), `--review-output` (custom path for review JSON), `--load-review` (import accepted triplets from reviewed file). Refactored into `_print_table()` and `_format_result_json()` helpers.
+- 50 new tests: `test_schema.py` (+11), `test_ner.py` (+6), `test_llm_extract.py` (26), `test_loader.py` (+6), `test_integration.py` (+5)
+- 421/421 passing, 5 skipped
+
+### Decisions
+- LLM function is injectable (`call_llm_fn` parameter) — tests use mocks, no real API calls in the test suite
+- Gap detection requires ≥2 noun chunks (not just 1) — a sentence with a single entity and no predicate is unlikely to contain an extractable relationship
+- LLM-extracted triplets are always `pending_review` — never auto-accepted into the KG. The human-in-the-loop design is intentional: LLM extraction is a suggestion engine, not a truth source
+- Review JSON format designed for hand-editing: flat list of dicts with a `status` field the reviewer changes to "accepted" or "rejected"
+- Batching (default 20 sentences/call) keeps LLM context manageable while reducing round-trips
 
 ---
 
@@ -73,22 +94,6 @@ Update this section each session with current priorities.
 - Entity aliases include article variants ("the fracture war" alongside "fracture war") because spaCy noun phrase extraction includes determiners
 - Multi-hop is opt-in (`multi_hop=False` default) — caller decides when to expand; keeps subject_scan as the default fallback for backward compatibility
 - Multi-hop uses BFS with visited set for cycle prevention, collects only facts where objects are also KG subjects (avoids expanding leaf values like "Zelphos" that have no forward facts)
-
----
-
-## 2026-03-20 — D4: Augmented output quality benchmark (thin)
-
-### What changed
-- `benchmarks/ground_truth.py`: New `AUGMENTED_BENCHMARK_CASES` — 5 KG augmented + 3 math augmented cases with `match_strings` that prove grounding worked (fictional KG values a naked LLM can't produce).
-- `benchmarks/run_augmented_benchmark.py`: Benchmark runner comparing naked LLM vs. full Crystal pipeline (real LLM calls) on augmented paths. Scores both with D1 rubric (accuracy, specificity, no-hallucination). Side-by-side report + JSON output. CLI: `python -m benchmarks.run_augmented_benchmark`.
-- `tests/golden/test_cases.py`: `KG_AUGMENTED_CASES` now have expected result strings (previously `None`).
-- 20 new tests in `test_augmented_benchmark.py`: case format validation (4), scoring with synthetic responses (5), summary aggregation (3), routing verification for KG cases (5) and math reasoning signals (3).
-- 371/371 passing, 5 skipped.
-
-### Decisions
-- Treatment arm uses the full `build_crystal_graph()` pipeline (not manual detection) — exercises the real code path including LLM call for augmented routes.
-- Baseline is scored against treatment's KG results for rubric specificity/grounding — otherwise there's no rubric baseline for comparison since naked LLM has no KG context.
-- Match strings are intentionally minimal (one KG value per case). The rubric dimensions handle deeper quality measurement; binary accuracy just gates "did grounding reach the output at all."
 
 ---
 

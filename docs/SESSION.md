@@ -1,13 +1,16 @@
-# Session — 2026-03-20
+# Session — 2026-03-25
 
 ## Goal
-Implement thin D4: augmented output quality benchmark.
+Implement D2 Phase 2: LLM-assisted relationship extraction for the KG ingestion pipeline.
 
 ## Completed
-- Added `AUGMENTED_BENCHMARK_CASES` to `benchmarks/ground_truth.py` (5 KG augmented + 3 math augmented)
-- Created `benchmarks/run_augmented_benchmark.py`: baseline vs. treatment with rubric scoring
-- Updated `tests/golden/test_cases.py`: KG_AUGMENTED_CASES now have expected result strings
-- 20 new tests in `tests/unit/test_augmented_benchmark.py`
-- 371/371 passing, 5 skipped
-- Archived D3 entry from DEVLOG → DEVLOG_ARCHIVE
-- Updated Active Focus: D4 complete, next milestone is D2 Phase 2
+- Schema: `ReviewableTriplet`, `LLMExtractionResult` in `schema.py`
+- NER gap detection: `find_unresolved_sentences()` in `ner.py`
+- LLM extraction: new `llm_extract.py` module with structured prompt, robust JSON parsing, batching
+- Review loader: `load_review()` in `loader.py`
+- Pipeline integration: `ingest_with_llm()` two-pass pipeline in `__init__.py`
+- CLI: `--llm-assist`, `--review-output`, `--load-review` flags in `__main__.py`
+- 50 new tests across 5 test files
+- 421/421 passing, 5 skipped
+- Archived D4 entry from DEVLOG → DEVLOG_ARCHIVE
+- Updated Active Focus: D2 Phase 2 complete, next milestone is D2 Phase 3

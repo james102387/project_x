@@ -1,10 +1,17 @@
 """Integration tests: ingest → build_kg → query."""
 
+import json
 import pytest
 from pathlib import Path
 
-from crystal.ingest import ingest, build_kg
-from crystal.ingest.schema import IngestResult, Triplet
+from crystal.ingest import ingest, ingest_with_llm, build_kg
+from crystal.ingest.loader import load_review
+from crystal.ingest.schema import (
+    IngestResult,
+    LLMExtractionResult,
+    ReviewableTriplet,
+    Triplet,
+)
 
 FIXTURES = Path(__file__).parent.parent.parent / "fixtures"
 
@@ -72,3 +79,84 @@ class TestMergeAndBuild:
         # CSV has 3 triplets, JSON has 2, with 2 overlapping
         assert len(kg) >= 3
         assert kg.has_entity("korth")  # from JSON aliases
+
+
+class TestIngestWithLlm:
+    """D2 Phase 2: two-pass ingestion (NER + LLM)."""
+
+    def test_returns_both_results(self):
+        def _mock_llm(prompt):
+            return json.dumps([
+                {"subject": "Mock", "predicate": "test", "object": "Value",
+                 "confidence": "high", "sentence_index": 1},
+            ]), None
+
+        ner_result, llm_result = ingest_with_llm(
+            FIXTURES / "sample_text.txt",
+            call_llm_fn=_mock_llm,
+        )
+        assert isinstance(ner_result, IngestResult)
+        assert isinstance(llm_result, LLMExtractionResult)
+        assert len(ner_result.triplets) >= 3
+        assert llm_result.source == str(FIXTURES / "sample_text.txt")
+
+    def test_ner_result_matches_plain_ingest(self):
+        def _noop_llm(prompt):
+            return "[]", None
+
+        ner_result, _ = ingest_with_llm(
+            FIXTURES / "sample_text.txt",
+            call_llm_fn=_noop_llm,
+        )
+        plain_result = ingest(FIXTURES / "sample_text.txt")
+        assert ner_result.as_tuples() == plain_result.as_tuples()
+
+
+class TestReviewRoundtrip:
+    """D2 Phase 2: write review file → edit → load back."""
+
+    def test_full_roundtrip(self, tmp_path):
+        llm_result = LLMExtractionResult(
+            reviewable=[
+                ReviewableTriplet(
+                    "Remulak", "borders", "Draveth",
+                    "Remulak borders Draveth.", "high", "pending_review",
+                ),
+                ReviewableTriplet(
+                    "Sulari", "exports", "minerals",
+                    "Sulari exports minerals.", "medium", "pending_review",
+                ),
+            ],
+            source="doc.txt",
+        )
+        review_path = tmp_path / "review.json"
+        review_data = llm_result.to_review_dict()
+        review_data["reviewable"][0]["status"] = "accepted"
+        review_data["reviewable"][1]["status"] = "rejected"
+        review_path.write_text(json.dumps(review_data))
+
+        loaded = load_review(review_path)
+        assert len(loaded.triplets) == 1
+        assert loaded.triplets[0].subject == "Remulak"
+        assert loaded.triplets[0].predicate == "borders"
+
+    def test_merge_reviewed_with_ner(self, tmp_path):
+        ner_result = IngestResult(
+            triplets=[Triplet("Remulak", "capital", "Zelphos")],
+            source="doc.txt",
+        )
+        review = {
+            "reviewable": [
+                {"subject": "Remulak", "predicate": "borders", "object": "Draveth",
+                 "status": "accepted"},
+            ],
+        }
+        review_path = tmp_path / "review.json"
+        review_path.write_text(json.dumps(review))
+
+        reviewed = load_review(review_path)
+        merged = ner_result.merge(reviewed)
+        kg = build_kg(merged)
+        assert len(kg) == 2
+        assert kg.lookup(subject="Remulak", predicate="capital")
+        assert kg.lookup(subject="Remulak", predicate="borders")

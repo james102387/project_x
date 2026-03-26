@@ -3,7 +3,7 @@
 import pytest
 import spacy
 
-from crystal.ingest.ner import extract_triplets, ingest_text, ingest_file
+from crystal.ingest.ner import extract_triplets, ingest_text, ingest_file, find_unresolved_sentences
 
 
 @pytest.fixture(scope="module")
@@ -180,3 +180,49 @@ class TestIngestFile:
         assert result.source == str(p)
         assert result.triplets[0].subject == "Remulak"
         assert result.triplets[0].object == "Zelphos"
+
+
+class TestFindUnresolvedSentences:
+    """D2 Phase 2: detect sentences where NER found entities but no predicates."""
+
+    def test_resolved_sentences_excluded(self, nlp):
+        text = "Remulak is a planet."
+        unresolved = find_unresolved_sentences(text, nlp=nlp)
+        assert len(unresolved) == 0
+
+    def test_no_entities_excluded(self, nlp):
+        text = "Hello there."
+        unresolved = find_unresolved_sentences(text, nlp=nlp)
+        assert len(unresolved) == 0
+
+    def test_unresolved_with_entities_found(self, nlp):
+        text = "Unlike Remulak, Draveth specializes more in governmental traditions."
+        unresolved = find_unresolved_sentences(text, nlp=nlp)
+        # This is a sentence structure that dep-tree patterns may struggle with,
+        # but it contains entity-like noun chunks. We just verify the function
+        # returns sentences with at least 2 chunks that produced no triplets.
+        for sent_text, entities in unresolved:
+            assert len(entities) >= 2
+            assert isinstance(sent_text, str)
+
+    def test_mixed_text(self, nlp):
+        text = (
+            "Remulak is a planet. "
+            "The capital of Remulak is Zelphos. "
+            "Between Draveth and Sulari, trade relationships remain complex."
+        )
+        unresolved = find_unresolved_sentences(text, nlp=nlp)
+        # The first two sentences should resolve. The third might not.
+        # All resolved sentences should be excluded.
+        resolved_texts = {"Remulak is a planet.", "The capital of Remulak is Zelphos."}
+        for sent_text, _ in unresolved:
+            assert sent_text not in resolved_texts
+
+    def test_empty_text(self, nlp):
+        unresolved = find_unresolved_sentences("", nlp=nlp)
+        assert unresolved == []
+
+    def test_single_entity_excluded(self, nlp):
+        text = "Remulak alone."
+        unresolved = find_unresolved_sentences(text, nlp=nlp)
+        assert len(unresolved) == 0

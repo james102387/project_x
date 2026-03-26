@@ -258,6 +258,37 @@ def extract_triplets(text: str, nlp=None) -> list[Triplet]:
     return triplets
 
 
+def _get_noun_chunks(sent: Span) -> list[str]:
+    """Extract cleaned noun chunk texts from a sentence span."""
+    chunks = []
+    for chunk in sent.noun_chunks:
+        text = _span_text(chunk)
+        if text and len(text) > 1:
+            chunks.append(text)
+    return chunks
+
+
+def find_unresolved_sentences(text: str, nlp=None) -> list[tuple[str, list[str]]]:
+    """Find sentences where spaCy identifies entities but dep-tree extraction fails.
+
+    Returns list of (sentence_text, entity_names) for sentences that have
+    at least two noun chunks but produced zero triplets via the dep-tree
+    patterns — these are candidates for LLM-assisted extraction.
+    """
+    if nlp is None:
+        nlp = _get_nlp()
+    doc = nlp(text)
+    unresolved: list[tuple[str, list[str]]] = []
+    for sent in doc.sents:
+        triplets = _extract_from_sentence(sent)
+        if triplets:
+            continue
+        chunks = _get_noun_chunks(sent)
+        if len(chunks) >= 2:
+            unresolved.append((sent.text.strip(), chunks))
+    return unresolved
+
+
 def ingest_text(text: str, source: str = "", nlp=None) -> IngestResult:
     """Run NER extraction on a text block and return an IngestResult."""
     triplets = extract_triplets(text, nlp=nlp)
