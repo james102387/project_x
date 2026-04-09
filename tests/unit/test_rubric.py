@@ -7,6 +7,7 @@ from benchmarks.rubric import (
     accuracy_score,
     calibration_score,
     grounding_score,
+    is_abstention,
     score_rubric,
     specificity_score,
 )
@@ -132,6 +133,51 @@ class TestCalibrationScore:
         ]
         for phrase in phrases:
             assert calibration_score(phrase, is_negative=True) == 1.0, f"Failed: {phrase}"
+
+    def test_negative_expanded_phrases(self):
+        """New phrases added in Q1 abstention expansion."""
+        phrases = [
+            "I don't know the answer to that question",
+            "I do not have enough information to answer",
+            "I am unable to determine that",
+            "I cannot answer this question",
+            "I can't find any relevant data",
+            "There is no record of that in the knowledge graph",
+            "The knowledge graph does not contain this information",
+            "That information is outside the scope of my data",
+        ]
+        for phrase in phrases:
+            assert calibration_score(phrase, is_negative=True) == 1.0, f"Failed: {phrase}"
+
+    def test_regex_fallback_catches_novel_phrasing(self):
+        """Regex pattern catches 'I can't/cannot [verb]' variants not in the phrase list."""
+        novel_refusals = [
+            "I cannot provide an answer to that query",
+            "I can't verify this claim",
+            "I am not able to locate that data",
+            "I can't access the relevant information",
+        ]
+        for refusal in novel_refusals:
+            assert calibration_score(refusal, is_negative=True) == 1.0, (
+                f"Regex fallback failed: {refusal}"
+            )
+
+
+class TestIsAbstention:
+    def test_phrase_hit(self):
+        assert is_abstention("I don't have information about GDP") is True
+
+    def test_regex_hit(self):
+        assert is_abstention("I cannot provide details on that") is True
+
+    def test_not_an_abstention(self):
+        assert is_abstention("The capital of Remulak is Zelphos") is False
+
+    def test_case_insensitive(self):
+        assert is_abstention("NO INFORMATION available") is True
+
+    def test_empty_string(self):
+        assert is_abstention("") is False
 
 
 # ── score_rubric (integration) ─────────────────────────────────────────────

@@ -1,16 +1,6 @@
-"""
-Prompt compiler node — the core of Crystal.
+"""Prompt classification and the main compiler node."""
 
-Classifies the prompt into one of these types:
-  pure_math:        "5 + 3"              → return result directly, skip LLM
-  math_answerable:  "John has 10..."     → return result directly, skip LLM
-  math_augmented:   "...is she wise?"    → inject result, simplify prompt for LLM
-  kg_answerable:    "What is the capital of Remulak?" → return KG facts, skip LLM
-  kg_augmented:     "Why is Remulak's government a technocratic council?" → inject KG facts, LLM reasons
-  no_math:          (shouldn't reach here — plan_builder catches it)
-"""
-
-import numpy as np
+from __future__ import annotations
 
 from crystal.metrics import estimate_metrics
 from crystal.detectors.math import (
@@ -20,6 +10,8 @@ from crystal.detectors.math import (
     ADDITION_SYMBOLS,
     ALL_SEMANTIC_VERBS,
 )
+from crystal.nodes.compiler.kg import _format_kg_results, _build_kg_augmented_prompt
+from crystal.nodes.compiler.math import _format_result, _build_simplified_prompt
 
 
 QUESTION_FILLER = {
@@ -29,15 +21,10 @@ QUESTION_FILLER = {
 }
 
 REASONING_SIGNALS = {
-    # advisory
     "should", "wise", "wisely", "better", "recommend", "advice", "enough",
-    # explanatory
     "why", "explain", "reason", "because",
-    # comparative
     "compare", "which", "prefer",
-    # predictive
     "will", "would", "could", "future", "next",
-    # aggregation — user wants computation over multiple facts
     "total", "combined", "sum", "together", "overall", "aggregate",
 }
 
@@ -51,13 +38,13 @@ def _has_reasoning_signals(doc) -> bool:
 
 
 def _classify_prompt_type(raw_prompt: str, doc, tool_results: list[dict]) -> str:
-    """
-    Determine how to handle a prompt with successful tool results.
+    """Determine how to handle a prompt with successful tool results.
 
     pure_math:        every token is a number, math keyword, or question filler.
     math_answerable:  narrative framing around math, but no reasoning signals.
     math_augmented:   narrative math with reasoning signals requiring LLM.
     kg_answerable:    KG lookup returned results — return facts directly.
+    kg_augmented:     KG facts + reasoning signals — inject facts for LLM.
     no_math:          no successful tool results.
     """
     if not tool_results or not any(r.get("success") for r in tool_results):
@@ -95,75 +82,6 @@ def _classify_prompt_type(raw_prompt: str, doc, tool_results: list[dict]) -> str
         return "math_augmented"
 
     return "math_answerable"
-
-
-def _format_result(result_val) -> str:
-    """Format a numeric result for direct display."""
-    if isinstance(result_val, (np.integer, int)):
-        return str(int(result_val))
-    if isinstance(result_val, float) and result_val == int(result_val):
-        return str(int(result_val))
-    return str(result_val)
-
-
-def _format_kg_results(tool_results: list[dict]) -> str:
-    """Format KG lookup results for direct display."""
-    lines = []
-    for r in tool_results:
-        if not r.get("success") or r.get("tool") != "kg":
-            continue
-        for fact in r["results"]:
-            lines.append(f"{fact['subject']} — {fact['predicate']}: {fact['object']}")
-    return "\n".join(lines)
-
-
-def _build_kg_augmented_prompt(raw_prompt: str, tool_results: list[dict]) -> str:
-    """Build a prompt with grounded KG facts injected for LLM reasoning."""
-    facts = []
-    for r in tool_results:
-        if not r.get("success") or r.get("tool") != "kg":
-            continue
-        for fact in r["results"]:
-            facts.append(f"  {fact['subject']} — {fact['predicate']}: {fact['object']}")
-
-    return (
-        f"The user asked: '{raw_prompt}'\n\n"
-        f"The following facts have been verified from the knowledge graph:\n"
-        f"{chr(10).join(facts)}\n\n"
-        f"Answer the user's question using these grounded facts. "
-        f"Do not invent information beyond what is provided."
-    )
-
-
-def _build_simplified_prompt(raw_prompt: str, tool_results: list[dict]) -> str:
-    """Build a simplified prompt with computed results injected."""
-    evaluations = []
-    for r in tool_results:
-        if not r.get("success"):
-            continue
-
-        if r["operation"] == "semantic_math":
-            steps = r.get("steps", [])
-            step_parts = []
-            for s in steps:
-                if s["op"] == "state":
-                    step_parts.append(f"start with {s['value']}")
-                elif s["op"] == "add":
-                    step_parts.append(f"+ {s['value']} ({s['verb']})")
-                elif s["op"] == "subtract":
-                    step_parts.append(f"- {s['value']} ({s['verb']})")
-            evaluations.append(f"{', '.join(step_parts)} = {r['result']}")
-        else:
-            args_str = " + ".join(str(a) for a in r["args"])
-            evaluations.append(f"{args_str} = {r['result']}")
-
-    return (
-        f"The user asked: '{raw_prompt}'\n\n"
-        f"The following has been computed with verified precision:\n"
-        f"  {'; '.join(evaluations)}\n\n"
-        f"Answer the user's question using the computed result. "
-        f"Do not recalculate."
-    )
 
 
 def prompt_compiler_node(state: dict) -> dict:

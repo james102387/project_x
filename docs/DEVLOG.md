@@ -9,10 +9,124 @@ Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.
 
 Update this section each session with current priorities.
 
-- **D1, D2 (Phases 1+2), D3, D4, D5, D6 complete.** Web UI live at `python -m crystal.ui`.
-- **Next milestone:** D2 Phase 3 (community detection) and F-series items.
-- **Key architectural additions:** Two-pass ingestion (`ingest_with_llm()`), human-reviewable LLM extraction output, `load_review()` for importing accepted triplets.
-- **Test count:** 421 passing, 5 skipped.
+- **Phase 1a complete.** 500 SCOTUS cases ingested from COLD Cases, 1,305 triplets in SQLite KG, 1,421 auto-accepted golden answers (1,321 Phase 1a + 100 original). Review UI fixed and functional with pre-populated questions table.
+- **Tiered data strategy established.** Structured API data (Tier 0) auto-accepted with no human review. NER/LLM-extracted content (Tier 1+) will go through Crystal-proposes / human-verifies workflow.
+- **Next milestones:** Phase 1b (citation graph from CourtListener — needs API token), then run Ralph Wiggum loop on the 1,421 golden answers.
+- **Test count:** 659 passing, 5 skipped.
+- **Known gaps:** Citation-format entity spans ("384 U.S. 436") not detected by spaCy — needs regex pre-pass. "decided" predicate ambiguous between date/judges depending on WH-word context.
+
+---
+
+## 2026-04-09 — Phase 1a Bulk Ingestion, Tiered Data Strategy, Review UI Fixes
+
+### What changed
+- **Tiered data strategy** — Established phased ingestion roadmap (TODO.md rewritten):
+  - Phase 1 (structured API): auto-accept, no human review needed. Golden answers are verbatim API field values.
+  - Phase 2 (unstructured text): Crystal proposes, human verifies. NER/LLM extraction with confidence-tiered review.
+- **Phase 1a bulk ingestion** — `scripts/bulk_ingest.py`: streams SCOTUS cases from COLD Cases (HuggingFace), filters by court name, builds SQLite KG, generates questions, auto-accepts everything with `confidence_tier: 0`.
+  - 500 SCOTUS cases → 1,305 triplets → 1,321 auto-accepted questions (Tier 1 factual + 20 negatives)
+  - SQLite KG at `data/legal.sqlite`: 1,301 triplets, 496 subjects
+  - Batch file: `review/batch_phase1a_*.json` with `auto_accepted: true`
+- **Auto-accepted original 100 questions** — `review/pending_questions.json` status changed from `pending_review` to `accepted`. Total golden answers: 1,421.
+- **Review UI fixes** (Gradio 6 compatibility):
+  - `list_batches()` now discovers all `*.json` files with `cases` lists, not just `batch_*.json`
+  - `load_batch_questions()`, `load_batch_context()`, `save_review_decisions()` use `_resolve_batch_path()` helper
+  - `load_batch_context()` falls back to extracting source triplets from each case's `source_triplet` field
+  - All Dataframe returns converted to `pandas.DataFrame` (Gradio 6 `type="pandas"` default)
+  - Questions table pre-populated on page load (`.change` event doesn't fire on initial render)
+  - Refresh button now updates all Review tab components (dashboard, dropdown, table, context, gaps)
+  - "Textbox" label renamed to "Save Status"
+
+### Decisions
+- Structured API data needs no human approval: the golden answer is the API field value, and the odds of incorrect data from a structured source are negligible
+- Batching is unnecessary for auto-accepted data — bulk ingest replaces the cron → review → accept workflow for Tier 0
+- 500 cases / ~2,500 questions is the sufficiency threshold for Ralph Wiggum convergence (~50 per predicate)
+- Phase 1b/1c (CourtListener citation graph + judge bios) deferred until `COURTLISTENER_API_TOKEN` is available
+
+---
+
+## 2026-04-04 — Cron Ingestion, Interactive Review UI, Ralph Wiggum Phase 6b
+
+### What changed
+- **Ingestion cron CLI** — `src/crystal/ingest/cron.py`
+  - `run_ingestion_batch()` runs the full pipeline: stream COLD Cases → build/update SQLite KG → generate questions → export to `review/batch_YYYYMMDD_HHMMSS.json` with batch metadata (id, source, record count, timestamp, source triplets)
+  - CLI: `PYTHONPATH=src:. python src/crystal/ingest/cron.py --source cold-cases --limit 100`
+  - Tracks accepted case count across batches, prompts when ready for Ralph Wiggum
+  - 8 tests in `tests/unit/ingest/test_cron.py`
+- **Batch-aware review API** — `src/crystal/review.py` extended
+  - `list_batches()`, `load_batch_questions()`, `load_batch_context()`, `save_review_decisions()`, `collect_accepted_cases()`
+  - `format_review_dashboard()` now includes batch summary and Ralph Wiggum readiness indicator
+  - 13 tests in `tests/unit/test_review_batches.py`
+- **Interactive review UI** — `src/crystal/ui/app.py` Review tab redesigned
+  - Batch selector dropdown with per-batch metadata display
+  - Interactive questions table: edit Status column → Save Decisions button
+  - Batch context panel: shows source triplets grouped by entity
+- **Ralph Wiggum Phase 6b (autonomous mutation)** — `benchmarks/ralph_wiggum.py`
+  - `_propose_changes()`: LLM analyzes failures, proposes dict additions to QUESTION_PREDICATE_MAP and LEGAL_PREDICATE_ALIASES
+  - `_validate_proposal()`: string→string only, additions only, allowed sections only
+  - `_apply_proposal()` / `_insert_dict_entries()`: regex-based insertion before closing brace of target dict literals
+  - `_revert_proposal()` / `_remove_dict_entries()`: non-git revert path for undoing failed proposals
+  - Git integration: `--use-git` flag creates `ralph/*` branch, commits changes, `git reset --hard` on regression
+  - `_parse_llm_proposal()`: extracts JSON from code fences or bare text
+  - CLI: `PYTHONPATH=src:. python benchmarks/ralph_wiggum.py --threshold 0.90 [--use-git] [--dry-run]`
+  - `ralph_results.tsv` output log (iteration, score, commit, keep/discard)
+  - 14 tests in `tests/unit/test_ralph_wiggum_mutations.py`
+  - All 12 original tests still pass
+- **Test total:** 659 passing, 5 skipped (+35 new tests)
+
+### Decisions
+- Adopted karpathy/autoresearch pattern for Ralph Wiggum: one mutable file (predicate map), immutable evaluation, git as undo, no human approval
+- Two mutable files rather than one: QUESTION_PREDICATE_MAP (maps extracted phrases → predicates) and LEGAL_PREDICATE_ALIASES (maps surface forms → canonical predicates) serve complementary roles
+- Non-git revert path available (`_revert_proposal`) for use without `--use-git` — safer for development
+- Consecutive discard limit (3) prevents infinite loops when LLM proposals aren't useful
+- `collect_accepted_cases()` aggregates across all batch files — Ralph Wiggum draws from entire reviewed corpus
+- `format_review_dashboard()` now takes optional `review_dir` parameter for testability
+
+---
+
+## 2026-03-29 — Legal Data Ingestion Pipeline (Phases 0-6)
+
+### What changed
+- **Phase 0: Legal ontology** — `src/crystal/data/legal_ontology.py`
+  - 7 canonical predicates (cites, cited_by_count, court, date_filed, judges, disposition, nature_of_suit)
+  - 40+ predicate aliases, COURT_TYPE_MAP (12 codes)
+  - `normalize_case_name()`, `parse_citation()`, `generate_case_aliases()` with slug-derived aliases
+  - 31 tests in `tests/unit/test_legal_ontology.py`
+- **Phase 1: COLD Cases adapter** — `src/crystal/ingest/sources/cold_cases.py`
+  - `_record_to_triplets()`, `ingest_cold_cases()` (streaming iterator with filters, injectable records)
+  - `scotus_filter()` for SCOTUS-specific detection
+  - 22 tests in `tests/unit/ingest/test_cold_cases.py`
+- **Phase 3: SQLite persistence** — `src/crystal/tools/kg/store.py`
+  - `SqliteKnowledgeGraph` with same lookup()/traverse() API as in-memory KG
+  - `bulk_insert()` with dedup, WAL mode, 3-tier resolution cascade via SQL
+  - `src/crystal/tools/kg/legal.py` — convenience builders (memory + SQLite)
+  - 26 tests in `tests/unit/tools/test_sqlite_kg.py`
+- **Phase 2: CourtListener client** — `src/crystal/ingest/sources/courtlistener.py`
+  - REST client with rate limiting, retry, cursor pagination
+  - `citations_to_triplets()` for mapping citation results to KG format
+  - 12 tests with mock HTTP transport
+- **Phase 4: Question generator** — `src/crystal/ingest/question_gen.py`
+  - Tier 1 (factual lookup) + Tier 2 (relational traversal) + negative case generation
+  - Predicate-specific natural language templates, `QuestionCase` dataclass
+  - 22 tests
+- **Phase 5: Fitness function** — `benchmarks/fitness.py`
+  - `binary_correct()`, `fitness_score()`, `evaluate_cases()` — single metric for Ralph Wiggum loop
+  - 17 tests
+- **Phase 6: Ralph Wiggum loop** — `benchmarks/ralph_wiggum.py`
+  - `RalphWiggumLoop` with `run_iteration()`, `run()`, failure analysis
+  - Converges on easy cases, early-stops on score plateau
+  - 12 tests
+- **Benchmark cases** — `benchmarks/legal_ground_truth.py`
+  - 11 positive + 3 negative legal questions, `LEGAL_KNOWN_GAPS` for future detector work
+  - 29 integration tests in `tests/integration/test_legal_pipeline.py`
+- **Detector updates**: QUESTION_PREDICATE_MAP extended (filed, decided, ruled), LEGAL_PREDICATE_ALIASES expanded
+
+### Decisions
+- SQLite before CourtListener (Phase 3 before Phase 2): persistence needed before handling large citation volumes
+- Citation-format entity spans deferred: spaCy splits "384 U.S. 436" into separate tokens, needs regex pre-pass in detector
+- "decided" mapped to date_filed (not court/judges): "who" context lost after noise word stripping — Ralph Wiggum optimization target
+- In-memory KG collapses multi-valued predicates (cites): SQLite KG used for question gen tests with citations
+- No neo4j needed: SQLite handles the scale (8M records at sub-second query time via indexed lookups)
 
 ---
 
@@ -56,44 +170,6 @@ Update this section each session with current priorities.
 - Copular `of`-flip checks both subject and attr for `prep(of)` to handle both "The capital of X is Y" and "Y is the capital of X"
 - Determiner stripping in `_span_text` only (not in `_get_subject_span`) — subjects keep their structure, objects get cleaned
 - `_join_tokens` collapses spaces around hyphens to preserve "Dark-ore" from spaCy's "Dark", "-", "ore" tokenization
-
----
-
-## 2026-03-16 — D6: Reasoning cost benchmark (K-reduction)
-
-### What changed
-- `src/crystal/llm.py`: Extracted `_extract_usage()` helper. Now captures `thoughts_token_count` (reasoning tokens) from Gemini usage metadata alongside prompt and output tokens. Computes `total_tokens` sum.
-- `src/crystal/metrics.py`: `TokenMetrics` extended with `actual_reasoning_tokens` and `actual_total_tokens`. New `ReasoningComparison` dataclass for per-query grounded-vs-ungrounded comparison with computed properties (`total_token_delta`, `reasoning_token_delta`, savings percentages). New `summarize_reasoning_comparisons()` aggregates per-query data into summary statistics.
-- `src/crystal/nodes/llm_nodes.py`: Extracted `_update_metrics_from_usage()` helper. Both augmented and fallback nodes propagate all four token fields (prompt, output, reasoning, total).
-- `benchmarks/run_reasoning_benchmark.py`: New benchmark runner. Runs identical queries through both naked LLM and Crystal-grounded pipeline using a thinking-capable model (default: gemini-2.5-flash). Records per-query: accuracy, prompt/output/reasoning/total tokens. Reports accuracy delta and token savings. Handles kg_answerable (LLM bypass = 0 tokens) and kg_augmented paths. CLI with `--model` and `--cases` flags.
-- 23 new unit tests: `_extract_usage` (4), `_update_metrics_from_usage` (3), `ReasoningComparison` (9), `summarize_reasoning_comparisons` (5), `TokenMetrics` reasoning fields (2)
-- 278/278 passing, 5 skipped
-
-### Decisions
-- Reasoning benchmark uses existing `BENCHMARK_CASES` from ground_truth.py rather than waiting for D4 — Remulak cases exercise both kg_answerable and kg_augmented paths, sufficient for initial K-reduction measurement
-- kg_answerable cases counted as 0 grounded tokens (LLM fully bypassed) — this is the strongest form of K-reduction
-- `_extract_usage()` made a module-level function (not method) so the reasoning benchmark can call it directly without going through `call_llm()`
-
----
-
-## 2026-03-16 — D5: Entity aliases + fuzzy matching + multi-hop traversal
-
-### What changed
-- New `src/crystal/tools/kg/fuzzy.py`: `fuzzy_match()` using `rapidfuzz.fuzz.token_sort_ratio`
-- `graph.py`: added `entity_aliases` param, `_resolve_entity()` (exact → alias → fuzzy cascade), `_resolve_predicate_fuzzy()` (same cascade for predicates), `subjects` property, `traverse()` (BFS depth-limited multi-hop, default depth=2)
-- `data/remulak.py`: `ENTITY_ALIASES` dict (~20 entries) mapping short forms to canonical entities
-- `detectors/kg.py`: `find_entity_spans()` now uses 3-tier cascade with spaCy noun phrase extraction as fallback, length-ratio guard against derived forms (e.g., "Remulakian" ≠ "Remulak"), `detect_kg_query()` accepts `multi_hop` and `max_depth` params, detection results include `match_tier`, `match_score`, `original_text`, `predicate_match_tier`
-- `QUESTION_PREDICATE_MAP`: added `"long last" → "duration"`, `"long" → "duration"`
-- `requirements.txt`: added `rapidfuzz>=3.0.0`
-- Golden test cases: 3 alias cases + 2 fuzzy string cases
-- Unit tests: `test_fuzzy.py` (8 tests), expanded `test_kg.py` (entity aliases, fuzzy entity, fuzzy predicate, multi-hop traversal, subjects property — 20+ new tests), expanded `test_kg.py` detector tests (match_tier, alias detection, fuzzy detection, multi-hop detection)
-- 255/255 passing, 5 skipped
-
-### Decisions
-- Length-ratio guard (0.7–1.3) on fuzzy entity matches from noun phrase extraction prevents derived adjectives ("Remulakian") from fuzzy-matching their base entity ("Remulak")
-- Entity aliases include article variants ("the fracture war" alongside "fracture war") because spaCy noun phrase extraction includes determiners
-- Multi-hop is opt-in (`multi_hop=False` default) — caller decides when to expand; keeps subject_scan as the default fallback for backward compatibility
-- Multi-hop uses BFS with visited set for cycle prevention, collects only facts where objects are also KG subjects (avoids expanding leaf values like "Zelphos" that have no forward facts)
 
 ---
 

@@ -217,22 +217,22 @@ class TestFuzzyEntity:
 
 class TestFuzzyPredicate:
     def test_exact_predicate(self, kg):
-        resolved, tier = kg._resolve_predicate_fuzzy("capital", subject="remulak")
+        resolved, tier = kg._resolve_predicate_cascade("capital", subject="remulak")
         assert resolved == "capital"
         assert tier == "exact"
 
     def test_alias_predicate(self, kg):
-        resolved, tier = kg._resolve_predicate_fuzzy("capital city", subject="remulak")
+        resolved, tier = kg._resolve_predicate_cascade("capital city", subject="remulak")
         assert resolved == "capital"
         assert tier == "alias"
 
     def test_fuzzy_predicate(self, kg):
-        resolved, tier = kg._resolve_predicate_fuzzy("capitl", subject="remulak")
+        resolved, tier = kg._resolve_predicate_cascade("capitl", subject="remulak")
         assert tier == "fuzzy"
         assert resolved == "capital"
 
     def test_no_match_predicate(self, kg):
-        resolved, tier = kg._resolve_predicate_fuzzy("gdp", subject="remulak")
+        resolved, tier = kg._resolve_predicate_cascade("gdp", subject="remulak")
         assert tier == "none"
 
 

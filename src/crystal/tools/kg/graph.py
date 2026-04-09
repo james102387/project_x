@@ -76,10 +76,10 @@ class KnowledgeGraph:
         """Map an alias to its canonical predicate, or return as-is."""
         return self._predicate_aliases.get(predicate.lower(), predicate)
 
-    def _resolve_predicate_fuzzy(
+    def _resolve_predicate_cascade(
         self, predicate: str, subject: str | None = None,
     ) -> tuple[str, str]:
-        """Resolve a predicate via 3-tier cascade.
+        """Resolve a predicate via 3-tier cascade: exact → alias → fuzzy.
 
         If subject is given, fuzzy matching runs against predicates for that
         subject only (narrower candidate set = better precision).

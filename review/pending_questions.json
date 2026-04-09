@@ -1,0 +1,1472 @@
+{
+  "description": "Auto-generated questions pending human review. Change status to 'accepted' or 'rejected'. Correct golden_answer and match_strings as needed.",
+  "total": 100,
+  "pending": 0,
+  "cases": [
+    {
+      "question": "What court decided Bethel School District V. Fraser?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "bethel school district v. fraser",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Bethel School District V. Fraser filed?",
+      "golden_answer": "1986-07-07",
+      "match_strings": [
+        "1986-07-07"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "bethel school district v. fraser",
+        "date_filed",
+        "1986-07-07"
+      ]
+    },
+    {
+      "question": "Which court decided Brandenburg V. Ohio?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "brandenburg v. ohio",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Brandenburg V. Ohio decided?",
+      "golden_answer": "1969-06-09",
+      "match_strings": [
+        "1969-06-09"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "brandenburg v. ohio",
+        "date_filed",
+        "1969-06-09"
+      ]
+    },
+    {
+      "question": "What court heard Brown V. Board Of Education?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "brown v. board of education",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "What date was Brown V. Board Of Education filed?",
+      "golden_answer": "1954-05-17",
+      "match_strings": [
+        "1954-05-17"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "brown v. board of education",
+        "date_filed",
+        "1954-05-17"
+      ]
+    },
+    {
+      "question": "Which court decided Bush V. Gore?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "bush v. gore",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "What date was Bush V. Gore filed?",
+      "golden_answer": "2000-12-12",
+      "match_strings": [
+        "2000-12-12"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "bush v. gore",
+        "date_filed",
+        "2000-12-12"
+      ]
+    },
+    {
+      "question": "Which court decided Carpenter V. United States?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "carpenter v. united states",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "What date was Carpenter V. United States filed?",
+      "golden_answer": "2018-06-22",
+      "match_strings": [
+        "2018-06-22"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "carpenter v. united states",
+        "date_filed",
+        "2018-06-22"
+      ]
+    },
+    {
+      "question": "What court heard Chevron U.S.A., Inc. V. Natural Resources Defense Council, Inc.?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "chevron u.s.a., inc. v. natural resources defense council, inc.",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Chevron U.S.A., Inc. V. Natural Resources Defense Council, Inc. filed?",
+      "golden_answer": "1984-06-25",
+      "match_strings": [
+        "1984-06-25"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "chevron u.s.a., inc. v. natural resources defense council, inc.",
+        "date_filed",
+        "1984-06-25"
+      ]
+    },
+    {
+      "question": "Which court decided Citizens United V. Federal Election Commission?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "citizens united v. federal election commission",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Citizens United V. Federal Election Commission filed?",
+      "golden_answer": "2010-01-21",
+      "match_strings": [
+        "2010-01-21"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "citizens united v. federal election commission",
+        "date_filed",
+        "2010-01-21"
+      ]
+    },
+    {
+      "question": "What court heard Crawford V. Washington?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "crawford v. washington",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Crawford V. Washington decided?",
+      "golden_answer": "2004-03-08",
+      "match_strings": [
+        "2004-03-08"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "crawford v. washington",
+        "date_filed",
+        "2004-03-08"
+      ]
+    },
+    {
+      "question": "What court heard District Of Columbia V. Heller?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "district of columbia v. heller",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "What date was District Of Columbia V. Heller filed?",
+      "golden_answer": "2008-06-26",
+      "match_strings": [
+        "2008-06-26"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "district of columbia v. heller",
+        "date_filed",
+        "2008-06-26"
+      ]
+    },
+    {
+      "question": "What court heard Dobbs V. Jackson Women'S Health Organization?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "dobbs v. jackson women's health organization",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Dobbs V. Jackson Women'S Health Organization decided?",
+      "golden_answer": "2022-06-24",
+      "match_strings": [
+        "2022-06-24"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "dobbs v. jackson women's health organization",
+        "date_filed",
+        "2022-06-24"
+      ]
+    },
+    {
+      "question": "What court decided Dred Scott V. Sandford?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "dred scott v. sandford",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "What date was Dred Scott V. Sandford filed?",
+      "golden_answer": "1857-03-06",
+      "match_strings": [
+        "1857-03-06"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "dred scott v. sandford",
+        "date_filed",
+        "1857-03-06"
+      ]
+    },
+    {
+      "question": "What court decided Engel V. Vitale?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "engel v. vitale",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Engel V. Vitale filed?",
+      "golden_answer": "1962-06-25",
+      "match_strings": [
+        "1962-06-25"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "engel v. vitale",
+        "date_filed",
+        "1962-06-25"
+      ]
+    },
+    {
+      "question": "What court heard Furman V. Georgia?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "furman v. georgia",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "What date was Furman V. Georgia filed?",
+      "golden_answer": "1972-06-29",
+      "match_strings": [
+        "1972-06-29"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "furman v. georgia",
+        "date_filed",
+        "1972-06-29"
+      ]
+    },
+    {
+      "question": "What court heard Gibbons V. Ogden?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "gibbons v. ogden",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Gibbons V. Ogden filed?",
+      "golden_answer": "1824-03-02",
+      "match_strings": [
+        "1824-03-02"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "gibbons v. ogden",
+        "date_filed",
+        "1824-03-02"
+      ]
+    },
+    {
+      "question": "Which court decided Gideon V. Wainwright?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "gideon v. wainwright",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Gideon V. Wainwright decided?",
+      "golden_answer": "1963-03-18",
+      "match_strings": [
+        "1963-03-18"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "gideon v. wainwright",
+        "date_filed",
+        "1963-03-18"
+      ]
+    },
+    {
+      "question": "What court heard Gonzales V. Raich?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "gonzales v. raich",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "What date was Gonzales V. Raich filed?",
+      "golden_answer": "2005-06-06",
+      "match_strings": [
+        "2005-06-06"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "gonzales v. raich",
+        "date_filed",
+        "2005-06-06"
+      ]
+    },
+    {
+      "question": "What court heard Griswold V. Connecticut?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "griswold v. connecticut",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Griswold V. Connecticut decided?",
+      "golden_answer": "1965-06-07",
+      "match_strings": [
+        "1965-06-07"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "griswold v. connecticut",
+        "date_filed",
+        "1965-06-07"
+      ]
+    },
+    {
+      "question": "Which court decided Grutter V. Bollinger?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "grutter v. bollinger",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Grutter V. Bollinger decided?",
+      "golden_answer": "2003-06-23",
+      "match_strings": [
+        "2003-06-23"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "grutter v. bollinger",
+        "date_filed",
+        "2003-06-23"
+      ]
+    },
+    {
+      "question": "What court decided Hazelwood School District V. Kuhlmeier?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "hazelwood school district v. kuhlmeier",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Hazelwood School District V. Kuhlmeier decided?",
+      "golden_answer": "1988-01-13",
+      "match_strings": [
+        "1988-01-13"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "hazelwood school district v. kuhlmeier",
+        "date_filed",
+        "1988-01-13"
+      ]
+    },
+    {
+      "question": "Which court decided Heart Of Atlanta Motel V. United States?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "heart of atlanta motel v. united states",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Heart Of Atlanta Motel V. United States decided?",
+      "golden_answer": "1964-12-14",
+      "match_strings": [
+        "1964-12-14"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "heart of atlanta motel v. united states",
+        "date_filed",
+        "1964-12-14"
+      ]
+    },
+    {
+      "question": "What court decided Katz V. United States?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "katz v. united states",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Katz V. United States decided?",
+      "golden_answer": "1967-12-18",
+      "match_strings": [
+        "1967-12-18"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "katz v. united states",
+        "date_filed",
+        "1967-12-18"
+      ]
+    },
+    {
+      "question": "What court decided Korematsu V. United States?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "korematsu v. united states",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "What date was Korematsu V. United States filed?",
+      "golden_answer": "1944-12-18",
+      "match_strings": [
+        "1944-12-18"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "korematsu v. united states",
+        "date_filed",
+        "1944-12-18"
+      ]
+    },
+    {
+      "question": "Which court decided Lawrence V. Texas?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "lawrence v. texas",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Lawrence V. Texas decided?",
+      "golden_answer": "2003-06-26",
+      "match_strings": [
+        "2003-06-26"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "lawrence v. texas",
+        "date_filed",
+        "2003-06-26"
+      ]
+    },
+    {
+      "question": "Which court decided Lemon V. Kurtzman?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "lemon v. kurtzman",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Lemon V. Kurtzman decided?",
+      "golden_answer": "1971-06-28",
+      "match_strings": [
+        "1971-06-28"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "lemon v. kurtzman",
+        "date_filed",
+        "1971-06-28"
+      ]
+    },
+    {
+      "question": "What court heard Loper Bright Enterprises V. Raimondo?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "loper bright enterprises v. raimondo",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Loper Bright Enterprises V. Raimondo decided?",
+      "golden_answer": "2024-06-28",
+      "match_strings": [
+        "2024-06-28"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "loper bright enterprises v. raimondo",
+        "date_filed",
+        "2024-06-28"
+      ]
+    },
+    {
+      "question": "Which court decided Loving V. Virginia?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "loving v. virginia",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Loving V. Virginia decided?",
+      "golden_answer": "1967-06-12",
+      "match_strings": [
+        "1967-06-12"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "loving v. virginia",
+        "date_filed",
+        "1967-06-12"
+      ]
+    },
+    {
+      "question": "What court heard Mapp V. Ohio?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "mapp v. ohio",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "What date was Mapp V. Ohio filed?",
+      "golden_answer": "1961-06-19",
+      "match_strings": [
+        "1961-06-19"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "mapp v. ohio",
+        "date_filed",
+        "1961-06-19"
+      ]
+    },
+    {
+      "question": "What court decided Marbury V. Madison?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "marbury v. madison",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "What date was Marbury V. Madison filed?",
+      "golden_answer": "1803-02-24",
+      "match_strings": [
+        "1803-02-24"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "marbury v. madison",
+        "date_filed",
+        "1803-02-24"
+      ]
+    },
+    {
+      "question": "Which court decided Mcculloch V. Maryland?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "mcculloch v. maryland",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Mcculloch V. Maryland filed?",
+      "golden_answer": "1819-03-06",
+      "match_strings": [
+        "1819-03-06"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "mcculloch v. maryland",
+        "date_filed",
+        "1819-03-06"
+      ]
+    },
+    {
+      "question": "Which court decided Mcdonald V. City Of Chicago?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "mcdonald v. city of chicago",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "What date was Mcdonald V. City Of Chicago filed?",
+      "golden_answer": "2010-06-28",
+      "match_strings": [
+        "2010-06-28"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "mcdonald v. city of chicago",
+        "date_filed",
+        "2010-06-28"
+      ]
+    },
+    {
+      "question": "What court heard Miranda V. Arizona?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "miranda v. arizona",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Miranda V. Arizona decided?",
+      "golden_answer": "1966-06-13",
+      "match_strings": [
+        "1966-06-13"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "miranda v. arizona",
+        "date_filed",
+        "1966-06-13"
+      ]
+    },
+    {
+      "question": "What court decided New York Times Co. V. Sullivan?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "new york times co. v. sullivan",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was New York Times Co. V. Sullivan filed?",
+      "golden_answer": "1964-03-09",
+      "match_strings": [
+        "1964-03-09"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "new york times co. v. sullivan",
+        "date_filed",
+        "1964-03-09"
+      ]
+    },
+    {
+      "question": "Which court decided Obergefell V. Hodges?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "obergefell v. hodges",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Obergefell V. Hodges decided?",
+      "golden_answer": "2015-06-26",
+      "match_strings": [
+        "2015-06-26"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "obergefell v. hodges",
+        "date_filed",
+        "2015-06-26"
+      ]
+    },
+    {
+      "question": "What court decided Planned Parenthood V. Casey?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "planned parenthood v. casey",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Planned Parenthood V. Casey decided?",
+      "golden_answer": "1992-06-29",
+      "match_strings": [
+        "1992-06-29"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "planned parenthood v. casey",
+        "date_filed",
+        "1992-06-29"
+      ]
+    },
+    {
+      "question": "What court heard Plessy V. Ferguson?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "plessy v. ferguson",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Plessy V. Ferguson filed?",
+      "golden_answer": "1896-05-18",
+      "match_strings": [
+        "1896-05-18"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "plessy v. ferguson",
+        "date_filed",
+        "1896-05-18"
+      ]
+    },
+    {
+      "question": "Which court decided Regents Of The University Of California V. Bakke?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "regents of the university of california v. bakke",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Regents Of The University Of California V. Bakke filed?",
+      "golden_answer": "1978-06-28",
+      "match_strings": [
+        "1978-06-28"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "regents of the university of california v. bakke",
+        "date_filed",
+        "1978-06-28"
+      ]
+    },
+    {
+      "question": "Which court decided Riley V. California?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "riley v. california",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Riley V. California decided?",
+      "golden_answer": "2014-06-25",
+      "match_strings": [
+        "2014-06-25"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "riley v. california",
+        "date_filed",
+        "2014-06-25"
+      ]
+    },
+    {
+      "question": "What court heard Roe V. Wade?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "roe v. wade",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "What date was Roe V. Wade filed?",
+      "golden_answer": "1973-01-22",
+      "match_strings": [
+        "1973-01-22"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "roe v. wade",
+        "date_filed",
+        "1973-01-22"
+      ]
+    },
+    {
+      "question": "Which court decided Roper V. Simmons?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "roper v. simmons",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Roper V. Simmons filed?",
+      "golden_answer": "2005-03-01",
+      "match_strings": [
+        "2005-03-01"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "roper v. simmons",
+        "date_filed",
+        "2005-03-01"
+      ]
+    },
+    {
+      "question": "What court heard Schenck V. United States?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "schenck v. united states",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Schenck V. United States decided?",
+      "golden_answer": "1919-03-03",
+      "match_strings": [
+        "1919-03-03"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "schenck v. united states",
+        "date_filed",
+        "1919-03-03"
+      ]
+    },
+    {
+      "question": "Which court decided Shelby County V. Holder?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "shelby county v. holder",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Shelby County V. Holder filed?",
+      "golden_answer": "2013-06-25",
+      "match_strings": [
+        "2013-06-25"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "shelby county v. holder",
+        "date_filed",
+        "2013-06-25"
+      ]
+    },
+    {
+      "question": "What court heard Terry V. Ohio?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "terry v. ohio",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "What date was Terry V. Ohio filed?",
+      "golden_answer": "1968-06-10",
+      "match_strings": [
+        "1968-06-10"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "terry v. ohio",
+        "date_filed",
+        "1968-06-10"
+      ]
+    },
+    {
+      "question": "Which court decided Texas V. Johnson?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "texas v. johnson",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "What date was Texas V. Johnson filed?",
+      "golden_answer": "1989-06-21",
+      "match_strings": [
+        "1989-06-21"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "texas v. johnson",
+        "date_filed",
+        "1989-06-21"
+      ]
+    },
+    {
+      "question": "Which court decided Tinker V. Des Moines?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "tinker v. des moines",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "Which court decided Tinker V. Des Moines Independent Community School District?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "tinker v. des moines independent community school district",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Tinker V. Des Moines Independent Community School District decided?",
+      "golden_answer": "1969-02-24",
+      "match_strings": [
+        "1969-02-24"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "tinker v. des moines independent community school district",
+        "date_filed",
+        "1969-02-24"
+      ]
+    },
+    {
+      "question": "What court heard United States V. Nixon?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "united states v. nixon",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was United States V. Nixon filed?",
+      "golden_answer": "1974-07-24",
+      "match_strings": [
+        "1974-07-24"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "united states v. nixon",
+        "date_filed",
+        "1974-07-24"
+      ]
+    },
+    {
+      "question": "What court heard West Virginia State Board Of Education V. Barnette?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "west virginia state board of education v. barnette",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was West Virginia State Board Of Education V. Barnette filed?",
+      "golden_answer": "1943-06-14",
+      "match_strings": [
+        "1943-06-14"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "west virginia state board of education v. barnette",
+        "date_filed",
+        "1943-06-14"
+      ]
+    },
+    {
+      "question": "Which court decided Youngstown Sheet & Tube Co. V. Sawyer?",
+      "golden_answer": "Supreme Court of the United States",
+      "match_strings": [
+        "supreme court of the united states"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "youngstown sheet & tube co. v. sawyer",
+        "court",
+        "Supreme Court of the United States"
+      ]
+    },
+    {
+      "question": "When was Youngstown Sheet & Tube Co. V. Sawyer decided?",
+      "golden_answer": "1952-06-02",
+      "match_strings": [
+        "1952-06-02"
+      ],
+      "is_negative": false,
+      "tier": 1,
+      "status": "accepted",
+      "source_triplet": [
+        "youngstown sheet & tube co. v. sawyer",
+        "date_filed",
+        "1952-06-02"
+      ]
+    },
+    {
+      "question": "What is the gdp of Bethel School District V. Fraser?",
+      "golden_answer": "[ABSTAIN]",
+      "match_strings": [],
+      "is_negative": true,
+      "tier": 1,
+      "status": "accepted"
+    },
+    {
+      "question": "What is the population density of Brandenburg V. Ohio?",
+      "golden_answer": "[ABSTAIN]",
+      "match_strings": [],
+      "is_negative": true,
+      "tier": 1,
+      "status": "accepted"
+    },
+    {
+      "question": "What is the area in square miles of Brown V. Board Of Education?",
+      "golden_answer": "[ABSTAIN]",
+      "match_strings": [],
+      "is_negative": true,
+      "tier": 1,
+      "status": "accepted"
+    },
+    {
+      "question": "What is the chief justice of Bush V. Gore?",
+      "golden_answer": "[ABSTAIN]",
+      "match_strings": [],
+      "is_negative": true,
+      "tier": 1,
+      "status": "accepted"
+    },
+    {
+      "question": "What is the majority opinion author of Carpenter V. United States?",
+      "golden_answer": "[ABSTAIN]",
+      "match_strings": [],
+      "is_negative": true,
+      "tier": 1,
+      "status": "accepted"
+    }
+  ]
+}

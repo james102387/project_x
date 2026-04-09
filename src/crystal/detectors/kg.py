@@ -215,6 +215,10 @@ QUESTION_PREDICATE_MAP = {
     "famous": "known for",
     "long last": "duration",
     "long": "duration",
+    # legal
+    "filed": "date_filed",
+    "decided": "date_filed",
+    "ruled": "disposition",
 }
 
 
@@ -273,7 +277,7 @@ def detect_kg_query(
                 hits = kg.lookup(subject=subj, predicate=clean_predicate)
 
             if not hits:
-                fuzzy_pred, pred_tier = kg._resolve_predicate_fuzzy(
+                fuzzy_pred, pred_tier = kg._resolve_predicate_cascade(
                     clean_predicate, subject=subj,
                 )
                 if pred_tier != "none":
