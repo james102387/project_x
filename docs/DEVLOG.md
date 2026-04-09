@@ -9,15 +9,15 @@ Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.
 
 Update this section each session with current priorities.
 
-- **Phase 1a complete.** 500 SCOTUS cases ingested from COLD Cases, 1,305 triplets in SQLite KG, 1,421 auto-accepted golden answers (1,321 Phase 1a + 100 original). Review UI fixed and functional with pre-populated questions table.
-- **Tiered data strategy established.** Structured API data (Tier 0) auto-accepted with no human review. NER/LLM-extracted content (Tier 1+) will go through Crystal-proposes / human-verifies workflow.
-- **Next milestones:** Phase 1b (citation graph from CourtListener — needs API token), then run Ralph Wiggum loop on the 1,421 golden answers.
+- **Phase 1a+1b complete.** 500 SCOTUS cases from COLD Cases + 316 citation triplets from CourtListener. 1,469 auto-accepted golden answers. SQLite KG: 1,615 triplets, 496 subjects. Review UI fixed and functional.
+- **Tiered data strategy established.** Structured API data (Tier 0) auto-accepted. NER/LLM-extracted content (Tier 1+) goes through Crystal-proposes / human-verifies workflow.
+- **Next milestones:** Run Ralph Wiggum loop on the 1,469 golden answers. Phase 1c (judge bios) when needed. Phase 2 (opinion text extraction) when ready for unstructured data.
 - **Test count:** 659 passing, 5 skipped.
 - **Known gaps:** Citation-format entity spans ("384 U.S. 436") not detected by spaCy — needs regex pre-pass. "decided" predicate ambiguous between date/judges depending on WH-word context.
 
 ---
 
-## 2026-04-09 — Phase 1a Bulk Ingestion, Tiered Data Strategy, Review UI Fixes
+## 2026-04-09 — Phase 1a+1b Bulk Ingestion, Tiered Data Strategy, Review UI Fixes
 
 ### What changed
 - **Tiered data strategy** — Established phased ingestion roadmap (TODO.md rewritten):
@@ -25,9 +25,11 @@ Update this section each session with current priorities.
   - Phase 2 (unstructured text): Crystal proposes, human verifies. NER/LLM extraction with confidence-tiered review.
 - **Phase 1a bulk ingestion** — `scripts/bulk_ingest.py`: streams SCOTUS cases from COLD Cases (HuggingFace), filters by court name, builds SQLite KG, generates questions, auto-accepts everything with `confidence_tier: 0`.
   - 500 SCOTUS cases → 1,305 triplets → 1,321 auto-accepted questions (Tier 1 factual + 20 negatives)
-  - SQLite KG at `data/legal.sqlite`: 1,301 triplets, 496 subjects
-  - Batch file: `review/batch_phase1a_*.json` with `auto_accepted: true`
-- **Auto-accepted original 100 questions** — `review/pending_questions.json` status changed from `pending_review` to `accepted`. Total golden answers: 1,421.
+- **Phase 1b citation graph** — `scripts/bulk_citations.py`: searches CourtListener by case name → cluster → opinion → citations. Resolves cited opinion IDs to case names.
+  - 200 cases searched → 57 with citations → 316 citation triplets → 48 Tier 2 relational questions
+  - Rate-limited at 0.6s/request, ~15 min for 200 cases
+- **Auto-accepted original 100 questions** — `review/pending_questions.json` status changed from `pending_review` to `accepted`.
+- **Final totals:** 1,469 accepted golden answers, 1,615 triplets (1,301 metadata + 314 citations), 496 subjects in SQLite KG.
 - **Review UI fixes** (Gradio 6 compatibility):
   - `list_batches()` now discovers all `*.json` files with `cases` lists, not just `batch_*.json`
   - `load_batch_questions()`, `load_batch_context()`, `save_review_decisions()` use `_resolve_batch_path()` helper
@@ -41,7 +43,8 @@ Update this section each session with current priorities.
 - Structured API data needs no human approval: the golden answer is the API field value, and the odds of incorrect data from a structured source are negligible
 - Batching is unnecessary for auto-accepted data — bulk ingest replaces the cron → review → accept workflow for Tier 0
 - 500 cases / ~2,500 questions is the sufficiency threshold for Ralph Wiggum convergence (~50 per predicate)
-- Phase 1b/1c (CourtListener citation graph + judge bios) deferred until `COURTLISTENER_API_TOKEN` is available
+- Citation resolution requires 2 API calls per cited opinion (opinion → cluster → case_name) — capped at 10 citations/case and 200 cases for first run
+- Phase 1c (CourtListener /people/ judge bios) deferred — requires new adapter + entity type
 
 ---
 

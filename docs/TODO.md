@@ -38,8 +38,8 @@ All structured-source questions bypass human review. The golden answer is the AP
 | **1b** | CourtListener citations | cites (forward + reverse) | Citation graph for Tier 2 relational questions |
 | **1c** | CourtListener /people/ | appointing_president, law_school, birth_year, active_service | Judge biographical entity type |
 
-- [x] **Phase 1a** — Bulk SCOTUS ingest from COLD Cases via HuggingFace streaming. Auto-accept all questions.
-- [ ] **Phase 1b** — Citation graph from CourtListener `/opinions-cited/`. Requires `COURTLISTENER_API_TOKEN`.
+- [x] **Phase 1a** — Bulk SCOTUS ingest from COLD Cases via HuggingFace streaming. Auto-accept all questions. 500 cases, 1,321 questions.
+- [x] **Phase 1b** — Citation graph from CourtListener `/opinions-cited/`. 200 cases searched, 316 citation triplets, 48 Tier 2 questions.
 - [ ] **Phase 1c** — Judge biographical data from CourtListener `/people/`. New entity type (judges as subjects).
 
 ### Phase 2: Unstructured text (Crystal proposes, human verifies)

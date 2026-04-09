@@ -1,0 +1,164 @@
+{
+  "batch": {
+    "id": "phase1b_20260409_054630",
+    "source": "courtlistener-citations",
+    "records_ingested": 75,
+    "timestamp": "2026-04-09T05:46:30.575903+00:00",
+    "auto_accepted": true,
+    "confidence_tier": 0
+  },
+  "description": "Phase 1b citation graph — structured API data, auto-accepted.",
+  "total": 8,
+  "pending": 0,
+  "cases": [
+    {
+      "question": "Which cases are cited by Aetna Life Insurance V. Moore?",
+      "golden_answer": "continental life insurance v. chamberlain, insurance co. v. wilkinson, insurance company v. mahone, kuhn v. fairmont coal co., moulor v. american life insurance, new jersey mutual life insurance v. baker, northern assurance co. of london v. grand view building ass'n, northern assurance co. v. grand view building assn., penman v. st. paul fire & marine insurance, phoenix life ins. co. v. raddin",
+      "match_strings": [
+        "continental life insurance v. chamberlain",
+        "insurance co. v. wilkinson",
+        "insurance company v. mahone",
+        "kuhn v. fairmont coal co.",
+        "moulor v. american life insurance"
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "accepted",
+      "source_triplet": [
+        "aetna life insurance v. moore",
+        "cites",
+        "continental life insurance v. chamberlain"
+      ]
+    },
+    {
+      "question": "What cases does Allen V. Siebert cite?",
+      "golden_answer": "artuz v. bennett, carey v. saffold, cole v. state, commonwealth v. banks, daniel siebert v. donal campbell, ex parte ward, kirkland v. state, pace v. diguglielmo, people v. boclair, siebert v. alabama",
+      "match_strings": [
+        "artuz v. bennett",
+        "carey v. saffold",
+        "cole v. state",
+        "commonwealth v. banks",
+        "daniel siebert v. donal campbell"
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "accepted",
+      "source_triplet": [
+        "allen v. siebert",
+        "cites",
+        "artuz v. bennett"
+      ]
+    },
+    {
+      "question": "Which cases are cited by American Broadcasting Cos. V. Aereo, Inc.?",
+      "golden_answer": "costar group, inc. v. loopnet, inc., fox broadcasting co. v. dish network l.l.c., lawson v. fmr llc, metro-goldwyn-mayer studios inc. v. grokster, ltd., new york times co. v. tasini, parker v. google, inc., sony corp. of america v. universal city studios, inc., teleprompter corp. v. columbia broadcasting system, inc., united states v. american society of composers, authors & publishers, united states v. detroit timber & lumber co.",
+      "match_strings": [
+        "costar group, inc. v. loopnet, inc.",
+        "fox broadcasting co. v. dish network l.l.c.",
+        "lawson v. fmr llc",
+        "metro-goldwyn-mayer studios inc. v. grokster, ltd.",
+        "new york times co. v. tasini"
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "accepted",
+      "source_triplet": [
+        "american broadcasting cos. v. aereo, inc.",
+        "cites",
+        "costar group, inc. v. loopnet, inc."
+      ]
+    },
+    {
+      "question": "What cases does Atherton V. Federal Deposit Insurance Corp. cite?",
+      "golden_answer": "banco nacional de cuba v. sabbatino, boyle v. united technologies corp., city of milwaukee v. illinois, clarke v. securities industry assn., federal deposit ins. corp. v. swager, federal deposit insurance corporation, as receiver for central savings and loan association v. daniel t. mcsweeney frederick c. stalder, hinderlider v. la plata river & cherry creek ditch co., howard v. lyons, resolution trust corporation v. henry chapman, united states v. standard oil co. of california",
+      "match_strings": [
+        "banco nacional de cuba v. sabbatino",
+        "boyle v. united technologies corp.",
+        "city of milwaukee v. illinois",
+        "clarke v. securities industry assn.",
+        "federal deposit ins. corp. v. swager"
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "accepted",
+      "source_triplet": [
+        "atherton v. federal deposit insurance corp.",
+        "cites",
+        "banco nacional de cuba v. sabbatino"
+      ]
+    },
+    {
+      "question": "What cases does Ayrshire Collieries Corp. V. United States cite?",
+      "golden_answer": "ayrshire collieries corp. v. united states, board of trade of kansas city v. united states, illinois commerce commission v. united states, interstate commerce commission v. alabama midland railway co., interstate commerce commission v. baltimore & ohio railroad, l. t. barringer & co. v. united states, new york v. united states, texas & pacific railway co. v. united states, united states v. chicago, milwaukee, st. paul & pacific r.",
+      "match_strings": [
+        "ayrshire collieries corp. v. united states",
+        "board of trade of kansas city v. united states",
+        "illinois commerce commission v. united states",
+        "interstate commerce commission v. alabama midland railway co.",
+        "interstate commerce commission v. baltimore & ohio railroad"
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "accepted",
+      "source_triplet": [
+        "ayrshire collieries corp. v. united states",
+        "cites",
+        "ayrshire collieries corp. v. united states"
+      ]
+    },
+    {
+      "question": "What cases does Bank Of California, National Ass'N V. Richardson cite?",
+      "golden_answer": "bank of redemption v. boston, covington v. first nat. bank of covington, m'culloch v. state of maryland, mercantile bank v. new york, owensboro national bank v. owensboro, people v. weaver, weston and others v. the city council of charleston",
+      "match_strings": [
+        "bank of redemption v. boston",
+        "covington v. first nat. bank of covington",
+        "m'culloch v. state of maryland",
+        "mercantile bank v. new york",
+        "owensboro national bank v. owensboro"
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "accepted",
+      "source_triplet": [
+        "bank of california, national ass'n v. richardson",
+        "cites",
+        "bank of redemption v. boston"
+      ]
+    },
+    {
+      "question": "What cases does Berisha V. Lawson cite?",
+      "golden_answer": "d.j.m. v. hannibal public school district 60, dun & bradstreet, inc. v. greenmoss builders, inc., haughwout v. tordenti, john doe, a minor, by his mother and next friend, jane doe v. pulaski county special school district, rosen v. united states, state v. draskovich, state v. johnston, united states v. anthony elonis, united states v. dillard",
+      "match_strings": [
+        "d.j.m. v. hannibal public school district 60",
+        "dun & bradstreet, inc. v. greenmoss builders, inc.",
+        "haughwout v. tordenti",
+        "john doe, a minor, by his mother and next friend, jane doe v. pulaski county special school district",
+        "rosen v. united states"
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "accepted",
+      "source_triplet": [
+        "berisha v. lawson",
+        "cites",
+        "d.j.m. v. hannibal public school district 60"
+      ]
+    },
+    {
+      "question": "What cases does Brashear V. Mason cite?",
+      "golden_answer": "decatur v. paulding, kendall v. united states ex rel. stokes",
+      "match_strings": [
+        "decatur v. paulding",
+        "kendall v. united states ex rel. stokes"
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "accepted",
+      "source_triplet": [
+        "brashear v. mason",
+        "cites",
+        "decatur v. paulding"
+      ]
+    }
+  ]
+}

@@ -189,7 +189,8 @@ class TestClientConstruction:
         assert headers["Authorization"] == "Token test-token"
         client.close()
 
-    def test_auth_headers_without_token(self):
+    def test_auth_headers_without_token(self, monkeypatch):
+        monkeypatch.delenv("COURTLISTENER_API_TOKEN", raising=False)
         client = CourtListenerClient(api_token="", rate_limit=0)
         headers = client._auth_headers()
         assert "Authorization" not in headers
