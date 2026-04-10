@@ -11,9 +11,9 @@ Update this section each session with current priorities.
 
 - **Phase 1a+1b complete.** 500 SCOTUS cases from COLD Cases + 316 citation triplets from CourtListener. 1,469 auto-accepted golden answers. SQLite KG: 1,615 triplets, 496 subjects. Review UI fixed and functional.
 - **Tiered data strategy established.** Structured API data (Tier 0) auto-accepted. NER/LLM-extracted content (Tier 1+) goes through Crystal-proposes / human-verifies workflow.
+- **Known gaps: all resolved.** Citation-format spans detected via regex pre-scan; WH-word-aware predicate override ("who decided" → judges).
 - **Next milestones:** Run Ralph Wiggum loop on the 1,469 golden answers. Phase 1c (judge bios) when needed. Phase 2 (opinion text extraction) when ready for unstructured data.
-- **Test count:** 659 passing, 5 skipped.
-- **Known gaps:** Citation-format entity spans ("384 U.S. 436") not detected by spaCy — needs regex pre-pass. "decided" predicate ambiguous between date/judges depending on WH-word context.
+- **Test count:** 664 passing, 5 skipped.
 
 ---
 

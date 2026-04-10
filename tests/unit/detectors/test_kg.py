@@ -3,7 +3,12 @@
 import pytest
 import spacy
 
-from crystal.detectors.kg import find_entity_spans, has_question_structure, detect_kg_query
+from crystal.detectors.kg import (
+    find_entity_spans,
+    has_question_structure,
+    detect_kg_query,
+    _leading_wh_word,
+)
 from crystal.tools.kg import KnowledgeGraph
 
 
@@ -201,3 +206,72 @@ class TestDetectKgQuery:
         result = detect_kg_query(doc, kg)
         assert result is not None
         assert result["lookup_type"] == "subject_scan"
+
+
+# ── Legal domain: citation spans & WH-word context ──────────────────────
+
+LEGAL_TRIPLETS = [
+    ("384 u.s. 436", "case_name", "Miranda v. Arizona"),
+    ("384 u.s. 436", "court", "Supreme Court of the United States"),
+    ("384 u.s. 436", "date_filed", "1966-06-13"),
+    ("citizens united v. federal election commission", "date_filed", "2010-01-21"),
+    ("citizens united v. federal election commission", "judges",
+     "Roberts, Stevens, Scalia, Kennedy, Thomas, Ginsburg, Breyer, Alito, Sotomayor"),
+    ("citizens united v. federal election commission", "disposition", "Reversed"),
+]
+
+LEGAL_ENTITY_ALIASES: dict[str, str] = {
+    "miranda v. arizona": "384 u.s. 436",
+}
+
+
+@pytest.fixture
+def legal_kg():
+    return KnowledgeGraph(
+        LEGAL_TRIPLETS,
+        entity_aliases=LEGAL_ENTITY_ALIASES,
+    )
+
+
+class TestCitationSpanDetection:
+    """Regression: citation-format entity spans must be detected via regex."""
+
+    def test_citation_entity_found(self, legal_kg):
+        doc = nlp("What court decided 384 U.S. 436?")
+        spans = find_entity_spans(doc, legal_kg)
+        entities = {s["entity"] for s in spans}
+        assert "384 u.s. 436" in entities
+
+    def test_citation_targeted_lookup(self, legal_kg):
+        doc = nlp("What court decided 384 U.S. 436?")
+        result = detect_kg_query(doc, legal_kg)
+        assert result is not None
+        assert result["entity"] == "384 u.s. 436"
+        objects = {r["object"] for r in result["results"]}
+        assert "Supreme Court of the United States" in objects
+
+
+class TestWhWordPredicateOverride:
+    """Regression: 'Who decided X?' should resolve to judges, not date_filed."""
+
+    def test_who_decided_returns_judges(self, legal_kg):
+        doc = nlp("Who decided Citizens United v. Federal Election Commission?")
+        result = detect_kg_query(doc, legal_kg)
+        assert result is not None
+        assert result["lookup_type"] == "targeted"
+        predicates = {r["predicate"] for r in result["results"]}
+        assert "judges" in predicates
+        assert "date_filed" not in predicates
+
+    def test_when_decided_returns_date(self, legal_kg):
+        doc = nlp("When was Citizens United v. Federal Election Commission decided?")
+        result = detect_kg_query(doc, legal_kg)
+        assert result is not None
+        predicates = {r["predicate"] for r in result["results"]}
+        assert "date_filed" in predicates
+
+    def test_leading_wh_word_extraction(self):
+        assert _leading_wh_word(nlp("Who is the president?")) == "who"
+        assert _leading_wh_word(nlp("What is the capital?")) == "what"
+        assert _leading_wh_word(nlp("When was it filed?")) == "when"
+        assert _leading_wh_word(nlp("Tell me about X")) is None

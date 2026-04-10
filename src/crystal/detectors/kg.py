@@ -13,7 +13,17 @@ to do a targeted lookup rather than dumping all facts.
 
 from __future__ import annotations
 
+import re
+
 from crystal.tools.kg.graph import KnowledgeGraph
+
+_CITATION_PATTERN = re.compile(
+    r"\b(\d+)\s+"
+    r"(U\.S\.|S\.\s*Ct\.|L\.\s*Ed\.\s*(?:2d)?|F\.\s*(?:[23]d|Supp\.?\s*(?:[23]d)?)"
+    r"|A\.\s*(?:[23]d)?|N\.E\.\s*(?:[23]d)?|N\.W\.\s*(?:[23]d)?|S\.E\.\s*(?:[23]d)?"
+    r"|S\.W\.\s*(?:[23]d)?|So\.\s*(?:[23]d)?|P\.\s*(?:[23]d)?)"
+    r"\s+(\d+)\b"
+)
 
 
 QUESTION_WORDS = {"what", "who", "where", "when", "which", "how", "whose", "whom", "why"}
@@ -32,10 +42,29 @@ def find_entity_spans(doc, kg: KnowledgeGraph) -> list[dict]:
 
     Uses a 3-tier cascade: exact substring → alias → fuzzy.
     Tries longest match first (multi-word entities before single-word).
+    Citation-format spans (e.g. "384 U.S. 436") are detected via regex
+    before the spaCy-based cascade runs.
     """
     text_lower = doc.text.lower()
     matches = []
     matched_ranges: list[tuple[int, int]] = []
+
+    # Tier 0: citation-format spans (spaCy splits these into separate tokens)
+    for m in _CITATION_PATTERN.finditer(doc.text):
+        cite_text = m.group(0).lower()
+        cite_normalized = re.sub(r"\s+", " ", cite_text.strip())
+        resolved, tier = kg._resolve_entity(cite_normalized)
+        if tier != "none":
+            start, end = m.start(), m.end()
+            matched_ranges.append((start, end))
+            matches.append({
+                "entity": resolved,
+                "char_start": start,
+                "char_end": end,
+                "match_tier": tier,
+                "match_score": 1.0,
+                "original_text": cite_normalized,
+            })
 
     # Tier 1: exact substring scan against entity index
     sorted_entities = sorted(kg.entities, key=len, reverse=True)
@@ -221,6 +250,23 @@ QUESTION_PREDICATE_MAP = {
     "ruled": "disposition",
 }
 
+# WH-word overrides: (predicate_phrase, wh_word) → resolved_predicate
+# When a WH-word gives strong signal about the expected answer type,
+# override the default predicate mapping.
+_WH_PREDICATE_OVERRIDES: dict[tuple[str, str], str] = {
+    ("decided", "who"): "judges",
+    ("ruled", "who"): "judges",
+}
+
+
+def _leading_wh_word(doc) -> str | None:
+    """Return the leading WH-word (lowercase) if the question starts with one."""
+    for token in doc:
+        if token.pos_ in ("PUNCT", "SPACE"):
+            continue
+        return token.lemma_.lower() if token.lemma_.lower() in QUESTION_WORDS else None
+    return None
+
 
 def detect_kg_query(
     doc,
@@ -258,6 +304,8 @@ def detect_kg_query(
     predicate_match_tier = "none"
     results = []
 
+    wh_word = _leading_wh_word(doc)
+
     # All subject entities to query — for multi-entity questions like
     # "total population of X and Y", we need facts from every entity.
     all_subjects = [s["entity"] for s in subject_spans] if subject_spans else [entity_text]
@@ -270,7 +318,11 @@ def detect_kg_query(
         ).strip() or predicate_phrase
 
         for subj in all_subjects:
-            resolved = QUESTION_PREDICATE_MAP.get(clean_predicate, clean_predicate)
+            # Check WH-word override before falling back to the default map
+            resolved = _WH_PREDICATE_OVERRIDES.get(
+                (clean_predicate, wh_word),
+                QUESTION_PREDICATE_MAP.get(clean_predicate, clean_predicate),
+            )
             hits = kg.lookup(subject=subj, predicate=resolved)
 
             if not hits and resolved != clean_predicate:

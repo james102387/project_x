@@ -109,23 +109,11 @@ LEGAL_BENCHMARK_CASES: list[tuple[str, str, list[str], bool]] = [
 
 
 # ── Known gaps (detection enhancements needed) ───────────────────────────
-# These require detector changes before they can pass.
-# Tracked here so the Ralph Wiggum loop can eventually target them.
+# Resolved gaps are kept here as comments for history.
+# Active gaps require detector changes before they can pass.
 
-LEGAL_KNOWN_GAPS: list[tuple[str, str, list[str], str]] = [
-    (
-        "What court decided 384 U.S. 436?",
-        "Supreme Court of the United States (Miranda v. Arizona)",
-        ["supreme court"],
-        "Citation-format entity spans ('384 U.S. 436') split by spaCy into "
-        "separate tokens. Needs regex-based citation span detection in kg.py.",
-    ),
-    (
-        "Who decided Citizens United v. Federal Election Commission?",
-        "Roberts, Stevens, Scalia, Kennedy, Thomas, Ginsburg, Breyer, Alito, Sotomayor",
-        ["roberts"],
-        "Ambiguous predicate 'decided' — maps to date_filed but question expects "
-        "judges. Needs context-aware predicate resolution (WH-word = 'who' → judges).",
-    ),
-]
+# RESOLVED 2026-04-09: citation span regex pre-scan in kg.py detector
+# RESOLVED 2026-04-09: WH-word-aware predicate override ("who decided" → judges)
+
+LEGAL_KNOWN_GAPS: list[tuple[str, str, list[str], str]] = []
 
