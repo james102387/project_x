@@ -1,0 +1,154 @@
+{
+  "question": "Who wrote the opinion in Coventry Health Care of Mo., Inc. v. Nevils?",
+  "ground_truth": "Ginsburg",
+  "match_strings": [
+    "ginsburg"
+  ],
+  "is_negative": false,
+  "response": "Based on the verified facts from the knowledge graph, the opinion in *Coventry Health Care of Mo., Inc. v. Nevils* was written by **Ginsburg and Thomas**. Both justices are listed as opinion authors for this Supreme Court of the United States case.",
+  "prompt_type": "kg_augmented",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "coventry health care of mo., inc. v. nevils",
+      "results": [
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "attorneys",
+          "object": "Miguel A. Estrada, Washington, DC, for petitioner."
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "attorneys",
+          "object": "Miguel A. Estrada, Washington, DC, for petitioner., Zachary D. Tripp for the United States as amicus curiae, by special leave of the Court, supporting the petitioner., Matthew W.H. Wessler, Washington, DC, for respondent., *1194Ralph K. Phalen, Phalen Law, Mitchell L. Burgess, Burgess Law Firm, Kansas City, MO, John Campbell, Campbell Law, LLC, St. Louis, MO, Matthew Wessler, Deepak Gupta, Matthew Spurlock, Rachel S. Bloomekatz, Gupta Wessler PLLC, Washington, DC, Brian Wolfman, Washington, DC, for respondent., Thomas N. Sterchi, David M. Eisenberg, Baker Sterchi Cowden & Rice, LLC, Kansas City, MO, Miguel A. Estrada, Jonathan C. Bond, Ryan N. Watzel, Gibson, Dunn & Crutcher LLP, Washington, DC, for petitioner."
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "benton house, llc. v. cook & younts insurance, inc."
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "chevron u. s. a. inc. v. natural resources defense council, inc."
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "cipollone v. liggett group, inc."
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "coventry health care of mo., inc. v. nevils"
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "empire healthchoice assurance, inc. v. mcveigh"
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "gobeille v. liberty mut. ins. co."
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "helfrich v. blue cross & blue shield assoc"
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "hillman v. maretta"
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "jodie nevils v. group health plan, inc. and acs recovery services, inc."
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "jodie nevils v. group health plan, inc., and acs recovery services, inc."
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "marmet health care center, inc. v. brown"
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "morales v. trans world airlines, inc."
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "mueller v. burchfield"
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "northwest, inc. v. ginsberg"
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "cites",
+          "object": "teresa bell v. blue cross & blue shield of ok"
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "court",
+          "object": "Supreme Court of the United States"
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "date_filed",
+          "object": "2017-04-18"
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "judges",
+          "object": "Ginsburg, Thomas"
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "opinion_author",
+          "object": "Ginsburg"
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "opinion_author",
+          "object": "Thomas"
+        },
+        {
+          "subject": "coventry health care of mo., inc. v. nevils",
+          "predicate": "precedential_status",
+          "object": "Published"
+        }
+      ],
+      "lookup_type": "subject_scan",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 19,
+    "compiled_prompt_tokens": 940,
+    "raw_compute": 380,
+    "compiled_compute": 884540,
+    "savings_pct": -2326.7368421052633,
+    "token_savings_pct": -48.473684210526315,
+    "marginal_savings_pct": -59.808326787117046,
+    "prompt_type": "kg_augmented",
+    "actual_prompt_tokens": 974,
+    "actual_output_tokens": 62,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": 1036,
+    "actual_cached_tokens": 0
+  },
+  "prompt_tokens_estimate": 974,
+  "output_tokens": 62,
+  "reasoning_tokens": 0
+}

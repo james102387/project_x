@@ -1,0 +1,44 @@
+{
+  "question": "What is the precedential status of Loving v. Virginia?",
+  "ground_truth": "Published",
+  "match_strings": [
+    "published"
+  ],
+  "is_negative": false,
+  "response": "loving v. virginia \u2014 precedential_status: Published",
+  "prompt_type": "kg_answerable",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "loving v. virginia",
+      "results": [
+        {
+          "subject": "loving v. virginia",
+          "predicate": "precedential_status",
+          "object": "Published"
+        }
+      ],
+      "lookup_type": "targeted",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 12,
+    "compiled_prompt_tokens": 0,
+    "raw_compute": 156,
+    "compiled_compute": 0,
+    "savings_pct": 1.0,
+    "token_savings_pct": 1.0,
+    "marginal_savings_pct": 1.0,
+    "prompt_type": "kg_answerable",
+    "actual_prompt_tokens": null,
+    "actual_output_tokens": null,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": null,
+    "actual_cached_tokens": null
+  },
+  "prompt_tokens_estimate": 0,
+  "output_tokens": 0,
+  "reasoning_tokens": 0
+}

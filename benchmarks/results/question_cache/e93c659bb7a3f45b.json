@@ -1,0 +1,17 @@
+{
+  "question": "What court decided United States v. Ramsay?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# United States v. Ramsay\n\nI don't have enough context to give you a definitive answer, as there have been multiple cases with this title in U.S. courts. To provide you with the correct court, I would need additional information such as:\n\n- The year the case was decided\n- The subject matter (constitutional law, criminal procedure, tax law, etc.)\n- The parties' full names or context\n\nIf you can provide any of these details, I'd be happy to help identify which court decided the case you're asking about.",
+  "usage": {
+    "prompt_tokens": 19,
+    "output_tokens": 120,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 139
+  },
+  "prompt_tokens_estimate": 10
+}

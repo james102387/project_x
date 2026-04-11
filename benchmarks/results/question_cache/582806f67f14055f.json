@@ -1,0 +1,44 @@
+{
+  "question": "Which court decided Marbury v. Madison?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The **Supreme Court of the United States** decided Marbury v. Madison.",
+  "prompt_type": "kg_augmented",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "marbury v. madison",
+      "results": [
+        {
+          "subject": "marbury v. madison",
+          "predicate": "court",
+          "object": "Supreme Court of the United States"
+        }
+      ],
+      "lookup_type": "targeted",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 9,
+    "compiled_prompt_tokens": 61,
+    "raw_compute": 90,
+    "compiled_compute": 3782,
+    "savings_pct": -41.022222222222226,
+    "token_savings_pct": -5.777777777777778,
+    "marginal_savings_pct": -5.865669160432253,
+    "prompt_type": "kg_augmented",
+    "actual_prompt_tokens": 74,
+    "actual_output_tokens": 20,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": 94,
+    "actual_cached_tokens": 0
+  },
+  "prompt_tokens_estimate": 74,
+  "output_tokens": 20,
+  "reasoning_tokens": 0
+}

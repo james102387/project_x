@@ -1,0 +1,17 @@
+{
+  "question": "List the judges in Gideon v. Wainwright",
+  "ground_truth": "Warren, Black, Douglas, Clark, Harlan, Brennan, Stewart, White, Goldberg",
+  "match_strings": [
+    "warren"
+  ],
+  "is_negative": false,
+  "response": "# Judges in Gideon v. Wainwright (1963)\n\n## Majority Opinion\n**Justice Earl Warren** (Chief Justice) - wrote the unanimous opinion\n\n## The Full Court\nAll nine justices joined the unanimous decision:\n\n1. **Earl Warren** (Chief Justice)\n2. **Hugo L. Black**\n3. **William O. Douglas**\n4. **Tom C. Clark**\n5. **John M. Harlan II**\n6. **William J. Brennan Jr.**\n7. **Potter Stewart**\n8. **Byron R. White**\n9. **Thurgood Marshall**\n\nThis was a **9-0 unanimous decision**, establishing the constitutional right to counsel for defendants who cannot afford an attorney.",
+  "usage": {
+    "prompt_tokens": 21,
+    "output_tokens": 170,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 191
+  },
+  "prompt_tokens_estimate": 9
+}

@@ -1,0 +1,19 @@
+{
+  "question": "Who wrote the opinion in Gray v. Coan?",
+  "ground_truth": "Chase",
+  "match_strings": [
+    "chase"
+  ],
+  "is_negative": false,
+  "response": "Mr. Chief Justice Chase wrote the opinion in this case.",
+  "usage": {
+    "prompt_tokens": 181,
+    "output_tokens": 15,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 196
+  },
+  "prompt_source": "document",
+  "prompt_chars": 752,
+  "prompt_tokens_estimate": 188
+}

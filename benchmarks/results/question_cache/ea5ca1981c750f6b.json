@@ -1,0 +1,17 @@
+{
+  "question": "What statute did Roe v. Wade overturn?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "This document does not contain information about what statute Roe v. Wade overturned. The document is merely a brief Supreme Court order denying certiorari in an unrelated case (McTaggart v. Roe v. Wade). It does not discuss the details or holdings of Roe v. Wade itself.",
+  "usage": {
+    "prompt_tokens": 137,
+    "output_tokens": 71,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 208
+  },
+  "prompt_source": "document",
+  "prompt_chars": 357,
+  "prompt_tokens_estimate": 89
+}

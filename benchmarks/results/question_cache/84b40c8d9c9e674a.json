@@ -1,0 +1,19 @@
+{
+  "question": "When was Sturgis v. Clough decided?",
+  "ground_truth": "1863-12-15",
+  "match_strings": [
+    "1863"
+  ],
+  "is_negative": false,
+  "response": "Sturgis v. Clough was decided at the December Term of 1863.",
+  "usage": {
+    "prompt_tokens": 1471,
+    "output_tokens": 23,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 1494
+  },
+  "prompt_source": "document",
+  "prompt_chars": 6298,
+  "prompt_tokens_estimate": 1574
+}

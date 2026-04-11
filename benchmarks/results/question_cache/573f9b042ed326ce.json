@@ -1,0 +1,15 @@
+{
+  "question": "What lower court did Miranda v. Arizona come from?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "# Miranda v. Arizona\n\nMiranda v. Arizona came from the **Arizona Supreme Court**. \n\nThe case originated in trial court in Arizona, was appealed to the Arizona Supreme Court (which upheld the conviction), and was then appealed to the U.S. Supreme Court in 1966, where the landmark decision was made.",
+  "usage": {
+    "prompt_tokens": 18,
+    "output_tokens": 73,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 91
+  },
+  "prompt_tokens_estimate": 12
+}

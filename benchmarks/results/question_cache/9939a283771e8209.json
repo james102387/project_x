@@ -1,0 +1,19 @@
+{
+  "question": "When was Coventry Health Care of Mo., Inc. v. Nevils decided?",
+  "ground_truth": "2017-04-18",
+  "match_strings": [
+    "2017"
+  ],
+  "is_negative": false,
+  "response": "The opinion does not explicitly state when Coventry Health Care of Mo., Inc. v. Nevils was decided. However, based on the citation format and context clues in the document (such as references to cases from 2016 and the opinion being written by Justice Ginsburg), this appears to be a 2017 Supreme Court decision, though the exact date is not provided in the text.",
+  "usage": {
+    "prompt_tokens": 5675,
+    "output_tokens": 88,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 5763
+  },
+  "prompt_source": "document",
+  "prompt_chars": 19509,
+  "prompt_tokens_estimate": 4877
+}

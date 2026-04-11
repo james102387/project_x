@@ -1,0 +1,19 @@
+{
+  "question": "When was Richards v. Mackall decided?",
+  "ground_truth": "1884-10-01",
+  "match_strings": [
+    "1884"
+  ],
+  "is_negative": false,
+  "response": "The opinion does not state when the case was decided. The document shows various procedural dates (the decree was rendered July 5, 1884, the appeal was allowed July 8, 1884, and it was docketed in the Supreme Court on October 15, 1884), but it does not include the date of the Supreme Court's decision on the motion to dismiss.",
+  "usage": {
+    "prompt_tokens": 1509,
+    "output_tokens": 84,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 1593
+  },
+  "prompt_source": "document",
+  "prompt_chars": 5254,
+  "prompt_tokens_estimate": 1313
+}

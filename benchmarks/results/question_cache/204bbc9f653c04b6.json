@@ -1,0 +1,19 @@
+{
+  "question": "What court decided Roe v. Wade?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "Based on this document alone, I cannot definitively answer what court decided Roe v. Wade. The document only shows that the Supreme Court of the United States denied certiorari in McTaggart v. Roe v. Wade et al. in 2004. \n\nHowever, from general legal knowledge, Roe v. Wade was decided by the U.S. Supreme Court in 1973.",
+  "usage": {
+    "prompt_tokens": 135,
+    "output_tokens": 90,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 225
+  },
+  "prompt_source": "document",
+  "prompt_chars": 350,
+  "prompt_tokens_estimate": 87
+}

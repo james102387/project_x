@@ -1,0 +1,17 @@
+{
+  "question": "Tell me when Brown v. Board of Education was filed",
+  "ground_truth": "1954-05-17",
+  "match_strings": [
+    "1954"
+  ],
+  "is_negative": false,
+  "response": "Brown v. Board of Education was filed in **1951**. The case was decided by the Supreme Court on **May 17, 1952**, with the landmark ruling that \"separate but equal\" was unconstitutional in public education.",
+  "usage": {
+    "prompt_tokens": 18,
+    "output_tokens": 53,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 71
+  },
+  "prompt_tokens_estimate": 12
+}

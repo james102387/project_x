@@ -1,0 +1,69 @@
+{
+  "question": "Who wrote the opinion in United States v. Ramsay?",
+  "ground_truth": "Waite",
+  "match_strings": [
+    "waite"
+  ],
+  "is_negative": false,
+  "response": "Based on the verified facts from the knowledge graph, **Waite** wrote the opinion in United States v. Ramsay. This case was decided by the Supreme Court of the United States on January 17, 1887.",
+  "prompt_type": "kg_augmented",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "united states v. ramsay",
+      "results": [
+        {
+          "subject": "united states v. ramsay",
+          "predicate": "attorneys",
+          "object": "Mr. Attorney General and Mr. F. P. Dewees for appellant., Mr. George A. King and Mr. William W. Ilandlm for appellees."
+        },
+        {
+          "subject": "united states v. ramsay",
+          "predicate": "court",
+          "object": "Supreme Court of the United States"
+        },
+        {
+          "subject": "united states v. ramsay",
+          "predicate": "date_filed",
+          "object": "1887-01-17"
+        },
+        {
+          "subject": "united states v. ramsay",
+          "predicate": "judges",
+          "object": "Waite"
+        },
+        {
+          "subject": "united states v. ramsay",
+          "predicate": "opinion_author",
+          "object": "Waite"
+        },
+        {
+          "subject": "united states v. ramsay",
+          "predicate": "precedential_status",
+          "object": "Published"
+        }
+      ],
+      "lookup_type": "subject_scan",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 12,
+    "compiled_prompt_tokens": 177,
+    "raw_compute": 156,
+    "compiled_compute": 31506,
+    "savings_pct": -200.96153846153845,
+    "token_savings_pct": -13.75,
+    "marginal_savings_pct": -14.356466483927237,
+    "prompt_type": "kg_augmented",
+    "actual_prompt_tokens": 199,
+    "actual_output_tokens": 52,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": 251,
+    "actual_cached_tokens": 0
+  },
+  "prompt_tokens_estimate": 199,
+  "output_tokens": 52,
+  "reasoning_tokens": 0
+}

@@ -1,0 +1,82 @@
+{
+  "question": "What was the vote count in Roe v. Wade?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "Based on the verified facts from the knowledge graph, I don't have information about the specific vote count in Roe v. Wade. \n\nThe facts show that nine judges heard the case (Burger, Douglas, Brennan, Stewart, White, Marshall, Blackmun, Powell, and Rehnquist), and that Justice Blackmun authored the opinion with a disposition of \"Affirmed in part, reversed in part,\" but the exact voting breakdown is not included in the provided facts.",
+  "prompt_type": "kg_augmented",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "roe v. wade",
+      "results": [
+        {
+          "subject": "roe v. wade",
+          "predicate": "attorneys",
+          "object": "Sarah Weddington argued the cause for appellants."
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "cited_by_count",
+          "object": "8100"
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "court",
+          "object": "Supreme Court of the United States"
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "date_filed",
+          "object": "1973-01-22"
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "disposition",
+          "object": "Affirmed in part, reversed in part"
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "judges",
+          "object": "Burger, Douglas, Brennan, Stewart, White, Marshall, Blackmun, Powell, Rehnquist"
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "nature_of_suit",
+          "object": "Constitutional"
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "opinion_author",
+          "object": "Blackmun"
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "precedential_status",
+          "object": "Published"
+        }
+      ],
+      "lookup_type": "subject_scan",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 11,
+    "compiled_prompt_tokens": 213,
+    "raw_compute": 132,
+    "compiled_compute": 45582,
+    "savings_pct": -344.3181818181818,
+    "token_savings_pct": -18.363636363636363,
+    "marginal_savings_pct": -19.33857518354029,
+    "prompt_type": "kg_augmented",
+    "actual_prompt_tokens": 236,
+    "actual_output_tokens": 110,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": 346,
+    "actual_cached_tokens": 0
+  },
+  "prompt_tokens_estimate": 236,
+  "output_tokens": 110,
+  "reasoning_tokens": 0
+}

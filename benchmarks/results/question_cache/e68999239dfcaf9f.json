@@ -1,0 +1,19 @@
+{
+  "question": "What court decided Lasigi v. The Collector?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Answer\n\nThe document does not specify which court decided this case. While the opinion is delivered by \"Mr. Justice Nelson,\" the court name is not stated in the provided text.",
+  "usage": {
+    "prompt_tokens": 946,
+    "output_tokens": 40,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 986
+  },
+  "prompt_source": "document",
+  "prompt_chars": 3955,
+  "prompt_tokens_estimate": 988
+}

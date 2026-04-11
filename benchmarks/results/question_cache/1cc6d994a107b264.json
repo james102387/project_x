@@ -1,0 +1,17 @@
+{
+  "question": "What law school did Chief Justice Marshall attend?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "Chief Justice John Marshall did not attend law school. He was largely self-educated in the law, studying legal texts on his own and gaining practical experience through apprenticeship and practice. He was admitted to the Virginia bar in 1785 and became one of the most influential Chief Justices in American history despite lacking formal legal education\u2014a path that was not uncommon for lawyers in the late 18th century.",
+  "usage": {
+    "prompt_tokens": 16,
+    "output_tokens": 89,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 105
+  },
+  "prompt_source": "no_document",
+  "prompt_chars": 50,
+  "prompt_tokens_estimate": 12
+}

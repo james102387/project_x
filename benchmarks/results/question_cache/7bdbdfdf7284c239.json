@@ -1,0 +1,44 @@
+{
+  "question": "When was Brown v. Board of Education decided?",
+  "ground_truth": "1954-05-17",
+  "match_strings": [
+    "1954"
+  ],
+  "is_negative": false,
+  "response": "brown v. board of education \u2014 date_filed: 1954-05-17",
+  "prompt_type": "kg_answerable",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "brown v. board of education",
+      "results": [
+        {
+          "subject": "brown v. board of education",
+          "predicate": "date_filed",
+          "object": "1954-05-17"
+        }
+      ],
+      "lookup_type": "targeted",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 10,
+    "compiled_prompt_tokens": 0,
+    "raw_compute": 110,
+    "compiled_compute": 0,
+    "savings_pct": 1.0,
+    "token_savings_pct": 1.0,
+    "marginal_savings_pct": 1.0,
+    "prompt_type": "kg_answerable",
+    "actual_prompt_tokens": null,
+    "actual_output_tokens": null,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": null,
+    "actual_cached_tokens": null
+  },
+  "prompt_tokens_estimate": 0,
+  "output_tokens": 0,
+  "reasoning_tokens": 0
+}

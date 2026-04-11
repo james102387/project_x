@@ -1,0 +1,19 @@
+{
+  "question": "Who wrote the opinion in Union Insurance v. Hoge?",
+  "ground_truth": "Nelson",
+  "match_strings": [
+    "nelson"
+  ],
+  "is_negative": false,
+  "response": "Mr. Justice Nelson wrote the opinion in Union Insurance v. Hoge.",
+  "usage": {
+    "prompt_tokens": 3213,
+    "output_tokens": 19,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 3232
+  },
+  "prompt_source": "document",
+  "prompt_chars": 14175,
+  "prompt_tokens_estimate": 3543
+}

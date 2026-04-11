@@ -1,0 +1,19 @@
+{
+  "question": "What do we know about Roe v. Wade?",
+  "ground_truth": "1973",
+  "match_strings": [
+    "1973"
+  ],
+  "is_negative": false,
+  "response": "Based on this document, we know that:\n\n1. **Roe v. Wade was a defendant** in a case brought by McTaggart\n2. **A petition for certiorari was denied** by the U.S. Supreme Court on April 26, 2004\n3. **The case originated in Iowa** (Sup. Ct. Iowa)\n\nThis is a very limited document that only shows the case caption and disposition, providing minimal substantive information about Roe v. Wade itself.",
+  "usage": {
+    "prompt_tokens": 137,
+    "output_tokens": 112,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 249
+  },
+  "prompt_source": "document",
+  "prompt_chars": 353,
+  "prompt_tokens_estimate": 88
+}

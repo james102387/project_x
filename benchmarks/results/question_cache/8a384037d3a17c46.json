@@ -1,0 +1,44 @@
+{
+  "question": "Who decided Citizens United v. Federal Election Commission?",
+  "ground_truth": "Roberts, Stevens, Scalia, Kennedy, Thomas, Ginsburg, Breyer, Alito, Sotomayor",
+  "match_strings": [
+    "roberts"
+  ],
+  "is_negative": false,
+  "response": "citizens united v. federal election commission \u2014 judges: Roberts, Stevens, Scalia, Kennedy, Thomas, Ginsburg, Breyer, Alito, Sotomayor",
+  "prompt_type": "kg_answerable",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "citizens united v. federal election commission",
+      "results": [
+        {
+          "subject": "citizens united v. federal election commission",
+          "predicate": "judges",
+          "object": "Roberts, Stevens, Scalia, Kennedy, Thomas, Ginsburg, Breyer, Alito, Sotomayor"
+        }
+      ],
+      "lookup_type": "targeted",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 10,
+    "compiled_prompt_tokens": 0,
+    "raw_compute": 110,
+    "compiled_compute": 0,
+    "savings_pct": 1.0,
+    "token_savings_pct": 1.0,
+    "marginal_savings_pct": 1.0,
+    "prompt_type": "kg_answerable",
+    "actual_prompt_tokens": null,
+    "actual_output_tokens": null,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": null,
+    "actual_cached_tokens": null
+  },
+  "prompt_tokens_estimate": 0,
+  "output_tokens": 0,
+  "reasoning_tokens": 0
+}

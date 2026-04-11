@@ -1,0 +1,17 @@
+{
+  "question": "When was Loving v. Virginia decided?",
+  "ground_truth": "1967-06-12",
+  "match_strings": [
+    "1967"
+  ],
+  "is_negative": false,
+  "response": "Loving v. Virginia was decided on June 12, 1967. The Supreme Court ruled that laws prohibiting interracial marriage were unconstitutional.",
+  "usage": {
+    "prompt_tokens": 16,
+    "output_tokens": 36,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 52
+  },
+  "prompt_tokens_estimate": 9
+}

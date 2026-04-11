@@ -1,0 +1,19 @@
+{
+  "question": "When was Collector v. Doswell & Co. decided?",
+  "ground_truth": "1873-03-31",
+  "match_strings": [
+    "1873"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about when Collector v. Doswell & Co. was decided. To find this information, I'd recommend:\n\n1. Checking legal databases like Google Scholar (scholar.google.com), which has free access to court decisions\n2. Searching law library catalogs or resources\n3. Consulting LexisNexis or Westlaw if you have access\n\nIf you can provide more context about the case (such as the jurisdiction or what it concerned), I might be able to help you locate it more effectively.",
+  "usage": {
+    "prompt_tokens": 21,
+    "output_tokens": 119,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 140
+  },
+  "prompt_source": "no_document",
+  "prompt_chars": 44,
+  "prompt_tokens_estimate": 11
+}

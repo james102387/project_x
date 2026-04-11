@@ -1,0 +1,19 @@
+{
+  "question": "Who wrote the opinion in United States v. Ramsay?",
+  "ground_truth": "Waite",
+  "match_strings": [
+    "waite"
+  ],
+  "is_negative": false,
+  "response": "The document does not identify who wrote the opinion. It only states that \"MR. CHIEF JUSTICE WAITE announced that the judgment of the Court of Claims was Affirmed by a Divided Court.\" While Chief Justice Waite announced the judgment, the document does not explicitly indicate that he authored the opinion.",
+  "usage": {
+    "prompt_tokens": 193,
+    "output_tokens": 69,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 262
+  },
+  "prompt_source": "document",
+  "prompt_chars": 584,
+  "prompt_tokens_estimate": 146
+}

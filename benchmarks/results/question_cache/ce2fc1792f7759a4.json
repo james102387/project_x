@@ -1,0 +1,19 @@
+{
+  "question": "When was Obergefell v. Hodges filed?",
+  "ground_truth": "2015-06-26",
+  "match_strings": [
+    "2015"
+  ],
+  "is_negative": false,
+  "response": "Obergefell v. Hodges was filed in 2013. The case was decided by the U.S. Supreme Court on June 26, 2015, establishing a constitutional right to same-sex marriage nationwide.",
+  "usage": {
+    "prompt_tokens": 21,
+    "output_tokens": 52,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 73
+  },
+  "prompt_source": "no_document",
+  "prompt_chars": 36,
+  "prompt_tokens_estimate": 9
+}

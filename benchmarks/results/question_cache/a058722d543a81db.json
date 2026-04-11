@@ -1,0 +1,17 @@
+{
+  "question": "Who wrote the opinion in Union Insurance v. Hoge?",
+  "ground_truth": "Nelson",
+  "match_strings": [
+    "nelson"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about who wrote the opinion in Union Insurance v. Hoge readily available. To get an accurate answer, I'd recommend:\n\n1. Checking Google Scholar (scholar.google.com) - search for \"Union Insurance v. Hoge\"\n2. Looking it up on your jurisdiction's court website\n3. Consulting legal databases like Justia or FindLaw\n4. Checking the case citation directly if you have it\n\nIf you can provide additional details (such as the year, court, or jurisdiction), I may be able to help you further.",
+  "usage": {
+    "prompt_tokens": 20,
+    "output_tokens": 128,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 148
+  },
+  "prompt_tokens_estimate": 12
+}

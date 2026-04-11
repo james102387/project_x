@@ -1,0 +1,17 @@
+{
+  "question": "Who wrote the opinion in Richards v. Mackall?",
+  "ground_truth": "Waite",
+  "match_strings": [
+    "waite"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about the author of the opinion in Richards v. Mackall in my current knowledge base. To find this information, I'd recommend:\n\n1. Checking legal databases like Google Scholar (scholar.google.com), which provides free access to court opinions\n2. Looking at the case citation to determine which court decided it, then checking that court's official website\n3. Consulting legal research platforms like Justia or FindLaw\n\nIf you can provide additional details about the case (such as the year it was decided, which court decided it, or the full case citation), I may be able to help you further.",
+  "usage": {
+    "prompt_tokens": 19,
+    "output_tokens": 138,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 157
+  },
+  "prompt_tokens_estimate": 11
+}

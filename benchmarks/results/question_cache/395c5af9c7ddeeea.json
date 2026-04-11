@@ -1,0 +1,17 @@
+{
+  "question": "What court decided Mapp v. Ohio?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The U.S. Supreme Court decided Mapp v. Ohio in 1961. The case established the \"exclusionary rule,\" which prohibits illegally obtained evidence from being used in state criminal prosecutions.",
+  "usage": {
+    "prompt_tokens": 17,
+    "output_tokens": 47,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 64
+  },
+  "prompt_tokens_estimate": 8
+}

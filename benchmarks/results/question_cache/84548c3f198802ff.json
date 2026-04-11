@@ -1,0 +1,17 @@
+{
+  "question": "When was Flanders v. Seelye decided?",
+  "ground_truth": "1882-05-18",
+  "match_strings": [
+    "1882"
+  ],
+  "is_negative": false,
+  "response": "I don't have enough information to answer this question accurately. \"Flanders v. Seelye\" could refer to multiple cases, and without additional context (such as the jurisdiction, the year it was decided, or the subject matter), I cannot determine which specific case you're asking about or when it was decided.\n\nIf you could provide more details about the case, I'd be happy to help you find the information you're looking for.",
+  "usage": {
+    "prompt_tokens": 20,
+    "output_tokens": 95,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 115
+  },
+  "prompt_tokens_estimate": 9
+}

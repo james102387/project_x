@@ -1,0 +1,17 @@
+{
+  "question": "Who were the judges in Marbury v. Madison?",
+  "ground_truth": "Marshall, Paterson, Chase, Washington",
+  "match_strings": [
+    "marshall"
+  ],
+  "is_negative": false,
+  "response": "# Marbury v. Madison Judges\n\nThe case was decided by the **Supreme Court of the United States** in 1803. Chief Justice **John Marshall** wrote the majority opinion.\n\nThe other justices serving at that time were:\n- William Cushing\n- William Paterson\n- Samuel Chase\n- Bushrod Washington\n\nHowever, **John Marshall's opinion is what defined the case**, as it established the principle of judicial review\u2014the power of courts to strike down laws deemed unconstitutional.",
+  "usage": {
+    "prompt_tokens": 19,
+    "output_tokens": 112,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 131
+  },
+  "prompt_tokens_estimate": 10
+}

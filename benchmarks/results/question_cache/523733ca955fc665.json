@@ -1,0 +1,82 @@
+{
+  "question": "What was the oral argument date for Brown v. Board of Education?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "I don't have information about the oral argument date for Brown v. Board of Education in the verified facts provided. The knowledge graph includes the date the case was filed (May 17, 1954) and other details about the case, but the specific oral argument date is not included in these verified facts.",
+  "prompt_type": "kg_augmented",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "brown v. board of education",
+      "results": [
+        {
+          "subject": "brown v. board of education",
+          "predicate": "attorneys",
+          "object": "Robert L. Carter argued the cause for appellants. Thurgood Marshall was on the briefs."
+        },
+        {
+          "subject": "brown v. board of education",
+          "predicate": "cited_by_count",
+          "object": "12450"
+        },
+        {
+          "subject": "brown v. board of education",
+          "predicate": "court",
+          "object": "Supreme Court of the United States"
+        },
+        {
+          "subject": "brown v. board of education",
+          "predicate": "date_filed",
+          "object": "1954-05-17"
+        },
+        {
+          "subject": "brown v. board of education",
+          "predicate": "disposition",
+          "object": "Reversed"
+        },
+        {
+          "subject": "brown v. board of education",
+          "predicate": "judges",
+          "object": "Warren, Black, Reed, Frankfurter, Douglas, Jackson, Burton, Clark, Minton"
+        },
+        {
+          "subject": "brown v. board of education",
+          "predicate": "nature_of_suit",
+          "object": "Civil Rights"
+        },
+        {
+          "subject": "brown v. board of education",
+          "predicate": "opinion_author",
+          "object": "Warren"
+        },
+        {
+          "subject": "brown v. board of education",
+          "predicate": "precedential_status",
+          "object": "Published"
+        }
+      ],
+      "lookup_type": "subject_scan",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 14,
+    "compiled_prompt_tokens": 220,
+    "raw_compute": 210,
+    "compiled_compute": 48620,
+    "savings_pct": -230.52380952380952,
+    "token_savings_pct": -14.714285714285714,
+    "marginal_savings_pct": -15.520547945205479,
+    "prompt_type": "kg_augmented",
+    "actual_prompt_tokens": 242,
+    "actual_output_tokens": 66,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": 308,
+    "actual_cached_tokens": 0
+  },
+  "prompt_tokens_estimate": 242,
+  "output_tokens": 66,
+  "reasoning_tokens": 0
+}

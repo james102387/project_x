@@ -99,13 +99,32 @@ The naked LLM baseline is a strawman. Lawyers paste real documents into ChatGPT.
 
 ### Unstructured text (Crystal proposes, human verifies)
 
-- [ ] **Phase 2a** — Opinion text extraction (holdings, doctrines, reasoning chains). NER + LLM pipeline with `ReviewableTriplet` workflow.
+- [x] **Phase 2a** — Document ingestion MVP. Full pipeline: NER + LLM extraction → confidence scoring → auto-accept/review → SQLite KG persistence. Progressive trust model. Legal-tuned prompt. UI tab. Before/after comparison. Validated on 5 real SCOTUS opinions (543 triplets).
+- [ ] **Phase 2a+** — Run with LLM extraction enabled on real opinions. Tune auto-accept threshold based on LLM extraction quality.
 - [ ] **Phase 2b** — Oral argument transcripts. New source adapter.
 - [ ] **D2 Phase 3** — Community detection (Leiden) for entity clusters. See also L3.
 
 ### Sufficiency threshold
 
 ~500 cases / ~2,500 questions across 6+ predicates — sufficient for Ralph Wiggum convergence (~50 per predicate), statistically significant benchmarks, and regression detection.
+
+---
+
+## KG Scaffold Expansion & Distribution
+
+**Business model:** Crystal (engine) + pre-built legal KG (scaffold) + customer document uploads. The scaffold provides day-one value and citation network connectivity. Current scaffold: 543 subjects, 20.7% citation hit rate against uploaded documents.
+
+### Scaffold density
+
+- [ ] **S1.** Expand CourtListener scaffold from 543 to ~5,000 subjects. Target 70%+ citation hit rate.
+- [ ] **S2.** Priority ingestion: top-cited cases first (highest connectivity value per case added).
+- [ ] **Phase 1c** — Judge bios from CourtListener `/people/` (links judge entities across cases).
+
+### Segmented distribution
+
+- [ ] **S3.** KG segmentation by jurisdiction (federal appellate, SCOTUS, state courts) and practice area.
+- [ ] **S4.** Delta update mechanism — incremental triplet bundles via webhook/pull. Uses existing `sync_state` table + `bulk_insert()` idempotency.
+- [ ] **S5.** Segment subscription model — customer selects relevant segments, receives targeted updates.
 
 ---
 

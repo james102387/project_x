@@ -1,0 +1,17 @@
+{
+  "question": "Who wrote the opinion in Coventry Health Care of Mo., Inc. v. Nevils?",
+  "ground_truth": "Ginsburg",
+  "match_strings": [
+    "ginsburg"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about who wrote the opinion in Coventry Health Care of Mo., Inc. v. Nevils readily available. To find this information, I'd recommend:\n\n1. Checking Google Scholar (scholar.google.com) and searching for the case name\n2. Looking it up on the court's official website if you know which court decided it\n3. Checking legal databases like FindLaw or Justia\n\nIf you can provide additional details like the year it was decided or which court heard it, I may be able to help you locate this information more efficiently.",
+  "usage": {
+    "prompt_tokens": 28,
+    "output_tokens": 128,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 156
+  },
+  "prompt_tokens_estimate": 17
+}

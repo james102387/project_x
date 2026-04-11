@@ -1,0 +1,44 @@
+{
+  "question": "What court decided Miranda v. Arizona?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "miranda v. arizona \u2014 court: Supreme Court of the United States",
+  "prompt_type": "kg_answerable",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "miranda v. arizona",
+      "results": [
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "court",
+          "object": "Supreme Court of the United States"
+        }
+      ],
+      "lookup_type": "targeted",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 8,
+    "compiled_prompt_tokens": 0,
+    "raw_compute": 72,
+    "compiled_compute": 0,
+    "savings_pct": 1.0,
+    "token_savings_pct": 1.0,
+    "marginal_savings_pct": 1.0,
+    "prompt_type": "kg_answerable",
+    "actual_prompt_tokens": null,
+    "actual_output_tokens": null,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": null,
+    "actual_cached_tokens": null
+  },
+  "prompt_tokens_estimate": 0,
+  "output_tokens": 0,
+  "reasoning_tokens": 0
+}

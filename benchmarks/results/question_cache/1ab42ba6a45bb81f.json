@@ -1,0 +1,15 @@
+{
+  "question": "What was the vote count in Roe v. Wade?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "# Roe v. Wade Vote Count\n\nThe Supreme Court's decision in **Roe v. Wade (1973) was 7-2**.\n\nThe majority opinion, written by Justice Harry Blackmun, was joined by six other justices. Justices Byron White and William Rehnquist dissented.",
+  "usage": {
+    "prompt_tokens": 20,
+    "output_tokens": 73,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 93
+  },
+  "prompt_tokens_estimate": 9
+}

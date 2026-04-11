@@ -1,0 +1,20 @@
+{
+  "question": "Who decided Mapp v. Ohio?",
+  "ground_truth": "Warren, Black, Frankfurter, Douglas, Clark, Harlan, Brennan, Whittaker, Stewart",
+  "match_strings": [
+    "warren",
+    "clark"
+  ],
+  "is_negative": false,
+  "response": "The U.S. Supreme Court decided Mapp v. Ohio. This citation (367 U.S. 643) indicates the case appears in volume 367 of the United States Reports, which contains Supreme Court opinions.",
+  "usage": {
+    "prompt_tokens": 87,
+    "output_tokens": 51,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 138
+  },
+  "prompt_source": "document",
+  "prompt_chars": 307,
+  "prompt_tokens_estimate": 76
+}

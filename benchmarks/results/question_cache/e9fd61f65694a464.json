@@ -1,0 +1,17 @@
+{
+  "question": "When was Fentress Coal & Coke Co. v. Elmore decided?",
+  "ground_truth": "1919-04-28",
+  "match_strings": [
+    "1919"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about when Fentress Coal & Coke Co. v. Elmore was decided in my current knowledge base. To find this information, I'd recommend:\n\n1. Checking legal databases like Google Scholar (scholar.google.com), which has free access to court opinions\n2. Searching state court records if you know which state's court decided it\n3. Consulting legal research platforms like Justia or FindLaw\n\nIf you can provide additional context about which court or state this case is from, I may be able to help further.",
+  "usage": {
+    "prompt_tokens": 27,
+    "output_tokens": 126,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 153
+  },
+  "prompt_tokens_estimate": 13
+}

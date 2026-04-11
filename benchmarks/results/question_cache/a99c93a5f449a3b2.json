@@ -1,0 +1,19 @@
+{
+  "question": "What court decided Collector v. Doswell & Co.?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about a case titled \"Collector v. Doswell & Co.\" in my training data. To help you find this information, I would need additional context such as:\n\n- The country and jurisdiction where the case was decided\n- The approximate time period\n- The subject matter of the case\n\nIf you could provide any of these details, I'd be better able to assist you, or I'd recommend checking legal databases like Google Scholar, LexisNexis, or your country's official court records.",
+  "usage": {
+    "prompt_tokens": 21,
+    "output_tokens": 114,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 135
+  },
+  "prompt_source": "no_document",
+  "prompt_chars": 46,
+  "prompt_tokens_estimate": 11
+}

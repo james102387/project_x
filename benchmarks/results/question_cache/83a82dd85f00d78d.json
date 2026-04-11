@@ -1,0 +1,20 @@
+{
+  "question": "Who were the judges in Roe v. Wade?",
+  "ground_truth": "Burger, Douglas, Brennan, Stewart, White, Marshall, Blackmun, Powell, Rehnquist",
+  "match_strings": [
+    "burger",
+    "blackmun"
+  ],
+  "is_negative": false,
+  "response": "This document does not provide information about the judges in Roe v. Wade. It is merely a Supreme Court order denying certiorari in an unrelated case (McTaggart v. Roe v. Wade et al.) from 2004. To find information about the judges in the original Roe v. Wade case (1973), you would need to consult the actual Roe v. Wade opinion or other historical sources about that case.",
+  "usage": {
+    "prompt_tokens": 137,
+    "output_tokens": 100,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 237
+  },
+  "prompt_source": "document",
+  "prompt_chars": 354,
+  "prompt_tokens_estimate": 88
+}

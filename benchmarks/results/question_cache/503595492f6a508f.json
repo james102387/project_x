@@ -1,0 +1,74 @@
+{
+  "question": "Who wrote the opinion in Flanders v. Seelye?",
+  "ground_truth": "Blatchford",
+  "match_strings": [
+    "blatchford"
+  ],
+  "is_negative": false,
+  "response": "According to the verified facts, **Blatchford** wrote the opinion in Flanders v. Seelye.",
+  "prompt_type": "kg_augmented",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "flanders v. seelye",
+      "results": [
+        {
+          "subject": "flanders v. seelye",
+          "predicate": "attorneys",
+          "object": "The Solicitor- General for the plaintiff in error., Mr?-H. H. Ogden for the defendant in error."
+        },
+        {
+          "subject": "flanders v. seelye",
+          "predicate": "attorneys",
+          "object": "The Solicitor-General for the plaintiff in error."
+        },
+        {
+          "subject": "flanders v. seelye",
+          "predicate": "court",
+          "object": "Supreme Court of the United States"
+        },
+        {
+          "subject": "flanders v. seelye",
+          "predicate": "date_filed",
+          "object": "1882-05-18"
+        },
+        {
+          "subject": "flanders v. seelye",
+          "predicate": "judges",
+          "object": "Blatchford, Bradley, Field, Woods"
+        },
+        {
+          "subject": "flanders v. seelye",
+          "predicate": "opinion_author",
+          "object": "Blatchford"
+        },
+        {
+          "subject": "flanders v. seelye",
+          "predicate": "precedential_status",
+          "object": "Published"
+        }
+      ],
+      "lookup_type": "subject_scan",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 13,
+    "compiled_prompt_tokens": 196,
+    "raw_compute": 182,
+    "compiled_compute": 38612,
+    "savings_pct": -211.15384615384616,
+    "token_savings_pct": -14.076923076923077,
+    "marginal_savings_pct": -14.764286535586985,
+    "prompt_type": "kg_augmented",
+    "actual_prompt_tokens": 222,
+    "actual_output_tokens": 29,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": 251,
+    "actual_cached_tokens": 0
+  },
+  "prompt_tokens_estimate": 222,
+  "output_tokens": 29,
+  "reasoning_tokens": 0
+}

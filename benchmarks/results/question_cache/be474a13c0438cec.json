@@ -1,0 +1,19 @@
+{
+  "question": "What court decided Coventry Health Care of Mo., Inc. v. Nevils?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The United States Supreme Court decided Coventry Health Care of Mo., Inc. v. Nevils. The opinion was delivered by Justice Ginsburg.",
+  "usage": {
+    "prompt_tokens": 5675,
+    "output_tokens": 35,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 5710
+  },
+  "prompt_source": "document",
+  "prompt_chars": 19511,
+  "prompt_tokens_estimate": 4877
+}

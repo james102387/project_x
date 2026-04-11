@@ -1,0 +1,17 @@
+{
+  "question": "Who were the attorneys in Gideon v. Wainwright?",
+  "ground_truth": "Abe Fortas argued the cause for petitioner",
+  "match_strings": [
+    "fortas"
+  ],
+  "is_negative": false,
+  "response": "# Gideon v. Wainwright Attorneys\n\n**Petitioner (Gideon):**\n- **Abe Fortas** - argued the case before the Supreme Court on behalf of Gideon\n\n**Respondent (Wainwright):**\n- **Bruce R. Jacob** - Assistant Attorney General of Florida, argued for the state\n\nFortas's argument successfully convinced the Court that the Sixth Amendment required states to provide counsel to criminal defendants who couldn't afford it. This landmark 1963 decision established the right to court-appointed attorneys in felony cases.",
+  "usage": {
+    "prompt_tokens": 23,
+    "output_tokens": 133,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 156
+  },
+  "prompt_tokens_estimate": 11
+}

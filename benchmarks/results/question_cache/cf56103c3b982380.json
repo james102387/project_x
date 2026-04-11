@@ -1,0 +1,13 @@
+{
+  "question": "What was the majority opinion in Miranda?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "Supreme Court of the United States, decided in 1954",
+  "usage": {
+    "prompt_tokens": 10
+  },
+  "prompt_source": "no_document",
+  "prompt_chars": 41,
+  "prompt_tokens_estimate": 10
+}

@@ -1,0 +1,19 @@
+{
+  "question": "Who wrote the opinion in Richards v. Mackall?",
+  "ground_truth": "Waite",
+  "match_strings": [
+    "waite"
+  ],
+  "is_negative": false,
+  "response": "Chief Justice Waite wrote the opinion in Richards v. Mackall.",
+  "usage": {
+    "prompt_tokens": 1511,
+    "output_tokens": 19,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 1530
+  },
+  "prompt_source": "document",
+  "prompt_chars": 5262,
+  "prompt_tokens_estimate": 1315
+}

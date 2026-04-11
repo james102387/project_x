@@ -1,0 +1,17 @@
+{
+  "question": "Which court decided Marbury v. Madison?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The Supreme Court of the United States decided Marbury v. Madison in 1803. Chief Justice John Marshall wrote the landmark opinion that established the principle of judicial review.",
+  "usage": {
+    "prompt_tokens": 17,
+    "output_tokens": 38,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 55
+  },
+  "prompt_tokens_estimate": 9
+}

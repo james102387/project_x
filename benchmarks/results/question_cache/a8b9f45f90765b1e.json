@@ -1,0 +1,44 @@
+{
+  "question": "When was Flanders v. Seelye decided?",
+  "ground_truth": "1882-05-18",
+  "match_strings": [
+    "1882"
+  ],
+  "is_negative": false,
+  "response": "flanders v. seelye \u2014 date_filed: 1882-05-18",
+  "prompt_type": "kg_answerable",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "flanders v. seelye",
+      "results": [
+        {
+          "subject": "flanders v. seelye",
+          "predicate": "date_filed",
+          "object": "1882-05-18"
+        }
+      ],
+      "lookup_type": "targeted",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 11,
+    "compiled_prompt_tokens": 0,
+    "raw_compute": 132,
+    "compiled_compute": 0,
+    "savings_pct": 1.0,
+    "token_savings_pct": 1.0,
+    "marginal_savings_pct": 1.0,
+    "prompt_type": "kg_answerable",
+    "actual_prompt_tokens": null,
+    "actual_output_tokens": null,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": null,
+    "actual_cached_tokens": null
+  },
+  "prompt_tokens_estimate": 0,
+  "output_tokens": 0,
+  "reasoning_tokens": 0
+}

@@ -1,0 +1,17 @@
+{
+  "question": "What court decided Roe v. Wade?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The U.S. Supreme Court decided Roe v. Wade in 1973. The decision ruled that the constitutional right to privacy protected a woman's right to have an abortion, subject to certain state regulations at different stages of pregnancy.",
+  "usage": {
+    "prompt_tokens": 17,
+    "output_tokens": 52,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 69
+  },
+  "prompt_tokens_estimate": 7
+}

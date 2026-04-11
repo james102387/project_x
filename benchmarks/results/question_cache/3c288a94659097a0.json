@@ -1,0 +1,11 @@
+{
+  "question": "Q?",
+  "ground_truth": "A",
+  "match_strings": [
+    "a"
+  ],
+  "is_negative": false,
+  "response": "[ERROR: fail]",
+  "usage": null,
+  "prompt_tokens_estimate": 0
+}

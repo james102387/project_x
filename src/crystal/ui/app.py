@@ -21,8 +21,9 @@ import pandas as pd
 
 from crystal.graph import build_crystal_graph
 from crystal.state import make_initial_state
-from crystal.ingest import ingest, build_kg
+from crystal.ingest import ingest, build_kg, ingest_document, DocumentIngestionResult
 from crystal.ingest.ner import ingest_text
+from crystal.compare import before_after_comparison, generate_questions_from_triplets
 from crystal.review import (
     format_review_dashboard,
     list_batches,
@@ -223,6 +224,191 @@ def ask_question(question, kg_state):
         llm_meta = ""
 
     return crystal_response, crystal_meta, llm_response, llm_meta, grounding_info
+
+
+# ── Document ingestion helpers ────────────────────────────────────────────
+
+_INGEST_AUTO_HEADERS = ["Subject", "Predicate", "Object", "Source", "Confidence"]
+_INGEST_PENDING_HEADERS = ["#", "Subject", "Predicate", "Object", "Source", "Confidence", "Sentence"]
+
+
+def _scored_to_auto_df(triplets):
+    rows = [
+        [st.subject, st.predicate, st.object, st.extraction_source, f"{st.ingestion_confidence:.2f}"]
+        for st in triplets
+    ]
+    return pd.DataFrame(rows, columns=_INGEST_AUTO_HEADERS) if rows else pd.DataFrame(columns=_INGEST_AUTO_HEADERS)
+
+
+def _scored_to_pending_df(triplets):
+    rows = [
+        [str(i), st.subject, st.predicate, st.object, st.extraction_source,
+         f"{st.ingestion_confidence:.2f}", st.source_sentence[:120]]
+        for i, st in enumerate(triplets)
+    ]
+    return pd.DataFrame(rows, columns=_INGEST_PENDING_HEADERS) if rows else pd.DataFrame(columns=_INGEST_PENDING_HEADERS)
+
+
+def _ingest_stats_text(result):
+    s = result.stats
+    return (
+        f"**Extracted {s.get('total_extracted', 0)} facts** from `{s.get('source', '?')}` "
+        f"in {s.get('elapsed_seconds', 0):.1f}s\n\n"
+        f"- Auto-accepted: **{s.get('auto_accepted', 0)}** (already in KG)\n"
+        f"- Pending review: **{s.get('pending_review', 0)}**\n"
+        f"- Rejected (low confidence): **{s.get('rejected', 0)}**\n"
+        f"- NER extractions: {s.get('ner_triplets', 0)} | LLM extractions: {s.get('llm_triplets', 0)}"
+    )
+
+
+def run_ingestion(files, paste_text, kg_state, threshold):
+    """Run document ingestion on uploaded files or pasted text."""
+    texts = []
+    if files:
+        for f in files:
+            try:
+                texts.append(("file", Path(f.name)))
+            except Exception:
+                pass
+    if paste_text and paste_text.strip():
+        texts.append(("text", paste_text.strip()))
+
+    if not texts:
+        empty = DocumentIngestionResult()
+        return (
+            kg_state, empty,
+            "No documents provided.",
+            pd.DataFrame(columns=_INGEST_AUTO_HEADERS),
+            pd.DataFrame(columns=_INGEST_PENDING_HEADERS),
+            _format_kg_stats(_kg_info(kg_state, "current")),
+        )
+
+    all_auto = []
+    all_pending = []
+    all_rejected = []
+    combined_stats = {
+        "total_extracted": 0, "auto_accepted": 0, "pending_review": 0,
+        "rejected": 0, "ner_triplets": 0, "llm_triplets": 0,
+        "elapsed_seconds": 0.0, "source": "",
+    }
+
+    try:
+        call_llm = crystal.llm.call_llm
+    except Exception:
+        call_llm = None
+
+    for kind, content in texts:
+        try:
+            result = ingest_document(
+                content, kg_state,
+                call_llm_fn=call_llm,
+                auto_accept_threshold=float(threshold),
+                domain="legal",
+            )
+            all_auto.extend(result.auto_accepted)
+            all_pending.extend(result.pending_review)
+            all_rejected.extend(result.rejected)
+            for k in ("total_extracted", "auto_accepted", "pending_review",
+                       "rejected", "ner_triplets", "llm_triplets"):
+                combined_stats[k] += result.stats.get(k, 0)
+            combined_stats["elapsed_seconds"] += result.stats.get("elapsed_seconds", 0)
+            src = result.stats.get("source", "")
+            combined_stats["source"] = src if not combined_stats["source"] else combined_stats["source"] + f", {src}"
+        except Exception as e:
+            return (
+                kg_state, DocumentIngestionResult(),
+                f"Error during ingestion: {e}",
+                pd.DataFrame(columns=_INGEST_AUTO_HEADERS),
+                pd.DataFrame(columns=_INGEST_PENDING_HEADERS),
+                _format_kg_stats(_kg_info(kg_state, "current")),
+            )
+
+    combined = DocumentIngestionResult(
+        auto_accepted=all_auto,
+        pending_review=all_pending,
+        rejected=all_rejected,
+        stats=combined_stats,
+    )
+    combined._kg = kg_state
+    combined._source = combined_stats["source"]
+
+    source_label = combined_stats.get("source", "Ingested")
+    info = _kg_info(kg_state, source_label)
+
+    return (
+        kg_state, combined,
+        _ingest_stats_text(combined),
+        _scored_to_auto_df(all_auto),
+        _scored_to_pending_df(all_pending),
+        _format_kg_stats(info),
+    )
+
+
+def accept_all_pending_action(ingest_result, kg_state):
+    if ingest_result is None or not isinstance(ingest_result, DocumentIngestionResult):
+        return "No ingestion result.", pd.DataFrame(columns=_INGEST_PENDING_HEADERS), _format_kg_stats(_kg_info(kg_state, "current"))
+    n = ingest_result.accept_all_pending()
+    info = _kg_info(kg_state, "current")
+    return f"Accepted {n} triplets into KG.", _scored_to_pending_df(ingest_result.pending_review), _format_kg_stats(info)
+
+
+def reject_all_pending_action(ingest_result, kg_state):
+    if ingest_result is None or not isinstance(ingest_result, DocumentIngestionResult):
+        return "No ingestion result.", pd.DataFrame(columns=_INGEST_PENDING_HEADERS)
+    n = ingest_result.reject_pending(list(range(len(ingest_result.pending_review))))
+    return f"Rejected {n} triplets.", _scored_to_pending_df(ingest_result.pending_review)
+
+
+def save_pending_decisions(ingest_result, table_data, kg_state):
+    """Accept or reject specific pending items based on user edits (not implemented as row-level yet)."""
+    if ingest_result is None or not isinstance(ingest_result, DocumentIngestionResult):
+        return "No ingestion result.", pd.DataFrame(columns=_INGEST_PENDING_HEADERS), _format_kg_stats(_kg_info(kg_state, "current"))
+
+    n = ingest_result.accept_all_pending()
+    info = _kg_info(kg_state, "current")
+    return (
+        f"Accepted {n} remaining pending triplets into KG.",
+        _scored_to_pending_df(ingest_result.pending_review),
+        _format_kg_stats(info),
+    )
+
+
+# ── Before/after comparison helpers ───────────────────────────────────────
+
+_COMPARE_HEADERS = ["Question", "Crystal (KG-grounded)", "Route", "LLM + Docs", "Naked LLM"]
+
+
+def run_comparison(questions_text, ingest_result, kg_state):
+    """Run before/after comparison on user-provided questions."""
+    if not questions_text or not questions_text.strip():
+        if ingest_result and isinstance(ingest_result, DocumentIngestionResult):
+            all_triplets = [st.as_tuple() for st in ingest_result.auto_accepted]
+            questions = generate_questions_from_triplets(all_triplets, max_questions=5)
+        else:
+            return "Enter questions or run ingestion first.", pd.DataFrame(columns=_COMPARE_HEADERS)
+    else:
+        questions = [q.strip() for q in questions_text.strip().split("\n") if q.strip()]
+
+    if not questions:
+        return "No questions to compare.", pd.DataFrame(columns=_COMPARE_HEADERS)
+
+    doc_text = ""
+    if ingest_result and isinstance(ingest_result, DocumentIngestionResult):
+        sentences = [st.source_sentence for st in ingest_result.auto_accepted + ingest_result.pending_review if st.source_sentence]
+        doc_text = " ".join(sentences[:20])
+
+    try:
+        result = before_after_comparison(questions, kg_state, document_text=doc_text)
+    except Exception as e:
+        return f"Comparison error: {e}", pd.DataFrame(columns=_COMPARE_HEADERS)
+
+    rows = [
+        [r.question, r.crystal_answer[:200], r.crystal_route,
+         r.llm_with_docs_answer[:200], r.llm_naked_answer[:200]]
+        for r in result.rows
+    ]
+    status = f"Compared {len(result.rows)} questions across 3 modes."
+    return status, pd.DataFrame(rows, columns=_COMPARE_HEADERS)
 
 
 # ── KG Explorer helpers ───────────────────────────────────────────────────
@@ -475,6 +661,105 @@ def build_ui() -> gr.Blocks:
                 fn=ask_question,
                 inputs=[question_input, kg_state],
                 outputs=[crystal_output, crystal_meta_output, llm_output, llm_meta_output, grounding_output],
+            )
+
+        with gr.Tab("Ingest Documents"):
+            gr.Markdown(
+                "Upload legal documents to extract facts into the knowledge graph. "
+                "High-confidence extractions are auto-accepted; others go to a review queue."
+            )
+
+            ingest_result_state = gr.State(None)
+
+            with gr.Row():
+                with gr.Column(scale=2):
+                    ingest_files = gr.File(
+                        label="Upload Documents (.txt, .csv, .json)",
+                        file_types=[".txt", ".csv", ".json"],
+                        file_count="multiple",
+                    )
+                with gr.Column(scale=2):
+                    ingest_paste = gr.Textbox(
+                        label="Or paste text",
+                        lines=5,
+                        placeholder="Paste legal opinion text here...",
+                    )
+                with gr.Column(scale=1):
+                    ingest_threshold = gr.Slider(
+                        minimum=0.40, maximum=0.95, value=0.70, step=0.05,
+                        label="Auto-accept threshold",
+                    )
+                    ingest_btn = gr.Button("Extract & Ingest", variant="primary")
+
+            ingest_status = gr.Markdown("")
+            ingest_kg_stats = gr.Markdown(_format_kg_stats(_default_kg_info()))
+
+            gr.Markdown("### Auto-Accepted (already in KG)")
+            ingest_auto_table = gr.Dataframe(
+                value=pd.DataFrame(columns=_INGEST_AUTO_HEADERS),
+                interactive=False,
+            )
+
+            gr.Markdown("### Pending Review")
+            ingest_pending_table = gr.Dataframe(
+                value=pd.DataFrame(columns=_INGEST_PENDING_HEADERS),
+                interactive=False,
+            )
+
+            with gr.Row():
+                accept_all_btn = gr.Button("Accept All Pending", variant="primary")
+                reject_all_btn = gr.Button("Reject All Pending", variant="stop")
+                save_pending_btn = gr.Button("Save & Accept Pending")
+
+            ingest_decision_status = gr.Markdown("")
+
+            ingest_btn.click(
+                fn=run_ingestion,
+                inputs=[ingest_files, ingest_paste, kg_state, ingest_threshold],
+                outputs=[kg_state, ingest_result_state, ingest_status,
+                         ingest_auto_table, ingest_pending_table, ingest_kg_stats],
+            )
+
+            accept_all_btn.click(
+                fn=accept_all_pending_action,
+                inputs=[ingest_result_state, kg_state],
+                outputs=[ingest_decision_status, ingest_pending_table, ingest_kg_stats],
+            )
+
+            reject_all_btn.click(
+                fn=reject_all_pending_action,
+                inputs=[ingest_result_state, kg_state],
+                outputs=[ingest_decision_status, ingest_pending_table],
+            )
+
+            save_pending_btn.click(
+                fn=save_pending_decisions,
+                inputs=[ingest_result_state, ingest_pending_table, kg_state],
+                outputs=[ingest_decision_status, ingest_pending_table, ingest_kg_stats],
+            )
+
+            gr.Markdown("---")
+            gr.Markdown("### Test Your Ingestion")
+            gr.Markdown(
+                "Compare Crystal (with ingested KG) vs naked LLM. "
+                "Enter questions below, or leave blank to auto-generate from extracted facts."
+            )
+            compare_questions = gr.Textbox(
+                label="Questions (one per line)",
+                lines=4,
+                placeholder="What court decided Miranda v. Arizona?\nWho wrote the opinion in Roe v. Wade?",
+            )
+            compare_btn = gr.Button("Run Comparison", variant="primary")
+            compare_status = gr.Markdown("")
+            compare_table = gr.Dataframe(
+                value=pd.DataFrame(columns=_COMPARE_HEADERS),
+                interactive=False,
+            )
+
+            compare_btn.click(
+                fn=run_comparison,
+                inputs=[compare_questions, ingest_result_state, kg_state],
+                outputs=[compare_status, compare_table],
             )
 
         with gr.Tab("Knowledge Graph"):

@@ -1,0 +1,17 @@
+{
+  "question": "What court decided Richards v. Mackall?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about a case called Richards v. Mackall in my knowledge base. To help you find the answer, could you provide additional context, such as:\n\n- The approximate year the case was decided\n- The jurisdiction (state, federal, or country)\n- The subject matter (contract law, property law, etc.)\n\nWith these details, I could better assist you in identifying which court decided the case.",
+  "usage": {
+    "prompt_tokens": 17,
+    "output_tokens": 93,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 110
+  },
+  "prompt_tokens_estimate": 9
+}

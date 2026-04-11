@@ -1,0 +1,17 @@
+{
+  "question": "What court decided Flanders v. Seelye?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about a case called \"Flanders v. Seelye\" in my knowledge base. To help you find this information, could you provide:\n\n1. The approximate year the case was decided\n2. The jurisdiction (state or federal court)\n3. Any additional context about what the case concerned\n\nWith these details, I'd be better able to help you identify which court decided it, or you might try searching legal databases like Google Scholar (scholar.google.com) or your state's court system website.",
+  "usage": {
+    "prompt_tokens": 20,
+    "output_tokens": 116,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 136
+  },
+  "prompt_tokens_estimate": 9
+}

@@ -1,0 +1,19 @@
+{
+  "question": "Tell me about Miranda v. Arizona",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Miranda v. Arizona\n\nThe document provided does not contain information about Miranda v. Arizona. It is merely a brief order denying a certiorari petition, with a notation that Justice Marshall did not participate.\n\nTo answer your question about Miranda v. Arizona, I would need a different source document. Miranda v. Arizona is the landmark 1966 U.S. Supreme Court case that established the requirement for police to inform suspects of their constitutional rights (the \"Miranda rights\") before custodial interrogation.",
+  "usage": {
+    "prompt_tokens": 80,
+    "output_tokens": 109,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 189
+  },
+  "prompt_source": "document",
+  "prompt_chars": 284,
+  "prompt_tokens_estimate": 71
+}

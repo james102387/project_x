@@ -1,0 +1,17 @@
+{
+  "question": "What court decided Sturgis v. Clough?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about a case called \"Sturgis v. Clough\" in my knowledge base. To help you find this information, I would need additional context such as:\n\n- The approximate year the case was decided\n- The state or jurisdiction where it was heard\n- The subject matter of the case\n\nIf you can provide any of these details, I'd be happy to help further. Alternatively, you might search legal databases like Google Scholar (scholar.google.com), FindLaw, or your state's court records for this case.",
+  "usage": {
+    "prompt_tokens": 20,
+    "output_tokens": 121,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 141
+  },
+  "prompt_tokens_estimate": 9
+}

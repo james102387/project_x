@@ -1,0 +1,15 @@
+{
+  "question": "What was the majority opinion in Miranda v. Arizona?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "# Miranda v. Arizona Majority Opinion\n\nIn **Miranda v. Arizona (1966)**, the Supreme Court ruled **5-4** that police must inform suspects of their constitutional rights before custodial interrogation.\n\n## Key Holdings:\n\nThe majority opinion (written by Chief Justice Earl Warren) established that suspects in police custody must be informed of:\n\n1. **Right to remain silent**\n2. **That statements can be used against them**\n3. **Right to an attorney**\n4. **That an attorney will be appointed if they cannot afford one**\n\n## Reasoning:\n\nThe Court found that custodial interrogation is inherently coercive and violates the **Fifth Amendment** (protection against self-incrimination) and **Sixth Amendment** (right to counsel) unless suspects are warned of these rights.\n\n## Impact:\n\nThis decision established the now-famous \"Miranda rights\" warnings that police recite when making arrests. Without proper Miranda warnings, statements obtained during custodial interrogation can be deemed inadmissible as evidence.\n\nThe case addressed concerns about police coercion and the reliability of confessions obtained without defendants knowing their rights.",
+  "usage": {
+    "prompt_tokens": 18,
+    "output_tokens": 250,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 268
+  },
+  "prompt_tokens_estimate": 13
+}

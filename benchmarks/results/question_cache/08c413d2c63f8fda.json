@@ -1,0 +1,21 @@
+{
+  "question": "When was 347 U.S. 483 decided?",
+  "ground_truth": "1954-05-17",
+  "match_strings": [
+    "1954"
+  ],
+  "is_negative": false,
+  "response": "# 347 U.S. 483\n\n347 U.S. 483 refers to a case reported in volume 347 of the United States Reports. Without knowing the specific case name, I cannot tell you the exact decision date from the citation alone.\n\nCould you provide the case name? That would allow me to give you the precise date the case was decided.",
+  "prompt_type": "no_math",
+  "kg_results": [],
+  "token_metrics": {
+    "actual_prompt_tokens": 21,
+    "actual_output_tokens": 82,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": 103,
+    "actual_cached_tokens": 0
+  },
+  "prompt_tokens_estimate": 21,
+  "output_tokens": 82,
+  "reasoning_tokens": 0
+}

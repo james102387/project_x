@@ -1,0 +1,19 @@
+{
+  "question": "When was Loving v. Virginia decided?",
+  "ground_truth": "1967-06-12",
+  "match_strings": [
+    "1967"
+  ],
+  "is_negative": false,
+  "response": "# Loving v. Virginia Decision Date\n\nBased on the document, Loving v. Virginia was decided in **1967**. \n\nThe Court noted probable jurisdiction on December 12, 1966, and the opinion was delivered by Chief Justice Warren (with no dissent indicated in this text). The case involved events from 1958-1966, with the Supreme Court's decision coming in 1967.",
+  "usage": {
+    "prompt_tokens": 5245,
+    "output_tokens": 89,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 5334
+  },
+  "prompt_source": "document",
+  "prompt_chars": 21240,
+  "prompt_tokens_estimate": 5310
+}

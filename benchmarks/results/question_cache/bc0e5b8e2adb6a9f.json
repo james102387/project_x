@@ -1,0 +1,17 @@
+{
+  "question": "When was Mapp v. Ohio decided?",
+  "ground_truth": "1961-06-19",
+  "match_strings": [
+    "1961"
+  ],
+  "is_negative": false,
+  "response": "Mapp v. Ohio was decided on June 19, 1961.\n\nThis landmark Supreme Court case established that the exclusionary rule (which prevents illegally obtained evidence from being used in court) applies to state governments through the Fourteenth Amendment, not just to the federal government.",
+  "usage": {
+    "prompt_tokens": 17,
+    "output_tokens": 63,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 80
+  },
+  "prompt_tokens_estimate": 7
+}

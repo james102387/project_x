@@ -158,6 +158,25 @@ def calibration_score(response: str, is_negative: bool) -> float:
     return 1.0 if is_abstention(response) else 0.0
 
 
+def _flatten_kg_results(kg_results: list[dict]) -> list[dict]:
+    """Normalize kg_results into flat triples with 'subject'/'object' keys.
+
+    The Crystal pipeline returns operation-level dicts like:
+      {"tool": "kg", "results": [{"subject": ..., "object": ...}]}
+    The rubric scorers need the inner triples directly.
+    """
+    flat = []
+    for entry in kg_results:
+        if "subject" in entry and "object" in entry:
+            flat.append(entry)
+        elif "results" in entry and isinstance(entry["results"], list):
+            flat.extend(
+                r for r in entry["results"]
+                if isinstance(r, dict) and "object" in r
+            )
+    return flat
+
+
 def score_rubric(
     response: str,
     match_strings: list[str],
@@ -165,11 +184,12 @@ def score_rubric(
     is_negative: bool = False,
 ) -> RubricResult:
     """Score a single response across all three rubric dimensions."""
+    flat_kg = _flatten_kg_results(kg_results or [])
     return RubricResult(
         accuracy=accuracy_score(response, match_strings),
-        specificity=specificity_score(response, kg_results or []),
+        specificity=specificity_score(response, flat_kg),
         no_hallucination=_no_hallucination_score(
-            response, kg_results or [], is_negative
+            response, flat_kg, is_negative
         ),
     )
 

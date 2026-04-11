@@ -1,0 +1,19 @@
+{
+  "question": "When was Union Insurance v. Hoge decided?",
+  "ground_truth": "1857-05-15",
+  "match_strings": [
+    "1857"
+  ],
+  "is_negative": false,
+  "response": "The document does not provide the date when this case was decided. While it references a New York legislative act from April 10, 1849, and events occurring in 1850-1853, the actual decision date of this case is not stated in the opinion text provided.",
+  "usage": {
+    "prompt_tokens": 3211,
+    "output_tokens": 60,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 3271
+  },
+  "prompt_source": "document",
+  "prompt_chars": 14167,
+  "prompt_tokens_estimate": 3541
+}

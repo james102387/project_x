@@ -1,0 +1,17 @@
+{
+  "question": "Who decided Citizens United v. Federal Election Commission?",
+  "ground_truth": "Roberts, Stevens, Scalia, Kennedy, Thomas, Ginsburg, Breyer, Alito, Sotomayor",
+  "match_strings": [
+    "roberts"
+  ],
+  "is_negative": false,
+  "response": "The U.S. Supreme Court decided Citizens United v. Federal Election Commission in 2010. The decision was 5-4, with the majority opinion written by Justice Anthony Kennedy.",
+  "usage": {
+    "prompt_tokens": 17,
+    "output_tokens": 41,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 58
+  },
+  "prompt_tokens_estimate": 14
+}

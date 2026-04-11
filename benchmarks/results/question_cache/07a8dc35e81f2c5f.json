@@ -1,0 +1,82 @@
+{
+  "question": "What statute did Roe v. Wade overturn?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "I cannot answer this question based on the verified facts provided. The knowledge graph contains information about Roe v. Wade's case details (such as the court, date filed, judges, and opinion author), but it does not include information about which statute, if any, the case overturned.\n\nTo properly answer your question, I would need facts that specifically address the statutes that were affected by the Roe v. Wade decision.",
+  "prompt_type": "kg_augmented",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "roe v. wade",
+      "results": [
+        {
+          "subject": "roe v. wade",
+          "predicate": "attorneys",
+          "object": "Sarah Weddington argued the cause for appellants."
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "cited_by_count",
+          "object": "8100"
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "court",
+          "object": "Supreme Court of the United States"
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "date_filed",
+          "object": "1973-01-22"
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "disposition",
+          "object": "Affirmed in part, reversed in part"
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "judges",
+          "object": "Burger, Douglas, Brennan, Stewart, White, Marshall, Blackmun, Powell, Rehnquist"
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "nature_of_suit",
+          "object": "Constitutional"
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "opinion_author",
+          "object": "Blackmun"
+        },
+        {
+          "subject": "roe v. wade",
+          "predicate": "precedential_status",
+          "object": "Published"
+        }
+      ],
+      "lookup_type": "subject_scan",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 9,
+    "compiled_prompt_tokens": 211,
+    "raw_compute": 90,
+    "compiled_compute": 44732,
+    "savings_pct": -496.02222222222224,
+    "token_savings_pct": -22.444444444444443,
+    "marginal_savings_pct": -23.625436408977556,
+    "prompt_type": "kg_augmented",
+    "actual_prompt_tokens": 235,
+    "actual_output_tokens": 94,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": 329,
+    "actual_cached_tokens": 0
+  },
+  "prompt_tokens_estimate": 235,
+  "output_tokens": 94,
+  "reasoning_tokens": 0
+}

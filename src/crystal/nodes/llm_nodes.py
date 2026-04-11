@@ -12,6 +12,7 @@ def _update_metrics_from_usage(metrics: dict, usage: dict | None) -> dict:
     metrics["actual_reasoning_tokens"] = usage.get("reasoning_tokens")
     metrics["actual_total_tokens"] = usage.get("total_tokens")
     metrics["actual_cached_tokens"] = usage.get("cached_tokens")
+    metrics["thinking_chars"] = usage.get("thinking_chars")
     return metrics
 
 

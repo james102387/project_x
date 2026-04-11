@@ -1,0 +1,18 @@
+{
+  "question": "Who were the judges in Armstrong v. Armstrong, General Motors Corp.?",
+  "ground_truth": "Black, Clark, Douglas, Frankfurter, Minton, Warren",
+  "match_strings": [
+    "black",
+    "warren"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about the judges in Armstrong v. Armstrong, General Motors Corp. in my current knowledge base.\n\nTo find this information, I'd recommend:\n\n1. **Google Scholar** (scholar.google.com) - Search for the case name and you'll find the full opinion with judge information\n2. **Court websites** - Check the relevant state or federal court's website\n3. **Legal databases** - Justia, FindLaw, or similar legal research sites\n4. **Law library resources** - Your local law library may have access to comprehensive case databases\n\nIf you can provide additional details like the year, jurisdiction, or court level, I might be able to help you narrow down your search.",
+  "usage": {
+    "prompt_tokens": 22,
+    "output_tokens": 155,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 177
+  },
+  "prompt_tokens_estimate": 17
+}

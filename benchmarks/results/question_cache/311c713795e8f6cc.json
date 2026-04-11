@@ -1,0 +1,19 @@
+{
+  "question": "Tell me when Brown v. Board of Education was filed",
+  "ground_truth": "1954-05-17",
+  "match_strings": [
+    "1954"
+  ],
+  "is_negative": false,
+  "response": "The document does not provide the filing date of Brown v. Board of Education. It only states that the decision on the merits was delivered on May 17, 1954, and this opinion addresses the question of relief/remedy.",
+  "usage": {
+    "prompt_tokens": 1752,
+    "output_tokens": 51,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 1803
+  },
+  "prompt_source": "document",
+  "prompt_chars": 7769,
+  "prompt_tokens_estimate": 1942
+}

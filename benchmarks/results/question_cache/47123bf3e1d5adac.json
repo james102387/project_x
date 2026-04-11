@@ -1,0 +1,21 @@
+{
+  "question": "When was Chevron v. NRDC decided?",
+  "ground_truth": "1984-06-25",
+  "match_strings": [
+    "1984"
+  ],
+  "is_negative": false,
+  "response": "Chevron U.S.A., Inc. v. Natural Resources Defense Council, Inc. was decided on **June 25, 1984**.\n\nThis landmark Supreme Court case established the two-step framework for judicial review of agency interpretations of statutes, which became known as \"Chevron deference.\"",
+  "prompt_type": "no_math",
+  "kg_results": [],
+  "token_metrics": {
+    "actual_prompt_tokens": 20,
+    "actual_output_tokens": 69,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": 89,
+    "actual_cached_tokens": 0
+  },
+  "prompt_tokens_estimate": 20,
+  "output_tokens": 69,
+  "reasoning_tokens": 0
+}

@@ -1,0 +1,17 @@
+{
+  "question": "What date was Loving v. Virginia filed?",
+  "ground_truth": "1967-06-12",
+  "match_strings": [
+    "1967"
+  ],
+  "is_negative": false,
+  "response": "Loving v. Virginia was filed on December 12, 1966, when the Supreme Court decided the case. However, if you're asking when it was originally brought to court, the case began in Virginia in 1958 when Richard and Mildred Loving were charged with violating Virginia's anti-miscegenation laws.",
+  "usage": {
+    "prompt_tokens": 17,
+    "output_tokens": 75,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 92
+  },
+  "prompt_tokens_estimate": 9
+}

@@ -1,0 +1,19 @@
+{
+  "question": "When was Brown v. Board of Education decided?",
+  "ground_truth": "1954-05-17",
+  "match_strings": [
+    "1954"
+  ],
+  "is_negative": false,
+  "response": "# Brown v. Board of Education Decision Date\n\nBased on this document, the original Brown v. Board of Education decision was rendered on **May 17, 1954**. \n\nThis opinion, known as Brown II, was decided on the remedial relief question and incorporates by reference the substantive decision from May 17, 1954.",
+  "usage": {
+    "prompt_tokens": 1751,
+    "output_tokens": 76,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 1827
+  },
+  "prompt_source": "document",
+  "prompt_chars": 7764,
+  "prompt_tokens_estimate": 1941
+}

@@ -1,0 +1,17 @@
+{
+  "question": "Who wrote the opinion in Dred Scott v. Sandford?",
+  "ground_truth": "Taney",
+  "match_strings": [
+    "taney"
+  ],
+  "is_negative": false,
+  "response": "Chief Justice Roger B. Taney wrote the majority opinion in Dred Scott v. Sandford (1857). The decision is one of the most infamous in Supreme Court history, ruling that enslaved African Americans were not citizens of the United States and had no right to sue in federal court.",
+  "usage": {
+    "prompt_tokens": 22,
+    "output_tokens": 65,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 87
+  },
+  "prompt_tokens_estimate": 12
+}

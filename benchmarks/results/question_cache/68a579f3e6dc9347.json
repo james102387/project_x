@@ -1,0 +1,17 @@
+{
+  "question": "Who wrote the opinion in Gray v. Coan?",
+  "ground_truth": "Chase",
+  "match_strings": [
+    "chase"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about a case called \"Gray v. Coan\" in my training data. To help you find this information, could you provide additional context such as:\n\n- The year the case was decided\n- Which court decided it (state or federal)\n- Which state or jurisdiction it's from\n\nWith these details, I'd be better able to help you identify the author of the opinion, or I can suggest ways to research it (such as checking Google Scholar, your state's court website, or legal databases like FindLaw or Justia).",
+  "usage": {
+    "prompt_tokens": 19,
+    "output_tokens": 122,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 141
+  },
+  "prompt_tokens_estimate": 9
+}

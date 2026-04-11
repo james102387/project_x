@@ -1,0 +1,19 @@
+{
+  "question": "When was Fentress Coal & Coke Co. v. Elmore decided?",
+  "ground_truth": "1919-04-28",
+  "match_strings": [
+    "1919"
+  ],
+  "is_negative": false,
+  "response": "The document does not contain information about when Fentress Coal & Coke Co. v. Elmore was decided. The opinion only cites other cases but does not mention this case.",
+  "usage": {
+    "prompt_tokens": 217,
+    "output_tokens": 44,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 261
+  },
+  "prompt_source": "document",
+  "prompt_chars": 566,
+  "prompt_tokens_estimate": 141
+}

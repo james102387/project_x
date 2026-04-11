@@ -1,0 +1,17 @@
+{
+  "question": "What court decided Union Insurance v. Hoge?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about a case called \"Union Insurance v. Hoge\" in my training data. To help you find this information, I would need additional details such as:\n\n- The year the case was decided\n- The jurisdiction (state or federal court)\n- The full names of the parties if these are shortened versions\n\nIf you can provide any of these details, I'd be happy to help you locate information about which court decided the case. Alternatively, you might try searching legal databases like Google Scholar (scholar.google.com), which has comprehensive coverage of court decisions.",
+  "usage": {
+    "prompt_tokens": 18,
+    "output_tokens": 126,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 144
+  },
+  "prompt_tokens_estimate": 10
+}

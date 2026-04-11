@@ -1,0 +1,17 @@
+{
+  "question": "Tell me about Miranda v. Arizona",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Miranda v. Arizona (1966)\n\n## The Case\nThis landmark Supreme Court decision established the requirement that police must inform suspects of their constitutional rights before custodial interrogation.\n\n## Background\nErnesto Miranda was arrested and confessed to crimes during police questioning without being informed of his right to remain silent or consult an attorney.\n\n## The Supreme Court's Ruling\nThe Court ruled 5-4 that Miranda's confession was inadmissible because police hadn't informed him of his Fifth Amendment protection against self-incrimination and his Sixth Amendment right to an attorney.\n\n## The Miranda Rights\nPolice must now tell suspects:\n- You have the right to remain silent\n- Anything you say can be used against you in court\n- You have the right to an attorney\n- If you can't afford an attorney, one will be provided\n\n## Significance\n- Became a cornerstone of criminal procedure\n- Protects suspects from coercive police tactics\n- Applies to custodial interrogation (when someone isn't free to leave)\n- Has been subject to various exceptions and refinements over time\n\n## Impact\nWhile intended to protect suspects, the ruling also standardized procedures that allow police to conduct interrogations legally, making it one of the most debated decisions in criminal justice.",
+  "usage": {
+    "prompt_tokens": 14,
+    "output_tokens": 280,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 294
+  },
+  "prompt_tokens_estimate": 8
+}

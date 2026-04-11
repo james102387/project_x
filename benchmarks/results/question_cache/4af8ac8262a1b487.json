@@ -1,0 +1,19 @@
+{
+  "question": "What date was Loving v. Virginia filed?",
+  "ground_truth": "1967-06-12",
+  "match_strings": [
+    "1967"
+  ],
+  "is_negative": false,
+  "response": "The document does not specify when the case was filed. However, it indicates that the Supreme Court noted probable jurisdiction on **December 12, 1966**.\n\nThe opinion itself was delivered after that date (the case citation shows 388 U.S., suggesting it was decided in 1967), but the exact filing date is not stated in this text.",
+  "usage": {
+    "prompt_tokens": 5246,
+    "output_tokens": 77,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 5323
+  },
+  "prompt_source": "document",
+  "prompt_chars": 21243,
+  "prompt_tokens_estimate": 5310
+}

@@ -1,0 +1,17 @@
+{
+  "question": "Tell me about Marbury v. Madison",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Marbury v. Madison (1803)\n\n## Overview\nA landmark Supreme Court case that established **judicial review**\u2014the power of courts to strike down laws as unconstitutional.\n\n## Background\n- **President John Adams** (Federalist) lost his reelection bid in 1800\n- Before leaving office, Adams appointed **William Marbury** as a justice of the peace\n- **Secretary of State James Madison** (under new President Thomas Jefferson) refused to deliver Marbury's commission\n- Marbury sued, asking the Supreme Court to force Madison to deliver it\n\n## The Decision\nChief Justice **John Marshall** ruled:\n- Marbury *did* have a right to his commission\n- **But** the Supreme Court couldn't force Madison to deliver it\n\n**Why?** Marshall found that the law Marbury relied on (part of the Judiciary Act of 1789) unconstitutionally expanded the Court's powers beyond what the Constitution allowed.\n\n## Significance\nBy striking down an act of Congress as unconstitutional, Marshall established that:\n- Courts can review the constitutionality of laws\n- The Constitution is the supreme law\n- Judicial review became a cornerstone of American constitutional law\n\n## The Irony\nThough Marbury lost his job, his case gave the Supreme Court enormous power\u2014arguably the most important outcome in Supreme Court history.",
+  "usage": {
+    "prompt_tokens": 16,
+    "output_tokens": 301,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 317
+  },
+  "prompt_tokens_estimate": 8
+}

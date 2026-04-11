@@ -1,0 +1,17 @@
+{
+  "question": "What court decided Lasigi v. The Collector?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about a case called \"Lasigi v. The Collector\" in my knowledge base. To help you find this information, it would be helpful to know:\n\n1. What jurisdiction it was decided in (country, state, etc.)\n2. Approximately when it was decided\n3. What subject matter it concerned\n\nIf you can provide any of these details, I may be able to help you better. Alternatively, you could search legal databases like Google Scholar (scholar.google.com), your jurisdiction's court websites, or legal research platforms like LexisNexis or Westlaw.",
+  "usage": {
+    "prompt_tokens": 19,
+    "output_tokens": 134,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 153
+  },
+  "prompt_tokens_estimate": 10
+}

@@ -1,0 +1,19 @@
+{
+  "question": "Who decided Loving v. Virginia?",
+  "ground_truth": "Warren, Black, Douglas, Clark, Harlan, Brennan, Stewart, White, Fortas",
+  "match_strings": [
+    "warren"
+  ],
+  "is_negative": false,
+  "response": "# Answer\n\nThe U.S. Supreme Court decided Loving v. Virginia, with Chief Justice Earl Warren delivering the opinion of the Court.",
+  "usage": {
+    "prompt_tokens": 5244,
+    "output_tokens": 32,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 5276
+  },
+  "prompt_source": "document",
+  "prompt_chars": 21235,
+  "prompt_tokens_estimate": 5308
+}

@@ -1,0 +1,19 @@
+{
+  "question": "When was Mapp v. Ohio decided?",
+  "ground_truth": "1961-06-19",
+  "match_strings": [
+    "1961"
+  ],
+  "is_negative": false,
+  "response": "The document does not provide the date when Mapp v. Ohio was decided. It only shows a citation (367 U.S. 643) and information about a motion and petition regarding the case, but no decision date is given.",
+  "usage": {
+    "prompt_tokens": 88,
+    "output_tokens": 53,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 141
+  },
+  "prompt_source": "document",
+  "prompt_chars": 312,
+  "prompt_tokens_estimate": 78
+}

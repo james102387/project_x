@@ -1,0 +1,19 @@
+{
+  "question": "What court heard Gideon v. Wainwright?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The United States Supreme Court heard Gideon v. Wainwright. The opinion was delivered by Mr. Justice Black for the Court.",
+  "usage": {
+    "prompt_tokens": 5165,
+    "output_tokens": 33,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 5198
+  },
+  "prompt_source": "document",
+  "prompt_chars": 20048,
+  "prompt_tokens_estimate": 5012
+}

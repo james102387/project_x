@@ -1,0 +1,17 @@
+{
+  "question": "What doctrine did Chevron v. NRDC establish?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "# Chevron v. NRDC\n\n**Chevron v. Natural Resources Defense Council** (1984) established the **Chevron deference doctrine**, a two-step framework for judicial review of agency interpretations of statutes:\n\n## The Two-Step Test\n\n1. **Step One**: Did Congress directly speak to the precise question at issue?\n   - If yes, that's the end of the matter\u2014the court must follow Congress's intent\n   - If no, proceed to step two\n\n2. **Step Two**: Is the agency's interpretation reasonable?\n   - Courts defer to the agency's interpretation if it's a permissible construction of the statute, even if it's not the only or best interpretation\n\n## Significance\n\nThis doctrine gave federal agencies substantial deference in interpreting ambiguous statutes they administer, significantly shaping administrative law for four decades.\n\n## Recent Development\n\nNotably, the U.S. Supreme Court **overturned Chevron deference** in *Loper v. Raimondo* (2024), requiring courts to use their independent judgment when reviewing agency statutory interpretations rather than automatically deferring to agencies.",
+  "usage": {
+    "prompt_tokens": 21,
+    "output_tokens": 253,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 274
+  },
+  "prompt_source": "no_document",
+  "prompt_chars": 44,
+  "prompt_tokens_estimate": 11
+}

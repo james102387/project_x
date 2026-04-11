@@ -1,0 +1,19 @@
+{
+  "question": "What court decided Sturgis v. Clough?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The Supreme Court of the United States decided Sturgis v. Clough. The case came to the Supreme Court on error from the Circuit Court of the United States for the Southern District of New York, and Justice Grier delivered the opinion of the Court.",
+  "usage": {
+    "prompt_tokens": 1471,
+    "output_tokens": 58,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 1529
+  },
+  "prompt_source": "document",
+  "prompt_chars": 6300,
+  "prompt_tokens_estimate": 1575
+}

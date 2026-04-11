@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import MagicMock
-from crystal.llm import _extract_usage
+from crystal.llm import _extract_usage_gemini as _extract_usage
 from crystal.nodes.llm_nodes import _update_metrics_from_usage
 
 

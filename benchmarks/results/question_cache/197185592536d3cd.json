@@ -1,0 +1,19 @@
+{
+  "question": "What court decided Mapp v. Ohio?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The U.S. Supreme Court decided Mapp v. Ohio, as indicated by the citation to 367 U.S. 643, which refers to volume 367 of the United States Reports (the official reporter for Supreme Court decisions).",
+  "usage": {
+    "prompt_tokens": 88,
+    "output_tokens": 55,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 143
+  },
+  "prompt_source": "document",
+  "prompt_chars": 314,
+  "prompt_tokens_estimate": 78
+}

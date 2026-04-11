@@ -1,0 +1,19 @@
+{
+  "question": "What court decided Armstrong v. Armstrong, General Motors Corp.?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about a case titled \"Armstrong v. Armstrong, General Motors Corp.\" in my training data. To help you find this information, I would need additional details such as:\n\n- The year the case was decided\n- The state or jurisdiction\n- The court level (trial court, appellate court, etc.)\n\nIf you could provide any of these details, I'd be better able to assist you. Alternatively, you might try searching legal databases like Google Scholar (scholar.google.com), FindLaw, or your state bar's legal resources.",
+  "usage": {
+    "prompt_tokens": 20,
+    "output_tokens": 122,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 142
+  },
+  "prompt_source": "no_document",
+  "prompt_chars": 64,
+  "prompt_tokens_estimate": 16
+}

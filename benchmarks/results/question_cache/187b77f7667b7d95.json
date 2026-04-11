@@ -1,0 +1,15 @@
+{
+  "question": "What was the constitutional basis for Marbury v. Madison?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "# Constitutional Basis for Marbury v. Madison\n\nThe case centered on **Section 13 of the Judiciary Act of 1789**, which granted the Supreme Court the power to issue writs of mandamus in cases involving federal officials.\n\n## The Core Constitutional Question\n\nChief Justice John Marshall's opinion challenged whether Congress had the authority to expand the Supreme Court's \"original jurisdiction\" (cases it can hear first) beyond what the **Constitution explicitly listed in Article III, Section 2**.\n\nThe Constitution specified that the Supreme Court had original jurisdiction only in cases involving:\n- Ambassadors and other public ministers\n- Cases where a state is a party\n\n## The Ruling\n\nMarshall held that:\n1. Section 13 of the Judiciary Act conflicted with Article III of the Constitution\n2. When federal law conflicts with the Constitution, the Constitution must prevail\n3. **The Supreme Court has the power to review acts of Congress and strike down those that violate the Constitution** (judicial review)\n\n## Significance\n\nThough Marbury actually lost his case, this decision established the foundational principle of **judicial review**\u2014the power of courts to invalidate unconstitutional legislation\u2014which has shaped American constitutional law ever since.",
+  "usage": {
+    "prompt_tokens": 20,
+    "output_tokens": 262,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 282
+  },
+  "prompt_tokens_estimate": 14
+}

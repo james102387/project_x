@@ -1,0 +1,19 @@
+{
+  "question": "Who filed the amicus brief in Citizens United?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "# Citizens United Amicus Briefs\n\nMultiple parties filed amicus (friend of the court) briefs in the *Citizens United v. FEC* case. Some of the most notable included:\n\n- **The Government** (supporting the FEC's position)\n- **Various media companies** (supporting Citizens United)\n- **Campaign finance reform groups** (supporting the FEC)\n- **Business organizations and corporations** (supporting Citizens United)\n- **Free speech advocacy groups** (on both sides)\n\nThe case itself was brought by **Citizens United**, a nonprofit organization, as the primary party challenging the constitutionality of campaign finance restrictions.\n\nIf you're looking for information about a specific amicus brief or organization, I'd be happy to help with more details.",
+  "prompt_type": "no_math",
+  "kg_results": [],
+  "token_metrics": {
+    "actual_prompt_tokens": 17,
+    "actual_output_tokens": 167,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": 184,
+    "actual_cached_tokens": 0
+  },
+  "prompt_tokens_estimate": 17,
+  "output_tokens": 167,
+  "reasoning_tokens": 0
+}

@@ -1,0 +1,19 @@
+{
+  "question": "What court decided United States v. Ramsay?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The Supreme Court of the United States decided United States v. Ramsay. The case was appealed from the Court of Claims, whose judgment the Supreme Court affirmed.",
+  "usage": {
+    "prompt_tokens": 191,
+    "output_tokens": 39,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 230
+  },
+  "prompt_source": "document",
+  "prompt_chars": 578,
+  "prompt_tokens_estimate": 144
+}

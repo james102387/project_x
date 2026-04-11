@@ -1,0 +1,17 @@
+{
+  "question": "What court decided Coventry Health Care of Mo., Inc. v. Nevils?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Coventry Health Care of Mo., Inc. v. Nevils\n\nThe **United States Court of Appeals for the Eighth Circuit** decided this case.\n\nThe case citation is **615 F.3d 887** (8th Cir. 2010). It addressed issues related to health insurance coverage and federal law.",
+  "usage": {
+    "prompt_tokens": 26,
+    "output_tokens": 75,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 101
+  },
+  "prompt_tokens_estimate": 15
+}

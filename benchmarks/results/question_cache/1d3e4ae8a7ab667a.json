@@ -1,0 +1,17 @@
+{
+  "question": "What was the oral argument date for Brown v. Board of Education?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "The document does not specify the oral argument date for Brown v. Board of Education II. It only indicates that further argument was requested on the question of relief (remedies), and that briefs were filed and oral argument occurred, but no specific date for that argument is provided in this opinion.",
+  "usage": {
+    "prompt_tokens": 1755,
+    "output_tokens": 62,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 1817
+  },
+  "prompt_source": "document",
+  "prompt_chars": 7783,
+  "prompt_tokens_estimate": 1945
+}

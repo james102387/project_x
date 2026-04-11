@@ -1,0 +1,17 @@
+{
+  "question": "What court decided Zubik v. Burwell?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The U.S. Supreme Court decided Zubik v. Burwell in 2016. The case addressed the contraceptive mandate under the Affordable Care Act and whether it violated the Religious Freedom Restoration Act (RFRA) when applied to religious organizations and employers with religious objections.",
+  "usage": {
+    "prompt_tokens": 20,
+    "output_tokens": 66,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 86
+  },
+  "prompt_tokens_estimate": 9
+}

@@ -1,0 +1,19 @@
+{
+  "question": "What court decided Gray v. Coan?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "Based on this document, the **United States Supreme Court** decided this case (referred to here as \"the court\"). The opinion was delivered by Chief Justice Chase.",
+  "usage": {
+    "prompt_tokens": 179,
+    "output_tokens": 36,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 215
+  },
+  "prompt_source": "document",
+  "prompt_chars": 746,
+  "prompt_tokens_estimate": 186
+}

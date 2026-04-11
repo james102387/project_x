@@ -1,0 +1,19 @@
+{
+  "question": "Who wrote the opinion in Coventry Health Care of Mo., Inc. v. Nevils?",
+  "ground_truth": "Ginsburg",
+  "match_strings": [
+    "ginsburg"
+  ],
+  "is_negative": false,
+  "response": "Justice Ginsburg wrote the opinion in Coventry Health Care of Mo., Inc. v. Nevils. This is stated at the beginning of the opinion: \"Justice GINSBURG delivered the opinion of the Court.\"",
+  "usage": {
+    "prompt_tokens": 5677,
+    "output_tokens": 49,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 5726
+  },
+  "prompt_source": "document",
+  "prompt_chars": 19517,
+  "prompt_tokens_estimate": 4879
+}

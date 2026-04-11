@@ -1,0 +1,17 @@
+{
+  "question": "When was Zubik v. Burwell decided?",
+  "ground_truth": "2015-04-15",
+  "match_strings": [
+    "2015"
+  ],
+  "is_negative": false,
+  "response": "Zubik v. Burwell was decided on June 29, 2016. The Supreme Court issued a per curiam (unsigned) opinion that vacated and remanded the case without reaching the merits on the contraceptive mandate issue.",
+  "usage": {
+    "prompt_tokens": 20,
+    "output_tokens": 56,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 76
+  },
+  "prompt_tokens_estimate": 8
+}

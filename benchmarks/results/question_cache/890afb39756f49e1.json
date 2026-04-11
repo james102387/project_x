@@ -1,0 +1,17 @@
+{
+  "question": "Who filed the amicus brief in Citizens United?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "# Citizens United Amicus Briefs\n\nMultiple organizations filed amicus curiae (friend of the court) briefs in the Citizens United case, as is typical for Supreme Court cases of significant public interest.\n\nHowever, if you're asking about a **specific notable brief**, could you clarify which one you mean? Some major briefs came from:\n\n- **The government** (defending campaign finance restrictions)\n- **Various business groups** (supporting Citizens United's position)\n- **Free speech advocacy organizations** (on both sides)\n- **Public interest groups** (arguing both for and against restrictions)\n\nAre you looking for information about briefs from a particular organization or perspective?",
+  "usage": {
+    "prompt_tokens": 17,
+    "output_tokens": 146,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 163
+  },
+  "prompt_source": "no_document",
+  "prompt_chars": 46,
+  "prompt_tokens_estimate": 11
+}

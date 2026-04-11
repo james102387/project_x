@@ -1,0 +1,17 @@
+{
+  "question": "Who wrote the dissent in Brown v. Board of Education?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "This document does not contain a dissent. It is the majority opinion of the Court in Brown v. Board of Education II (the remedy decision from 1955), written by Chief Justice Earl Warren. No dissenting opinion is included in this text.",
+  "usage": {
+    "prompt_tokens": 1754,
+    "output_tokens": 54,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 1808
+  },
+  "prompt_source": "document",
+  "prompt_chars": 7772,
+  "prompt_tokens_estimate": 1943
+}

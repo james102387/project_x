@@ -1,0 +1,15 @@
+{
+  "question": "What was the oral argument date for Brown v. Board of Education?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "The oral arguments for Brown v. Board of Education were held on **December 9-11, 1952**. The case was then reargued on **December 7-8, 1953**, before the Supreme Court issued its landmark decision on June 17, 1954.",
+  "usage": {
+    "prompt_tokens": 21,
+    "output_tokens": 64,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 85
+  },
+  "prompt_tokens_estimate": 16
+}

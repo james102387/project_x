@@ -1,0 +1,18 @@
+{
+  "question": "Who were the judges in Roe v. Wade?",
+  "ground_truth": "Burger, Douglas, Brennan, Stewart, White, Marshall, Blackmun, Powell, Rehnquist",
+  "match_strings": [
+    "burger",
+    "blackmun"
+  ],
+  "is_negative": false,
+  "response": "# Roe v. Wade Judges\n\nThe case was decided by the U.S. Supreme Court on January 22, 1973. The nine justices were:\n\n**Majority (7-2):**\n- Chief Justice Warren Burger\n- Justice Harry Blackmun (wrote the majority opinion)\n- Justice William O. Douglas\n- Justice William Brennan\n- Justice Potter Stewart\n- Justice Thurgood Marshall\n- Justice Lewis Powell\n\n**Dissent:**\n- Justice Byron White\n- Justice William Rehnquist\n\nJustice Blackmun's majority opinion established the constitutional right to abortion under the Due Process Clause of the Fourteenth Amendment, subject to state regulation at different stages of pregnancy.",
+  "usage": {
+    "prompt_tokens": 19,
+    "output_tokens": 161,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 180
+  },
+  "prompt_tokens_estimate": 8
+}

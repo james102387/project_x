@@ -1,0 +1,19 @@
+{
+  "question": "What court heard Terry v. Ohio?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The United States Supreme Court heard Terry v. Ohio. The opinion was delivered by Chief Justice Earl Warren, and the Court affirmed Terry's conviction.",
+  "usage": {
+    "prompt_tokens": 12972,
+    "output_tokens": 33,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 13005
+  },
+  "prompt_source": "document",
+  "prompt_chars": 53924,
+  "prompt_tokens_estimate": 13481
+}

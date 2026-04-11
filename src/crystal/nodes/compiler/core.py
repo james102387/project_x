@@ -12,6 +12,7 @@ from crystal.detectors.math import (
 )
 from crystal.nodes.compiler.kg import _format_kg_results, _build_kg_augmented_prompt
 from crystal.nodes.compiler.math import _format_result, _build_simplified_prompt
+from crystal.nodes.planner import CONFIDENCE_HIGH
 
 
 QUESTION_FILLER = {
@@ -37,7 +38,13 @@ def _has_reasoning_signals(doc) -> bool:
     return False
 
 
-def _classify_prompt_type(raw_prompt: str, doc, tool_results: list[dict]) -> str:
+def _classify_prompt_type(
+    raw_prompt: str,
+    doc,
+    tool_results: list[dict],
+    *,
+    grounding_confidence: float = 1.0,
+) -> str:
     """Determine how to handle a prompt with successful tool results.
 
     pure_math:        every token is a number, math keyword, or question filler.
@@ -46,6 +53,9 @@ def _classify_prompt_type(raw_prompt: str, doc, tool_results: list[dict]) -> str
     kg_answerable:    KG lookup returned results — return facts directly.
     kg_augmented:     KG facts + reasoning signals — inject facts for LLM.
     no_math:          no successful tool results.
+
+    Medium-confidence KG grounding forces kg_augmented so the LLM can
+    cross-check the facts instead of returning them blindly.
     """
     if not tool_results or not any(r.get("success") for r in tool_results):
         return "no_math"
@@ -55,6 +65,8 @@ def _classify_prompt_type(raw_prompt: str, doc, tool_results: list[dict]) -> str
         has_subject_scan = any(
             r.get("lookup_type") == "subject_scan" for r in kg_results
         )
+        if grounding_confidence < CONFIDENCE_HIGH:
+            return "kg_augmented"
         if _has_reasoning_signals(doc) or has_subject_scan:
             return "kg_augmented"
         return "kg_answerable"
@@ -89,8 +101,11 @@ def prompt_compiler_node(state: dict) -> dict:
     raw = state["raw_prompt"]
     doc = state["spacy_doc"]
     tool_results = state.get("tool_results", [])
+    grounding_confidence = state.get("grounding_confidence", 1.0)
 
-    prompt_type = _classify_prompt_type(raw, doc, tool_results)
+    prompt_type = _classify_prompt_type(
+        raw, doc, tool_results, grounding_confidence=grounding_confidence,
+    )
 
     if prompt_type == "kg_answerable":
         display = _format_kg_results(tool_results)
@@ -103,7 +118,9 @@ def prompt_compiler_node(state: dict) -> dict:
         }
 
     if prompt_type == "kg_augmented":
-        compiled = _build_kg_augmented_prompt(raw, tool_results)
+        compiled = _build_kg_augmented_prompt(
+            raw, tool_results, grounding_confidence=grounding_confidence,
+        )
         metrics = estimate_metrics(raw, compiled, prompt_type)
         return {
             "prompt_type": "kg_augmented",

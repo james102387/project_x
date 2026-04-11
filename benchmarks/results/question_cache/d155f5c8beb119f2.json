@@ -1,0 +1,17 @@
+{
+  "question": "What court decided 384 U.S. 436?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Miranda v. Arizona, 384 U.S. 436\n\nThe **U.S. Supreme Court** decided this landmark case in 1966.\n\nThis case established the requirement for police to inform suspects of their constitutional rights before custodial interrogation\u2014commonly known as \"Miranda rights.\"",
+  "usage": {
+    "prompt_tokens": 20,
+    "output_tokens": 66,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 86
+  },
+  "prompt_tokens_estimate": 8
+}

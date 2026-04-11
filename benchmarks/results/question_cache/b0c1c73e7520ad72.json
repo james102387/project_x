@@ -1,0 +1,18 @@
+{
+  "question": "What judges heard Mapp v. Ohio?",
+  "ground_truth": "Warren, Black, Frankfurter, Douglas, Clark, Harlan, Brennan, Whittaker, Stewart",
+  "match_strings": [
+    "warren",
+    "clark"
+  ],
+  "is_negative": false,
+  "response": "# Mapp v. Ohio Judges\n\nThe Supreme Court justices who heard **Mapp v. Ohio** (1961) were:\n\n- **Earl Warren** (Chief Justice)\n- **Hugo Black**\n- **William O. Douglas**\n- **Tom C. Clark**\n- **John M. Harlan II**\n- **William Brennan**\n- **Potter Stewart**\n- **Byron White**\n- **Charles Evans Whittaker**\n\nThe majority opinion establishing the exclusionary rule for state proceedings was written by **Justice Tom C. Clark**.",
+  "usage": {
+    "prompt_tokens": 17,
+    "output_tokens": 129,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 146
+  },
+  "prompt_tokens_estimate": 7
+}

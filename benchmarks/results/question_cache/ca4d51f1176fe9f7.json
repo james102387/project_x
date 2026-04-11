@@ -1,0 +1,17 @@
+{
+  "question": "Who authored the opinion in Mcculloch v. Maryland?",
+  "ground_truth": "Marshall",
+  "match_strings": [
+    "marshall"
+  ],
+  "is_negative": false,
+  "response": "Chief Justice John Marshall authored the opinion in McCulloch v. Maryland (1819). This landmark Supreme Court decision established the doctrine of implied powers under the Constitution and affirmed the supremacy of federal law over state law.",
+  "usage": {
+    "prompt_tokens": 21,
+    "output_tokens": 48,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 69
+  },
+  "prompt_tokens_estimate": 12
+}

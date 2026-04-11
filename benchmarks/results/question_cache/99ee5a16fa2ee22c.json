@@ -1,0 +1,19 @@
+{
+  "question": "What court decided Zubik v. Burwell?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The United States Supreme Court decided Zubik v. Burwell. This is evident from the opinion being issued \"PER CURIAM\" (by the whole Court) and the case citations indicating it was decided by the Supreme Court.",
+  "usage": {
+    "prompt_tokens": 2357,
+    "output_tokens": 53,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 2410
+  },
+  "prompt_source": "document",
+  "prompt_chars": 9229,
+  "prompt_tokens_estimate": 2307
+}

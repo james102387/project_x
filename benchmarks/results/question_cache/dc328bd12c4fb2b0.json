@@ -1,0 +1,19 @@
+{
+  "question": "When was Roe v. Wade decided?",
+  "ground_truth": "1973-01-22",
+  "match_strings": [
+    "1973"
+  ],
+  "is_negative": false,
+  "response": "This document does not provide the date when Roe v. Wade was decided. This is merely a Supreme Court order from April 26, 2004, denying certiorari in an unrelated case (McTaggart v. Roe v. Wade et al.). The actual Roe v. Wade decision was made on January 22, 1973.",
+  "usage": {
+    "prompt_tokens": 135,
+    "output_tokens": 81,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 216
+  },
+  "prompt_source": "document",
+  "prompt_chars": 348,
+  "prompt_tokens_estimate": 87
+}

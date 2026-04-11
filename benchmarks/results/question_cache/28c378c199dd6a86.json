@@ -1,0 +1,19 @@
+{
+  "question": "What court decided Flanders v. Seelye?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Answer\n\nThe United States Supreme Court decided Flanders v. Seelye. The opinion was delivered by Mr. Justice Blatchford, with three justices (Field, Bradley, and Woods) dissenting.",
+  "usage": {
+    "prompt_tokens": 5198,
+    "output_tokens": 50,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 5248
+  },
+  "prompt_source": "document",
+  "prompt_chars": 21794,
+  "prompt_tokens_estimate": 5448
+}

@@ -1,0 +1,19 @@
+{
+  "question": "Tell me the court that decided Miranda v. Arizona",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Court That Decided Miranda v. Arizona\n\nThe **U.S. Supreme Court** (Supreme Court of the United States) decided *Miranda v. Arizona*.\n\n**Note:** The document provided does not contain information about *Miranda v. Arizona*. The document only shows a brief order from the Arizona Supreme Court regarding a certiorari petition denial, with Justice Marshall recused. The answer is based on historical legal knowledge that *Miranda v. Arizona*, 384 U.S. 436 (1966), was decided by the U.S. Supreme Court.",
+  "usage": {
+    "prompt_tokens": 83,
+    "output_tokens": 122,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 205
+  },
+  "prompt_source": "document",
+  "prompt_chars": 301,
+  "prompt_tokens_estimate": 75
+}

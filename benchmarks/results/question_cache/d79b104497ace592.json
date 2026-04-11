@@ -1,0 +1,19 @@
+{
+  "question": "When was Zubik v. Burwell decided?",
+  "ground_truth": "2015-04-15",
+  "match_strings": [
+    "2015"
+  ],
+  "is_negative": false,
+  "response": "Based on this document, the specific decision date of Zubik v. Burwell is not provided. The opinion references \"Zubik\" in Justice Sotomayor's concurrence when citing to a lower court case (Sharpe Holdings), but does not state when Zubik itself was decided. The document appears to be the Zubik decision itself, but does not include the decision date in the excerpted text provided.",
+  "usage": {
+    "prompt_tokens": 2357,
+    "output_tokens": 98,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 2455
+  },
+  "prompt_source": "document",
+  "prompt_chars": 9227,
+  "prompt_tokens_estimate": 2306
+}

@@ -1,0 +1,15 @@
+{
+  "question": "What statute did Roe v. Wade overturn?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "Roe v. Wade (1973) didn't directly overturn a specific statute. Rather, it struck down many state laws that criminalized abortion as unconstitutional under the Due Process Clause of the Fourteenth Amendment.\n\nHowever, when Roe v. Wade itself was overturned by Dobbs v. Jackson Women's Health Organization (2022), that decision allowed states to enforce abortion restrictions and bans that had previously been invalidated by Roe.",
+  "usage": {
+    "prompt_tokens": 19,
+    "output_tokens": 103,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 122
+  },
+  "prompt_tokens_estimate": 9
+}

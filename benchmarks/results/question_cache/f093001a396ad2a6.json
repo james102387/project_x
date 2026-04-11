@@ -1,0 +1,19 @@
+{
+  "question": "Who authored the opinion in Mcculloch v. Maryland?",
+  "ground_truth": "Marshall",
+  "match_strings": [
+    "marshall"
+  ],
+  "is_negative": false,
+  "response": "Chief Justice John Marshall authored the opinion in McCulloch v. Maryland. The opinion states \"MARSHALL, Ch. J., delivered the opinion of the court.\"",
+  "usage": {
+    "prompt_tokens": 12883,
+    "output_tokens": 36,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 12919
+  },
+  "prompt_source": "document",
+  "prompt_chars": 60554,
+  "prompt_tokens_estimate": 15138
+}

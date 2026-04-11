@@ -1,0 +1,19 @@
+{
+  "question": "List the judges in Gideon v. Wainwright",
+  "ground_truth": "Warren, Black, Douglas, Clark, Harlan, Brennan, Stewart, White, Goldberg",
+  "match_strings": [
+    "warren"
+  ],
+  "is_negative": false,
+  "response": "# Judges in Gideon v. Wainwright\n\nBased on this opinion text, the identified judges are:\n\n1. **Mr. Justice Black** - delivered the majority opinion\n2. **Mr. Justice Douglas** - joined the majority opinion and wrote a concurrence\n3. **Mr. Justice Harlan** - referenced as having a differing view on incorporation doctrine\n4. **Mr. Justice Jackson** - referenced as sharing Justice Harlan's view\n\nThe opinion does not identify all nine justices on the Court at the time, only those explicitly mentioned in the text.",
+  "usage": {
+    "prompt_tokens": 5165,
+    "output_tokens": 128,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 5293
+  },
+  "prompt_source": "document",
+  "prompt_chars": 20049,
+  "prompt_tokens_estimate": 5012
+}

@@ -1,0 +1,17 @@
+{
+  "question": "Who wrote the opinion in Flanders v. Seelye?",
+  "ground_truth": "Blatchford",
+  "match_strings": [
+    "blatchford"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about the author of the opinion in Flanders v. Seelye readily available. To provide you with an accurate answer, I would need additional context, such as:\n\n- When the case was decided\n- Which court issued the opinion\n- The jurisdiction (state or federal)\n\nIf you could provide any of these details, I'd be better able to help you find this information, or I'd recommend checking legal databases like Google Scholar, Justia, or your jurisdiction's court records.",
+  "usage": {
+    "prompt_tokens": 22,
+    "output_tokens": 112,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 134
+  },
+  "prompt_tokens_estimate": 11
+}

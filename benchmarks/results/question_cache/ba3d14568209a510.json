@@ -1,0 +1,19 @@
+{
+  "question": "Tell me about Marbury v. Madison",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Marbury v. Madison\n\n**Case Overview:**\nThis landmark Supreme Court case addresses whether William Marbury is entitled to his commission as a justice of the peace for Washington, D.C., and whether the Supreme Court can issue a mandamus to compel the Secretary of State to deliver it.\n\n**Key Facts:**\n- President John Adams signed Marbury's commission as justice of the peace in February 1801\n- The Secretary of State affixed the seal but never delivered the commission to Marbury\n- Marbury petitioned the Supreme Court for a writ of mandamus to force delivery\n\n**The Court's Three-Part Analysis:**\n\n1. **Right to Commission:** The Court held that Marbury had a vested legal right to the commission once the President signed it and the Secretary affixed the seal, regardless of non-delivery.\n\n2. **Remedy Available:** The Court confirmed that the law must provide a remedy for violated legal rights\u2014\"a government of laws, and not of men.\"\n\n3. **Jurisdiction Problem:** The Court found that while mandamus was the appropriate remedy, **the Supreme Court lacked original jurisdiction to issue it** because Congress's grant of original mandamus authority in the Judiciary Act of 1789 conflicted with the Constitution's limitation of the Court's original jurisdiction.\n\n**Landmark Constitutional Holding:**\nThe Court established **judicial review**\u2014the power of courts to declare laws unconstitutional when they conflict with the Constitution. The Court declared that unconstitutional laws are void and that courts must apply the Constitution as paramount law.",
+  "usage": {
+    "prompt_tokens": 12742,
+    "output_tokens": 338,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 13080
+  },
+  "prompt_source": "document",
+  "prompt_chars": 55899,
+  "prompt_tokens_estimate": 13974
+}

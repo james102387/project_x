@@ -1,0 +1,17 @@
+{
+  "question": "What court decided Gray v. Coan?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about a case called \"Gray v. Coan\" in my knowledge base. To help you accurately, I would need more context, such as:\n\n- The year the case was decided\n- The jurisdiction (state or federal court)\n- The subject matter of the case\n\nIf you could provide any of these details, I'd be better able to help you identify which court decided it, or you might try searching legal databases like Google Scholar (scholar.google.com) or your state's court system records.",
+  "usage": {
+    "prompt_tokens": 17,
+    "output_tokens": 115,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 132
+  },
+  "prompt_tokens_estimate": 8
+}

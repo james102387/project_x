@@ -1,0 +1,18 @@
+{
+  "question": "Who decided Mapp v. Ohio?",
+  "ground_truth": "Warren, Black, Frankfurter, Douglas, Clark, Harlan, Brennan, Whittaker, Stewart",
+  "match_strings": [
+    "warren",
+    "clark"
+  ],
+  "is_negative": false,
+  "response": "# Mapp v. Ohio\n\n**The U.S. Supreme Court** decided Mapp v. Ohio in 1961.\n\nThe decision was written by **Justice Tom C. Clark**, and the Court ruled 6-3 that evidence obtained in violation of the Fourth Amendment (unreasonable search and seizure) must be excluded from trial. This established the \"exclusionary rule\" as binding on state courts.",
+  "usage": {
+    "prompt_tokens": 16,
+    "output_tokens": 92,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 108
+  },
+  "prompt_tokens_estimate": 6
+}

@@ -1,0 +1,19 @@
+{
+  "question": "What court decided Richards v. Mackall?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Answer\n\nThe United States Supreme Court decided Richards v. Mackall.\n\nThe opinion is from the U.S. Supreme Court (delivered by Chief Justice Waite), reviewing an appeal from a decree of the Supreme Court of the District of Columbia.",
+  "usage": {
+    "prompt_tokens": 1509,
+    "output_tokens": 56,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 1565
+  },
+  "prompt_source": "document",
+  "prompt_chars": 5256,
+  "prompt_tokens_estimate": 1314
+}

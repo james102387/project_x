@@ -1,0 +1,19 @@
+{
+  "question": "What court heard Plessy v. Ferguson?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Answer\n\nThe United States Supreme Court heard Plessy v. Ferguson.\n\nThis is evident from the opinion being delivered by Justice Brown and the Court's review of cases from various state supreme courts and federal courts, as well as the Court's discussion of the Thirteenth and Fourteenth Amendments to the U.S. Constitution.",
+  "usage": {
+    "prompt_tokens": 6114,
+    "output_tokens": 74,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 6188
+  },
+  "prompt_source": "document",
+  "prompt_chars": 27333,
+  "prompt_tokens_estimate": 6833
+}

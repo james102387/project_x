@@ -1,0 +1,15 @@
+{
+  "question": "Who filed the amicus brief in Citizens United?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "# Citizens United Amicus Briefs\n\nMultiple organizations filed amicus (friend of the court) briefs in *Citizens United v. FEC* (2010). Some of the most notable included:\n\n**Supporting Citizens United:**\n- The Chamber of Commerce\n- Various conservative and business groups\n- Free speech advocacy organizations\n\n**Supporting the FEC:**\n- Common Cause\n- Various campaign finance reform groups\n- Public interest organizations\n\nSince this was a major Supreme Court case, dozens of amicus briefs were filed on both sides. If you're interested in a specific organization or perspective, I'd be happy to provide more details.",
+  "usage": {
+    "prompt_tokens": 17,
+    "output_tokens": 137,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 154
+  },
+  "prompt_tokens_estimate": 11
+}

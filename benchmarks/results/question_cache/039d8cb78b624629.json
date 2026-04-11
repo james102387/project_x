@@ -1,0 +1,15 @@
+{
+  "question": "Who wrote the dissent in Brown v. Board of Education?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "There was no dissent in Brown v. Board of Education (1954). The decision was unanimous\u2014all nine justices agreed that \"separate but equal\" was unconstitutional in public education.\n\nChief Justice Earl Warren wrote the majority opinion for the Court.",
+  "usage": {
+    "prompt_tokens": 20,
+    "output_tokens": 56,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 76
+  },
+  "prompt_tokens_estimate": 13
+}

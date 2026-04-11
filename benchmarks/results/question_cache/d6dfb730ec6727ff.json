@@ -1,0 +1,17 @@
+{
+  "question": "When was Coventry Health Care of Mo., Inc. v. Nevils decided?",
+  "ground_truth": "2017-04-18",
+  "match_strings": [
+    "2017"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about the decision date for Coventry Health Care of Mo., Inc. v. Nevils in my current knowledge base. To find this information, I'd recommend:\n\n1. Checking Google Scholar (scholar.google.com)\n2. Looking at legal databases like FindLaw or Justia\n3. Searching the Missouri courts website\n4. Consulting Westlaw or LexisNexis if you have access\n\nIf you can provide additional context (such as the court level or approximate year), I may be able to help you further.",
+  "usage": {
+    "prompt_tokens": 26,
+    "output_tokens": 127,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 153
+  },
+  "prompt_tokens_estimate": 15
+}

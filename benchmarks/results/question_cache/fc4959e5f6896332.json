@@ -1,0 +1,82 @@
+{
+  "question": "What was the majority opinion in Miranda v. Arizona?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "# Miranda v. Arizona Majority Opinion\n\nBased on the verified facts, the majority opinion in **Miranda v. Arizona** was authored by **Chief Justice Warren**. \n\nThe Court's decision, filed on **June 13, 1966**, **reversed and remanded** the case. This landmark decision established what are now known as \"Miranda rights\" \u2014 the requirement that law enforcement must inform suspects of their constitutional rights before custodial interrogation.\n\nThe opinion was supported by justices Warren, Black, Douglas, Clark, Brennan, Stewart, and Fortas (a 7-2 majority, with Harlan and White dissenting).",
+  "prompt_type": "kg_augmented",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "miranda v. arizona",
+      "results": [
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "attorneys",
+          "object": "John J. Flynn argued the cause for petitioner. John P. Frank was on the briefs."
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "cited_by_count",
+          "object": "9832"
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "court",
+          "object": "Supreme Court of the United States"
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "date_filed",
+          "object": "1966-06-13"
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "disposition",
+          "object": "Reversed and remanded"
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "judges",
+          "object": "Warren, Black, Douglas, Clark, Harlan, Brennan, Stewart, White, Fortas"
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "nature_of_suit",
+          "object": "Criminal"
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "opinion_author",
+          "object": "Warren"
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "precedential_status",
+          "object": "Published"
+        }
+      ],
+      "lookup_type": "subject_scan",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 11,
+    "compiled_prompt_tokens": 217,
+    "raw_compute": 132,
+    "compiled_compute": 47306,
+    "savings_pct": -357.3787878787879,
+    "token_savings_pct": -18.727272727272727,
+    "marginal_savings_pct": -19.740188525333092,
+    "prompt_type": "kg_augmented",
+    "actual_prompt_tokens": 223,
+    "actual_output_tokens": 141,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": 364,
+    "actual_cached_tokens": 0
+  },
+  "prompt_tokens_estimate": 223,
+  "output_tokens": 141,
+  "reasoning_tokens": 0
+}

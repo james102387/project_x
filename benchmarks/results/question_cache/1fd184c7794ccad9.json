@@ -1,0 +1,19 @@
+{
+  "question": "Who were the judges in Marbury v. Madison?",
+  "ground_truth": "Marshall, Paterson, Chase, Washington",
+  "match_strings": [
+    "marshall"
+  ],
+  "is_negative": false,
+  "response": "# Judges in Marbury v. Madison\n\nThe opinion does not identify the individual judges who participated in this decision. The document is written as \"Opinion of the court\" without attribution to specific justices. \n\nHowever, it is historically known that **Chief Justice John Marshall** authored this unanimous opinion for the Supreme Court.",
+  "usage": {
+    "prompt_tokens": 12745,
+    "output_tokens": 70,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 12815
+  },
+  "prompt_source": "document",
+  "prompt_chars": 55909,
+  "prompt_tokens_estimate": 13977
+}

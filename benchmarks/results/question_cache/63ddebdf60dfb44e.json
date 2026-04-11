@@ -1,0 +1,17 @@
+{
+  "question": "What was the constitutional basis for Marbury v. Madison?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "# Constitutional Basis for Marbury v. Madison\n\nThe case arose from a conflict between:\n\n1. **Marbury's claimed right** under an Act of Congress (February 1801) that authorized the President to appoint justices of the peace for the District of Columbia with five-year tenure.\n\n2. **The Judiciary Act of 1789**, which granted the Supreme Court authority to \"issue writs of mandamus...to any courts appointed, or persons holding office, under the authority of the United States.\"\n\n3. **Article III of the Constitution**, which specifies that the Supreme Court has original jurisdiction only in cases \"affecting ambassadors, other public ministers and consuls, and those in which a state shall be a party,\" with appellate jurisdiction in all other cases.\n\nThe constitutional question was whether Congress could expand the Supreme Court's original jurisdiction beyond what Article III explicitly provided. Chief Justice Marshall held that the Judiciary Act's grant of mandamus power to the Supreme Court was **unconstitutional** because issuing a mandamus to deliver a commission constituted an original action, not appellate jurisdiction as required by Article III.\n\nThis case established the foundational principle of **judicial review**\u2014that courts have the authority and duty to strike down legislative acts that conflict with the Constitution.",
+  "usage": {
+    "prompt_tokens": 12746,
+    "output_tokens": 274,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 13020
+  },
+  "prompt_source": "document",
+  "prompt_chars": 55924,
+  "prompt_tokens_estimate": 13981
+}

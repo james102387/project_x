@@ -1,0 +1,17 @@
+{
+  "question": "Who were the judges in Brown v. Board of Education?",
+  "ground_truth": "Warren, Black, Reed, Frankfurter, Douglas, Jackson, Burton, Clark, Minton",
+  "match_strings": [
+    "warren"
+  ],
+  "is_negative": false,
+  "response": "# Brown v. Board of Education Judges\n\nThe case was decided by the **U.S. Supreme Court** with all nine justices participating:\n\n**Chief Justice:**\n- Earl Warren\n\n**Associate Justices:**\n- Hugo Black\n- Stanley Reed\n- Felix Frankfurter\n- William O. Douglas\n- Robert H. Jackson\n- Harold Burton\n- Tom Clark\n- Sherman Minton\n\nNotably, Chief Justice Warren authored the unanimous opinion, which was a significant achievement given the sensitive nature of the case and the need for a united front on this landmark civil rights decision.",
+  "usage": {
+    "prompt_tokens": 19,
+    "output_tokens": 129,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 148
+  },
+  "prompt_tokens_estimate": 12
+}

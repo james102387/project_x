@@ -4,6 +4,9 @@ LLM-assisted triplet extraction (D2 Phase 2).
 For sentences where NER found entities but dep-tree patterns couldn't
 resolve predicates, uses the LLM to extract (subject, predicate, object)
 relationships. Designed as an offline batch job with human-reviewable output.
+
+Domain-specific prompts (e.g. LEGAL_EXTRACTION_PROMPT) steer the LLM
+toward the ontology's canonical predicates for higher-confidence extraction.
 """
 
 from __future__ import annotations
@@ -39,6 +42,78 @@ Sentences:
 {sentences}
 
 JSON:"""
+
+
+LEGAL_EXTRACTION_PROMPT = """\
+Extract factual relationships from the legal text below as (subject, predicate, object) triplets.
+
+PREFERRED PREDICATES (use these when possible):
+- court: which court decided the case
+- date_filed: when the case was filed or decided
+- judges: justices or judges involved
+- opinion_author: who wrote the majority opinion
+- cites: cases cited by this opinion (use "Party v. Party" format)
+- attorneys: lawyers who argued the case
+- per_curiam: whether the opinion is unsigned (true/false)
+- precedential_status: publication status (e.g. "Published", "Precedential")
+- holding: the court's legal conclusion
+- doctrine: legal principles applied
+- reasoning: key reasoning or rationale
+
+CASE NAME FORMAT: Always use "Party v. Party" format (e.g. "Miranda v. Arizona", not "Miranda").
+
+Rules:
+- Only extract factual claims stated in the text, not speculation.
+- For case citations, extract as: {{"subject": "This Case v. Name", "predicate": "cites", "object": "Cited Case v. Name"}}
+- For judges/justices: use full names when available.
+- Assign confidence:
+  "high" = explicitly stated fact (dates, named judges, direct citations)
+  "medium" = clearly implied but requires interpretation
+  "low" = inferred or ambiguous
+
+Respond with ONLY a JSON array. Each element:
+{{"subject": "...", "predicate": "...", "object": "...", "confidence": "high|medium|low", "sentence_index": N}}
+
+Text excerpts:
+{sentences}
+
+JSON:"""
+
+
+def _get_prompt(domain: str) -> str:
+    """Return the extraction prompt for a given domain."""
+    if domain == "legal":
+        return LEGAL_EXTRACTION_PROMPT
+    return EXTRACTION_PROMPT
+
+
+def normalize_predicate(
+    raw_predicate: str,
+    ontology_predicates: set[str] | None = None,
+    predicate_aliases: dict[str, str] | None = None,
+) -> str:
+    """Normalize an extracted predicate against the ontology.
+
+    Tries exact match, then alias lookup, then substring containment.
+    Returns the canonical predicate if matched, or the raw predicate unchanged.
+    """
+    if not raw_predicate:
+        return raw_predicate
+
+    low = raw_predicate.lower().strip()
+
+    if ontology_predicates and low in ontology_predicates:
+        return low
+
+    if predicate_aliases and low in predicate_aliases:
+        return predicate_aliases[low]
+
+    if ontology_predicates:
+        for canon in ontology_predicates:
+            if canon in low or low in canon:
+                return canon
+
+    return low
 
 
 def _format_sentences(sentences: list[tuple[str, list[str]]]) -> str:
@@ -109,6 +184,7 @@ def extract_triplets_llm(
     sentences: list[tuple[str, list[str]]],
     call_llm_fn: Callable[[str], tuple[str, dict | None]] | None = None,
     batch_size: int = 20,
+    domain: str = "general",
 ) -> LLMExtractionResult:
     """Use LLM to extract triplets from sentences that NER couldn't handle.
 
@@ -117,6 +193,7 @@ def extract_triplets_llm(
         call_llm_fn: LLM caller matching call_llm(prompt) -> (text, usage).
                       Defaults to crystal.llm.call_llm if not provided.
         batch_size: Max sentences per LLM call to stay within context limits.
+        domain: "legal" for legal-tuned prompt, "general" for generic.
 
     Returns:
         LLMExtractionResult with reviewable triplets (all pending_review).
@@ -128,13 +205,14 @@ def extract_triplets_llm(
     if not sentences:
         return LLMExtractionResult()
 
+    prompt_template = _get_prompt(domain)
     all_reviewable: list[ReviewableTriplet] = []
     skipped: list[str] = []
 
     for start in range(0, len(sentences), batch_size):
         batch = sentences[start : start + batch_size]
         formatted = _format_sentences(batch)
-        prompt = EXTRACTION_PROMPT.format(sentences=formatted)
+        prompt = prompt_template.format(sentences=formatted)
 
         try:
             response_text, _usage = call_llm_fn(prompt)

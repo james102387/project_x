@@ -1,0 +1,19 @@
+{
+  "question": "Who decided Citizens United v. Federal Election Commission?",
+  "ground_truth": "Roberts, Stevens, Scalia, Kennedy, Thomas, Ginsburg, Breyer, Alito, Sotomayor",
+  "match_strings": [
+    "roberts"
+  ],
+  "is_negative": false,
+  "response": "# Answer\n\nThe **United States Supreme Court** decided Citizens United v. Federal Election Commission. Justice **Kennedy** delivered the opinion of the Court.",
+  "usage": {
+    "prompt_tokens": 24754,
+    "output_tokens": 33,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 24787
+  },
+  "prompt_source": "document",
+  "prompt_chars": 100237,
+  "prompt_tokens_estimate": 25059
+}

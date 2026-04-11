@@ -1,0 +1,74 @@
+{
+  "question": "Tell me about Marbury v. Madison",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Marbury v. Madison\n\nBased on the verified information:\n\n**Court:** Supreme Court of the United States\n\n**Date Filed:** February 24, 1803\n\n**Nature of Suit:** Constitutional\n\n**Judges:** Marshall, Paterson, Chase, and Washington\n\n**Opinion Author:** Marshall\n\n**Precedential Status:** Published\n\n**Citation Impact:** This case has been cited by 15,200 other cases, indicating its significant influence in legal precedent.\n\nMarbury v. Madison is one of the most important cases in American constitutional law, establishing foundational principles about the judiciary's role in constitutional interpretation.",
+  "prompt_type": "kg_augmented",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "marbury v. madison",
+      "results": [
+        {
+          "subject": "marbury v. madison",
+          "predicate": "cited_by_count",
+          "object": "15200"
+        },
+        {
+          "subject": "marbury v. madison",
+          "predicate": "court",
+          "object": "Supreme Court of the United States"
+        },
+        {
+          "subject": "marbury v. madison",
+          "predicate": "date_filed",
+          "object": "1803-02-24"
+        },
+        {
+          "subject": "marbury v. madison",
+          "predicate": "judges",
+          "object": "Marshall, Paterson, Chase, Washington"
+        },
+        {
+          "subject": "marbury v. madison",
+          "predicate": "nature_of_suit",
+          "object": "Constitutional"
+        },
+        {
+          "subject": "marbury v. madison",
+          "predicate": "opinion_author",
+          "object": "Marshall"
+        },
+        {
+          "subject": "marbury v. madison",
+          "predicate": "precedential_status",
+          "object": "Published"
+        }
+      ],
+      "lookup_type": "subject_scan",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 8,
+    "compiled_prompt_tokens": 158,
+    "raw_compute": 72,
+    "compiled_compute": 25122,
+    "savings_pct": -347.9166666666667,
+    "token_savings_pct": -18.75,
+    "marginal_savings_pct": -19.48896233474682,
+    "prompt_type": "kg_augmented",
+    "actual_prompt_tokens": 170,
+    "actual_output_tokens": 136,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": 306,
+    "actual_cached_tokens": 0
+  },
+  "prompt_tokens_estimate": 170,
+  "output_tokens": 136,
+  "reasoning_tokens": 0
+}

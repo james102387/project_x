@@ -1,0 +1,17 @@
+{
+  "question": "What court decided Pennsylvania Railroad v. St. Louis, Alton & Terre Haute Railroad?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Pennsylvania Railroad v. St. Louis, Alton & Terre Haute Railroad\n\nThe **U.S. Supreme Court** decided this case in **1893** (57 U.S. 513).\n\nThis case dealt with issues related to railroad operations and interstate commerce during the Gilded Age of American railroad expansion.",
+  "usage": {
+    "prompt_tokens": 28,
+    "output_tokens": 73,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 101
+  },
+  "prompt_tokens_estimate": 21
+}

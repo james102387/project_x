@@ -1,0 +1,17 @@
+{
+  "question": "When was 347 U.S. 483 decided?",
+  "ground_truth": "1954-05-17",
+  "match_strings": [
+    "1954"
+  ],
+  "is_negative": false,
+  "response": "# 347 U.S. 483\n\n347 U.S. 483 refers to **Roth v. United States**, which was decided on **June 24, 1957**.\n\nThis landmark Supreme Court case established the legal standard for determining what constitutes obscene material under the First Amendment.",
+  "usage": {
+    "prompt_tokens": 21,
+    "output_tokens": 70,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 91
+  },
+  "prompt_tokens_estimate": 7
+}

@@ -1,0 +1,17 @@
+{
+  "question": "What court decided Miranda v. Arizona?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The U.S. Supreme Court decided Miranda v. Arizona in 1966. The Court ruled that law enforcement must inform suspects of their constitutional rights before custodial interrogation, which led to what are now known as \"Miranda rights.\"",
+  "usage": {
+    "prompt_tokens": 15,
+    "output_tokens": 52,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 67
+  },
+  "prompt_tokens_estimate": 9
+}

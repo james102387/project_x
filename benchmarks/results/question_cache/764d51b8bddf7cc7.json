@@ -1,0 +1,17 @@
+{
+  "question": "What court heard Terry v. Ohio?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The U.S. Supreme Court heard Terry v. Ohio. The case was decided in 1968 and established the legal standard for \"stop and frisk\" searches by police officers.",
+  "usage": {
+    "prompt_tokens": 15,
+    "output_tokens": 42,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 57
+  },
+  "prompt_tokens_estimate": 7
+}

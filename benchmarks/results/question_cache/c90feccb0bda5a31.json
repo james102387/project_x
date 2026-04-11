@@ -1,0 +1,17 @@
+{
+  "question": "When was Gray v. Coan decided?",
+  "ground_truth": "1871-12-18",
+  "match_strings": [
+    "1871"
+  ],
+  "is_negative": false,
+  "response": "I don't have information about a case called \"Gray v. Coan\" in my knowledge base. Could you provide additional context, such as:\n\n- What jurisdiction (state or federal court)?\n- Approximately what time period?\n- What area of law it concerns?\n\nThis would help me better assist you in finding the information you're looking for.",
+  "usage": {
+    "prompt_tokens": 17,
+    "output_tokens": 78,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 95
+  },
+  "prompt_tokens_estimate": 7
+}

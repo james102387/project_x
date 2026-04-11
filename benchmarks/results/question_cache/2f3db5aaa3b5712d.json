@@ -1,0 +1,17 @@
+{
+  "question": "When was Armstrong v. Armstrong, General Motors Corp. decided?",
+  "ground_truth": "1956-04-09",
+  "match_strings": [
+    "1956"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about a case titled \"Armstrong v. Armstrong, General Motors Corp.\" in my training data. To find this case, I'd recommend:\n\n1. **Google Scholar** (scholar.google.com) - Search for the case name\n2. **Case law databases** like Justia, FindLaw, or your state's court website\n3. **Westlaw or LexisNexis** if you have access through a law library or institution\n\nIf you can provide additional details (such as the state, court level, or approximate time period), I may be able to help you better locate this decision.",
+  "usage": {
+    "prompt_tokens": 20,
+    "output_tokens": 138,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 158
+  },
+  "prompt_tokens_estimate": 15
+}

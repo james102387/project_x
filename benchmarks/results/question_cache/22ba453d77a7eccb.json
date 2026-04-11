@@ -1,0 +1,17 @@
+{
+  "question": "What do we know about Roe v. Wade?",
+  "ground_truth": "1973",
+  "match_strings": [
+    "1973"
+  ],
+  "is_negative": false,
+  "response": "# Roe v. Wade: Key Facts\n\n## The 1973 Decision\nThe Supreme Court ruled that the U.S. Constitution protects a right to abortion, striking down many state bans.\n\n## The Framework\nThe decision established:\n- **First trimester**: States couldn't restrict abortion\n- **Second trimester**: States could regulate abortion to protect maternal health\n- **Third trimester**: States could prohibit abortion except when necessary to preserve the life/health of the mother\n\n## Key Reasoning\nThe Court based the decision on a \"right to privacy\" derived from the Due Process Clause of the 14th Amendment.\n\n## 2022 Overturned\nIn *Dobbs v. Jackson Women's Health Organization*, the Supreme Court overturned Roe in June 2022, returning abortion regulation to individual states. This decision eliminated the federal constitutional right to abortion.\n\n## Current Status\nAfter the overturning:\n- Some states banned or heavily restricted abortion\n- Others protected or expanded abortion access\n- Laws vary significantly by state\n- The issue returned to democratic processes in individual states\n\nThe decision remains one of the most consequential and contested Supreme Court rulings in American history.",
+  "usage": {
+    "prompt_tokens": 19,
+    "output_tokens": 261,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 280
+  },
+  "prompt_tokens_estimate": 8
+}

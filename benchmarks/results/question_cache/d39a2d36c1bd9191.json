@@ -1,0 +1,17 @@
+{
+  "question": "What lower court did Miranda v. Arizona come from?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "Based on this document alone, I cannot determine what lower court Miranda v. Arizona came from. This text only shows that the Arizona Supreme Court denied certiorari and that Justice Marshall did not participate. It does not identify the lower court of origin.\n\nTo answer your question, I would need additional information beyond what is provided in this excerpt.",
+  "usage": {
+    "prompt_tokens": 84,
+    "output_tokens": 72,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 156
+  },
+  "prompt_source": "document",
+  "prompt_chars": 302,
+  "prompt_tokens_estimate": 75
+}

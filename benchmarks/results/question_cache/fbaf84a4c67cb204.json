@@ -1,0 +1,17 @@
+{
+  "question": "When was Lasigi v. The Collector decided?",
+  "ground_truth": "1863-12-15",
+  "match_strings": [
+    "1863"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about a case called \"Lasigi v. The Collector\" in my knowledge base. To help you find this information, could you provide additional details such as:\n\n- The jurisdiction (country, state, or court)\n- The approximate time period\n- The subject matter of the case\n- Any alternative spellings of the name\n\nThis would help me assist you better or point you toward relevant legal resources where you can find this information.",
+  "usage": {
+    "prompt_tokens": 19,
+    "output_tokens": 100,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 119
+  },
+  "prompt_tokens_estimate": 10
+}

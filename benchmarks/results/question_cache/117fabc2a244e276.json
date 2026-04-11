@@ -1,0 +1,19 @@
+{
+  "question": "When was Lasigi v. The Collector decided?",
+  "ground_truth": "1863-12-15",
+  "match_strings": [
+    "1863"
+  ],
+  "is_negative": false,
+  "response": "The document does not specify when this case was decided. While it references the Act of 2d May, 1830, no decision date is provided in the opinion text.",
+  "usage": {
+    "prompt_tokens": 946,
+    "output_tokens": 39,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 985
+  },
+  "prompt_source": "document",
+  "prompt_chars": 3953,
+  "prompt_tokens_estimate": 988
+}

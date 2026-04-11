@@ -1,0 +1,19 @@
+{
+  "question": "Who were the judges in Brown v. Board of Education?",
+  "ground_truth": "Warren, Black, Reed, Frankfurter, Douglas, Jackson, Burton, Clark, Minton",
+  "match_strings": [
+    "warren"
+  ],
+  "is_negative": false,
+  "response": "# Judges in Brown v. Board of Education\n\nBased on this document, only **Chief Justice Earl Warren** is identified as delivering the opinion of the Court. The document does not list the other justices who participated in the decision.\n\nTo answer your question completely, you would need to consult additional sources, as this opinion only identifies the Chief Justice by name.",
+  "usage": {
+    "prompt_tokens": 1753,
+    "output_tokens": 78,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 1831
+  },
+  "prompt_source": "document",
+  "prompt_chars": 7770,
+  "prompt_tokens_estimate": 1942
+}

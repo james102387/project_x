@@ -1,0 +1,17 @@
+{
+  "question": "When was Sturgis v. Clough decided?",
+  "ground_truth": "1863-12-15",
+  "match_strings": [
+    "1863"
+  ],
+  "is_negative": false,
+  "response": "I don't have enough context to answer your question about when Sturgis v. Clough was decided. There may be multiple cases with this name, or it could be a lesser-known case that I don't have reliable information about.\n\nCould you provide additional details, such as:\n- The jurisdiction (state or federal court)\n- The approximate time period\n- The subject matter of the case\n\nThis would help me give you an accurate answer.",
+  "usage": {
+    "prompt_tokens": 20,
+    "output_tokens": 99,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 119
+  },
+  "prompt_tokens_estimate": 8
+}

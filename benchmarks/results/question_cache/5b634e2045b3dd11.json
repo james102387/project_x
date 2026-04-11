@@ -1,0 +1,17 @@
+{
+  "question": "Who wrote the opinion in United States v. Ramsay?",
+  "ground_truth": "Waite",
+  "match_strings": [
+    "waite"
+  ],
+  "is_negative": false,
+  "response": "I don't have enough context to answer your question accurately, as there are multiple cases titled \"United States v. Ramsay\" or similar variations in U.S. legal history. \n\nCould you provide additional details such as:\n- The year the case was decided\n- The court (Supreme Court, Circuit Court, District Court, etc.)\n- The general subject matter of the case\n\nWith that information, I could identify the correct case and tell you who wrote the opinion.",
+  "usage": {
+    "prompt_tokens": 21,
+    "output_tokens": 104,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 125
+  },
+  "prompt_tokens_estimate": 12
+}

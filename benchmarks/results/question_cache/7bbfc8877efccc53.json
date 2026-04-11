@@ -1,0 +1,17 @@
+{
+  "question": "When was Roe v. Wade decided?",
+  "ground_truth": "1973-01-22",
+  "match_strings": [
+    "1973"
+  ],
+  "is_negative": false,
+  "response": "Roe v. Wade was decided on January 22, 1973. The Supreme Court ruled 7-2 that the constitutional right to privacy protected a woman's right to have an abortion, subject to certain state regulations at different stages of pregnancy.",
+  "usage": {
+    "prompt_tokens": 17,
+    "output_tokens": 56,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 73
+  },
+  "prompt_tokens_estimate": 7
+}

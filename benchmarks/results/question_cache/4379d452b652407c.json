@@ -1,0 +1,19 @@
+{
+  "question": "What court decided Union Insurance v. Hoge?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Court Decision\n\nThe **United States Supreme Court** decided Union Insurance v. Hoge. \n\nThe opinion indicates this was a writ of error from the Circuit Court of the United States for the northern district of New York, which means the Supreme Court reviewed the lower court's decision. Justice Nelson delivered the opinion of the Court, and Justice Daniel filed a dissent.",
+  "usage": {
+    "prompt_tokens": 3211,
+    "output_tokens": 80,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 3291
+  },
+  "prompt_source": "document",
+  "prompt_chars": 14169,
+  "prompt_tokens_estimate": 3542
+}

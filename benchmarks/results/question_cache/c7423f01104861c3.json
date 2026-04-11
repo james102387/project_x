@@ -1,0 +1,19 @@
+{
+  "question": "What court decided Miranda v. Arizona?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The United States Supreme Court decided Miranda v. Arizona.\n\n(Note: While the document shown is only a brief order denying certiorari, Miranda v. Arizona is the landmark 1966 Supreme Court case that established the requirement for police to inform suspects of their rights before custodial interrogation.)",
+  "usage": {
+    "prompt_tokens": 81,
+    "output_tokens": 66,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 147
+  },
+  "prompt_source": "document",
+  "prompt_chars": 290,
+  "prompt_tokens_estimate": 72
+}

@@ -1,0 +1,17 @@
+{
+  "question": "When was Union Insurance v. Hoge decided?",
+  "ground_truth": "1857-05-15",
+  "match_strings": [
+    "1857"
+  ],
+  "is_negative": false,
+  "response": "I don't have specific information about a case called \"Union Insurance v. Hoge\" in my training data. To find this information, I'd recommend:\n\n1. Checking legal databases like Google Scholar (scholar.google.com), which has free access to court decisions\n2. Searching on your jurisdiction's court website\n3. Consulting legal research platforms like Justia or FindLaw\n\nIf you can provide additional context (such as the jurisdiction, court level, or general subject matter), I may be able to help you further.",
+  "usage": {
+    "prompt_tokens": 18,
+    "output_tokens": 117,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 135
+  },
+  "prompt_tokens_estimate": 10
+}

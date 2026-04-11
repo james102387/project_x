@@ -1,0 +1,19 @@
+{
+  "question": "Who wrote the opinion in Flanders v. Seelye?",
+  "ground_truth": "Blatchford",
+  "match_strings": [
+    "blatchford"
+  ],
+  "is_negative": false,
+  "response": "Justice Blatchford wrote the opinion in Flanders v. Seelye.",
+  "usage": {
+    "prompt_tokens": 5200,
+    "output_tokens": 22,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 5222
+  },
+  "prompt_source": "document",
+  "prompt_chars": 21800,
+  "prompt_tokens_estimate": 5450
+}

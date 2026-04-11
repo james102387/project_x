@@ -21,6 +21,7 @@ class CrystalState(TypedDict):
     kg_detections: list[dict]       # entity/predicate detections from KG detector
     kg_results: list[dict]          # resolved KG lookup results
     kg_entities_found: list[str]    # entity strings matched in prompt
+    grounding_confidence: float     # 0.0–1.0; drives prompt framing and fallback decisions
 
 
 def make_initial_state(prompt: str, *, kg=None) -> CrystalState:
@@ -45,4 +46,5 @@ def make_initial_state(prompt: str, *, kg=None) -> CrystalState:
         "kg_detections": [],
         "kg_results": [],
         "kg_entities_found": [],
+        "grounding_confidence": 0.0,
     }

@@ -1,0 +1,19 @@
+{
+  "question": "When was Gray v. Coan decided?",
+  "ground_truth": "1871-12-18",
+  "match_strings": [
+    "1871"
+  ],
+  "is_negative": false,
+  "response": "The document does not contain information about when this case was decided. The opinion text provided does not include a date.",
+  "usage": {
+    "prompt_tokens": 179,
+    "output_tokens": 26,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 205
+  },
+  "prompt_source": "document",
+  "prompt_chars": 744,
+  "prompt_tokens_estimate": 186
+}

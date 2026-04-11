@@ -1,0 +1,17 @@
+{
+  "question": "What was the vote count in Roe v. Wade?",
+  "ground_truth": "[ABSTAIN]",
+  "match_strings": [],
+  "is_negative": true,
+  "response": "This document does not contain information about the vote count in Roe v. Wade. The document is a brief order denying certiorari in McTaggart v. Roe v. Wade et al. (2004) and does not discuss the original Roe v. Wade decision or its voting breakdown.",
+  "usage": {
+    "prompt_tokens": 138,
+    "output_tokens": 69,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 207
+  },
+  "prompt_source": "document",
+  "prompt_chars": 358,
+  "prompt_tokens_estimate": 89
+}

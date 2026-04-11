@@ -1,0 +1,19 @@
+{
+  "question": "Who were the attorneys in Gideon v. Wainwright?",
+  "ground_truth": "Abe Fortas argued the cause for petitioner",
+  "match_strings": [
+    "fortas"
+  ],
+  "is_negative": false,
+  "response": "# Attorneys in Gideon v. Wainwright\n\nThe opinion does not identify the specific attorneys who represented the parties. However, it does state that:\n\n1. **Gideon was initially unrepresented** - He appeared in court \"without funds and without a lawyer\" and requested appointed counsel, which was denied.\n\n2. **Counsel was appointed by the Supreme Court** - The Court states: \"Since Gideon was proceeding in forma pauperis, we appointed counsel to represent him and requested both sides to discuss in their briefs and oral arguments the following...\"\n\nThe opinion does not name the specific counsel appointed to represent Gideon on appeal or the attorney representing the State of Florida.",
+  "usage": {
+    "prompt_tokens": 5167,
+    "output_tokens": 157,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 5324
+  },
+  "prompt_source": "document",
+  "prompt_chars": 20057,
+  "prompt_tokens_estimate": 5014
+}

@@ -1,0 +1,15 @@
+{
+  "question": "When was Brown v. Board of Education decided?",
+  "ground_truth": "1954",
+  "match_strings": [
+    "1954"
+  ],
+  "is_negative": false,
+  "response": "Supreme Court of the United States, decided in 1954",
+  "usage": {
+    "prompt_tokens": 10
+  },
+  "prompt_source": "document",
+  "prompt_chars": 253,
+  "prompt_tokens_estimate": 63
+}

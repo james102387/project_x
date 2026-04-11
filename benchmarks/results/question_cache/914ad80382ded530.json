@@ -1,0 +1,17 @@
+{
+  "question": "What court heard Gideon v. Wainwright?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The U.S. Supreme Court heard Gideon v. Wainwright. The landmark case was decided on March 18, 1963, and established the constitutional right to legal counsel for criminal defendants who cannot afford an attorney.",
+  "usage": {
+    "prompt_tokens": 21,
+    "output_tokens": 53,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 74
+  },
+  "prompt_tokens_estimate": 9
+}

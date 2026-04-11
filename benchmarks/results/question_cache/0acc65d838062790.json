@@ -1,0 +1,17 @@
+{
+  "question": "Who decided Loving v. Virginia?",
+  "ground_truth": "Warren, Black, Douglas, Clark, Harlan, Brennan, Stewart, White, Fortas",
+  "match_strings": [
+    "warren"
+  ],
+  "is_negative": false,
+  "response": "Loving v. Virginia was decided by the U.S. Supreme Court. The decision was issued on June 12, 1967, with Chief Justice Earl Warren writing the majority opinion. The Court ruled unanimously (9-0) that laws prohibiting interracial marriage violated the Equal Protection and Due Process Clauses of the Fourteenth Amendment.",
+  "usage": {
+    "prompt_tokens": 15,
+    "output_tokens": 77,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 92
+  },
+  "prompt_tokens_estimate": 7
+}

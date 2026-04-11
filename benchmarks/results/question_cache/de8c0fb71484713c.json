@@ -1,0 +1,19 @@
+{
+  "question": "What court decided Pennsylvania Railroad v. St. Louis, Alton & Terre Haute Railroad?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Answer\n\nThe United States Supreme Court decided this case. The opinion was delivered by Mr. Justice Miller, and the case involved cross-appeals from a decree of the Circuit Court for the District of Indiana.",
+  "usage": {
+    "prompt_tokens": 11534,
+    "output_tokens": 45,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 11579
+  },
+  "prompt_source": "document",
+  "prompt_chars": 52838,
+  "prompt_tokens_estimate": 13209
+}

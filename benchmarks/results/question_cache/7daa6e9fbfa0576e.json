@@ -1,0 +1,17 @@
+{
+  "question": "What court heard Plessy v. Ferguson?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The U.S. Supreme Court heard Plessy v. Ferguson. The case was decided on May 18, 1896, and upheld the doctrine of \"separate but equal,\" allowing racial segregation in public facilities.",
+  "usage": {
+    "prompt_tokens": 18,
+    "output_tokens": 51,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 69
+  },
+  "prompt_tokens_estimate": 9
+}

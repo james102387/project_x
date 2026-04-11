@@ -1,0 +1,20 @@
+{
+  "question": "What judges heard Mapp v. Ohio?",
+  "ground_truth": "Warren, Black, Frankfurter, Douglas, Clark, Harlan, Brennan, Whittaker, Stewart",
+  "match_strings": [
+    "warren",
+    "clark"
+  ],
+  "is_negative": false,
+  "response": "This document does not identify which judges heard Mapp v. Ohio. It only contains a procedural order regarding a motion by the National District Attorneys' Association to file an amicus curiae brief and a denial of a petition for rehearing. To find the judges who heard the case, you would need to consult the full opinion or other sources documenting the case.",
+  "usage": {
+    "prompt_tokens": 88,
+    "output_tokens": 80,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 168
+  },
+  "prompt_source": "document",
+  "prompt_chars": 313,
+  "prompt_tokens_estimate": 78
+}

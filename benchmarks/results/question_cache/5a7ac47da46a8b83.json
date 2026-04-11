@@ -1,0 +1,19 @@
+{
+  "question": "Which court decided Marbury v. Madison?",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "The Supreme Court of the United States decided Marbury v. Madison. This is evident from the opinion's discussion of \"this court\" issuing writs of mandamus and references to the Supreme Court's constitutional jurisdiction.",
+  "usage": {
+    "prompt_tokens": 12743,
+    "output_tokens": 48,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 12791
+  },
+  "prompt_source": "document",
+  "prompt_chars": 55906,
+  "prompt_tokens_estimate": 13976
+}

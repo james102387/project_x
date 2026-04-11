@@ -1,0 +1,84 @@
+{
+  "question": "Tell me about Miranda v. Arizona",
+  "ground_truth": "Supreme Court of the United States",
+  "match_strings": [
+    "supreme court"
+  ],
+  "is_negative": false,
+  "response": "# Miranda v. Arizona\n\n**Miranda v. Arizona** is a landmark Supreme Court case with the following details:\n\n**Court & Decision:**\n- Decided by the Supreme Court of the United States\n- Date filed: June 13, 1966\n- Disposition: Reversed and remanded\n- Precedential status: Published\n\n**Nature of Case:**\n- Criminal case\n\n**Opinion:**\n- Written by Chief Justice Warren\n\n**Judges Involved:**\n- Warren, Black, Douglas, Clark, Harlan, Brennan, Stewart, White, and Fortas\n\n**Legal Representation:**\n- John J. Flynn argued the case for the petitioner\n- John P. Frank was on the briefs\n\n**Impact:**\n- This case has been cited 9,832 times, indicating its significant influence on American law\n\nThis case established important protections for criminal suspects regarding their rights during police interrogation, which remain a cornerstone of criminal procedure law today.",
+  "prompt_type": "kg_augmented",
+  "kg_results": [
+    {
+      "tool": "kg",
+      "operation": "lookup",
+      "entity": "miranda v. arizona",
+      "results": [
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "attorneys",
+          "object": "John J. Flynn argued the cause for petitioner. John P. Frank was on the briefs."
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "cited_by_count",
+          "object": "9832"
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "court",
+          "object": "Supreme Court of the United States"
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "date_filed",
+          "object": "1966-06-13"
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "disposition",
+          "object": "Reversed and remanded"
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "judges",
+          "object": "Warren, Black, Douglas, Clark, Harlan, Brennan, Stewart, White, Fortas"
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "nature_of_suit",
+          "object": "Criminal"
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "opinion_author",
+          "object": "Warren"
+        },
+        {
+          "subject": "miranda v. arizona",
+          "predicate": "precedential_status",
+          "object": "Published"
+        }
+      ],
+      "lookup_type": "subject_scan",
+      "success": true
+    }
+  ],
+  "token_metrics": {
+    "raw_prompt_tokens": 7,
+    "compiled_prompt_tokens": 214,
+    "raw_compute": 56,
+    "compiled_compute": 46010,
+    "savings_pct": -820.6071428571429,
+    "token_savings_pct": -29.571428571428573,
+    "marginal_savings_pct": -31.15034217279726,
+    "prompt_type": "kg_augmented",
+    "actual_prompt_tokens": 219,
+    "actual_output_tokens": 212,
+    "actual_reasoning_tokens": null,
+    "actual_total_tokens": 431,
+    "actual_cached_tokens": 0
+  },
+  "prompt_tokens_estimate": 219,
+  "output_tokens": 212,
+  "reasoning_tokens": 0
+}

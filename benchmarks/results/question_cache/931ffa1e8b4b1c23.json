@@ -1,0 +1,19 @@
+{
+  "question": "When was Flanders v. Seelye decided?",
+  "ground_truth": "1882-05-18",
+  "match_strings": [
+    "1882"
+  ],
+  "is_negative": false,
+  "response": "The document does not explicitly state when this case was decided. However, based on contextual clues in the opinion (such as references to events in 1879 and the case being heard by the Circuit Court in 1873), the decision appears to have been rendered sometime after 1879, but the specific date is not provided in the text.",
+  "usage": {
+    "prompt_tokens": 5198,
+    "output_tokens": 75,
+    "reasoning_tokens": null,
+    "cached_tokens": 0,
+    "total_tokens": 5273
+  },
+  "prompt_source": "document",
+  "prompt_chars": 21792,
+  "prompt_tokens_estimate": 5448
+}
