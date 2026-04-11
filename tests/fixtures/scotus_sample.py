@@ -22,6 +22,9 @@ SCOTUS_SAMPLE: list[dict] = [
         "judges": "Warren, Black, Douglas, Clark, Harlan, Brennan, Stewart, White, Fortas",
         "disposition": "Reversed and remanded",
         "nature_of_suit": "Criminal",
+        "precedential_status": "Published",
+        "attorneys": "John J. Flynn argued the cause for petitioner. John P. Frank was on the briefs.",
+        "opinions": [{"author_str": "Warren", "per_curiam": False, "type": "020lead"}],
     },
     {
         "id": 108714,
@@ -39,6 +42,9 @@ SCOTUS_SAMPLE: list[dict] = [
         "judges": "Warren, Black, Reed, Frankfurter, Douglas, Jackson, Burton, Clark, Minton",
         "disposition": "Reversed",
         "nature_of_suit": "Civil Rights",
+        "precedential_status": "Published",
+        "attorneys": "Robert L. Carter argued the cause for appellants. Thurgood Marshall was on the briefs.",
+        "opinions": [{"author_str": "Warren", "per_curiam": False, "type": "020lead"}],
     },
     {
         "id": 108715,
@@ -56,6 +62,9 @@ SCOTUS_SAMPLE: list[dict] = [
         "judges": "Burger, Douglas, Brennan, Stewart, White, Marshall, Blackmun, Powell, Rehnquist",
         "disposition": "Affirmed in part, reversed in part",
         "nature_of_suit": "Constitutional",
+        "precedential_status": "Published",
+        "attorneys": "Sarah Weddington argued the cause for appellants.",
+        "opinions": [{"author_str": "Blackmun", "per_curiam": False, "type": "020lead"}],
     },
     {
         "id": 108716,
@@ -73,6 +82,8 @@ SCOTUS_SAMPLE: list[dict] = [
         "judges": "Marshall, Paterson, Chase, Washington",
         "disposition": None,
         "nature_of_suit": "Constitutional",
+        "precedential_status": "Published",
+        "opinions": [{"author_str": "Marshall", "per_curiam": False, "type": "020lead"}],
     },
     {
         "id": 108717,
@@ -90,6 +101,9 @@ SCOTUS_SAMPLE: list[dict] = [
         "judges": "Warren, Black, Douglas, Clark, Harlan, Brennan, Stewart, White, Goldberg",
         "disposition": "Reversed",
         "nature_of_suit": "Criminal",
+        "precedential_status": "Published",
+        "attorneys": "Abe Fortas argued the cause for petitioner. Bruce R. Jacob argued the cause for respondent.",
+        "opinions": [{"author_str": "Black", "per_curiam": False, "type": "020lead"}],
     },
     {
         "id": 108718,
@@ -107,6 +121,8 @@ SCOTUS_SAMPLE: list[dict] = [
         "judges": "Warren, Black, Frankfurter, Douglas, Clark, Harlan, Brennan, Whittaker, Stewart",
         "disposition": "Reversed",
         "nature_of_suit": "Criminal",
+        "precedential_status": "Published",
+        "opinions": [{"author_str": "Clark", "per_curiam": False, "type": "020lead"}],
     },
     {
         "id": 108719,
@@ -141,6 +157,8 @@ SCOTUS_SAMPLE: list[dict] = [
         "judges": "Taney, Wayne, Catron, Daniel, Nelson, Grier, Campbell, Curtis, McLean",
         "disposition": "Reversed",
         "nature_of_suit": "Civil Rights",
+        "precedential_status": "Published",
+        "opinions": [{"author_str": "Taney", "per_curiam": False, "type": "020lead"}],
     },
     {
         "id": 108721,
@@ -226,6 +244,8 @@ SCOTUS_SAMPLE: list[dict] = [
         "judges": "Warren, Black, Douglas, Clark, Harlan, Brennan, Stewart, White, Fortas",
         "disposition": "Reversed",
         "nature_of_suit": "Civil Rights",
+        "precedential_status": "Published",
+        "opinions": [{"author_str": "Warren", "per_curiam": False, "type": "020lead"}],
     },
     {
         "id": 108726,
@@ -397,6 +417,8 @@ SCOTUS_SAMPLE: list[dict] = [
         "judges": "Marshall, Washington, Johnson, Livingston, Todd, Duvall, Story",
         "disposition": "Reversed",
         "nature_of_suit": "Constitutional",
+        "precedential_status": "Published",
+        "opinions": [{"author_str": "Marshall", "per_curiam": False, "type": "020lead"}],
     },
     {
         "id": 108736,

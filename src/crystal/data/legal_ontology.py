@@ -25,6 +25,10 @@ LEGAL_PREDICATES: list[str] = [
     "judges",
     "disposition",
     "nature_of_suit",
+    "opinion_author",
+    "per_curiam",
+    "attorneys",
+    "precedential_status",
 ]
 
 
@@ -84,6 +88,28 @@ LEGAL_PREDICATE_ALIASES: dict[str, str] = {
     "case type": "nature_of_suit",
     "subject matter": "nature_of_suit",
     "kind of case": "nature_of_suit",
+    # opinion author
+    "author": "opinion_author",
+    "written by": "opinion_author",
+    "who wrote": "opinion_author",
+    "authored by": "opinion_author",
+    "opinion written by": "opinion_author",
+    "majority author": "opinion_author",
+    # per curiam
+    "per curiam opinion": "per_curiam",
+    "unsigned opinion": "per_curiam",
+    # attorneys
+    "attorney": "attorneys",
+    "lawyer": "attorneys",
+    "lawyers": "attorneys",
+    "counsel": "attorneys",
+    "represented by": "attorneys",
+    "who represented": "attorneys",
+    "who argued": "attorneys",
+    # precedential status
+    "published": "precedential_status",
+    "publication status": "precedential_status",
+    "precedential": "precedential_status",
 }
 
 

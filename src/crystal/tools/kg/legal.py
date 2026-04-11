@@ -51,3 +51,14 @@ def build_legal_kg_sqlite(
             source="cold-cases",
         )
     return db
+
+
+def load_legal_kg(db_path: str | Path = "data/legal.sqlite") -> SqliteKnowledgeGraph | None:
+    """Open an existing SQLite legal KG for read-only querying.
+
+    Returns None if the database file doesn't exist.
+    """
+    path = Path(db_path)
+    if not path.exists():
+        return None
+    return SqliteKnowledgeGraph(path)

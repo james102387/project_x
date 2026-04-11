@@ -1,100 +1,155 @@
-# Crystal — Prioritized Task List
+# Crystal — Task List
 
-## MVP (complete) — Prove the core pipeline works
+## Completed
 
-- [x] **1. KG detection node** — Scan raw text against `kg.entities` (hash lookup, no spaCy). Detect entity mentions, match predicates via aliases.
-- [x] **2. KG execution node** — Takes preprocessed KG lookups, runs `kg.lookup()`, returns results.
-- [x] **3. Compiler: `kg_answerable` / `kg_augmented`** — `kg_answerable` returns the fact directly; `kg_augmented` injects grounded facts for LLM reasoning.
-- [x] **4. Golden test cases for KG** — 20 KG answerable + 3 KG augmented + 3 KG negative Remulak cases.
-- [x] **5. Baseline benchmark** — Naked LLM on Remulak questions. Result: 0% accuracy.
-- [x] **6. Treatment benchmark** — Crystal + KG on same questions. Result: 100% accuracy.
-- [x] **7. CrystalState schema update** — KG-related fields added.
-- [x] **8. Planner update** — Multiple detection types in the same plan.
+<details>
+<summary>MVP — Core pipeline (8/8)</summary>
 
-## Demo — Make the value proposition experienceable
+- [x] KG detection node (hash lookup, predicate matching via aliases)
+- [x] KG execution node (`kg.lookup()`)
+- [x] Compiler: `kg_answerable` / `kg_augmented` routing
+- [x] Golden test cases (20 answerable + 3 augmented + 3 negative)
+- [x] Baseline benchmark (naked LLM → 0% accuracy)
+- [x] Treatment benchmark (Crystal + KG → 100% accuracy)
+- [x] CrystalState schema update
+- [x] Planner update (multiple detection types)
 
-The core pipeline works. Now someone needs to be able to *use* it.
+</details>
 
-- [x] **D1. Minimal quality rubric** — Extend benchmark scoring beyond binary substring match. Three dimensions: factual accuracy, specificity, no-hallucination. Score all three paths (answerable, augmented, fallback) so the safety invariant is measurable. See `docs/PLAN_GRADING_RUBRIC.md` Phase 1.
-- [x] **D2. KG ingestion pipeline (offline) — Phase 1** — `src/crystal/ingest/` package: NER-based triplet extraction (5 dep-tree patterns), CSV/JSON hand-curated loaders, `Triplet`/`IngestResult` schema, `ingest()` → `build_kg()` pipeline, CLI at `python -m crystal.ingest <document>`.
-  - [x] **Phase 2 (LLM-assisted):** Use LLM for relationship extraction on sentences where NER finds entities but can't resolve predicates. Offline batch job, human-reviewable output. `llm_extract.py`, `find_unresolved_sentences()`, `ingest_with_llm()`, `load_review()`, CLI `--llm-assist`.
-  - [ ] **Phase 3 (community detection):** Leiden or similar for discovering entity clusters and implicit relationships in larger corpora. See L3 for legal-specific application (doctrinal families via citation graph clustering, GraphRAG-inspired).
-- [x] **D3. Web UI** — Gradio-based demo at `python -m crystal.ui`. Three tabs: Ask, Knowledge Graph, Review. Pre-loaded Remulak KG works out of the box.
-- [x] **D4. Augmented benchmark cases** — `AUGMENTED_BENCHMARK_CASES` in `benchmarks/ground_truth.py` (5 KG + 3 math). Benchmark runner at `benchmarks/run_augmented_benchmark.py`.
-- [x] **D5. Entity aliases + fuzzy string matching + multi-hop** — 3-tier resolution cascade (exact → alias → rapidfuzz) for entities and predicates.
-- [x] **D6. Reasoning cost benchmark (K-reduction)** — Token-level comparison with thinking models. Benchmark runner at `benchmarks/run_reasoning_benchmark.py`.
+<details>
+<summary>Demo tooling (6/6)</summary>
 
-## Ingestion Roadmap — Phased data strategy
+- [x] D1. Quality rubric — 3-dimension scoring (accuracy, specificity, no-hallucination)
+- [x] D2. KG ingestion pipeline — NER (5 dep-tree patterns), CSV/JSON loaders, LLM-assisted extraction
+- [x] D3. Web UI — Gradio (Ask, KG, Review tabs)
+- [x] D4. Augmented benchmark cases (5 KG + 3 math)
+- [x] D5. Entity aliases + fuzzy matching + multi-hop (3-tier resolution cascade)
+- [x] D6. Reasoning cost benchmark (K-reduction, token-level comparison)
 
-Golden answers from structured API sources are deterministic and require no human review. Human review is reserved for LLM-extracted content where confidence is lower.
+</details>
 
-### Phase 1: Structured API data (auto-accept)
+<details>
+<summary>Ingestion infrastructure (complete)</summary>
 
-All structured-source questions bypass human review. The golden answer is the API field value verbatim.
+- [x] Phase 1a — Bulk SCOTUS from COLD Cases (500 cases, 1,956 questions, auto-accepted)
+- [x] Phase 1b — Citation graph from CourtListener (316 triplets, 48 Tier 2 questions)
+- [x] L-ENRICH-1 — COLD Cases field expansion (opinion_author, per_curiam, attorneys, precedential_status)
+- [x] Ingestion cron CLI (`src/crystal/ingest/cron.py`)
+- [x] Batch-aware review API (`src/crystal/review.py`)
+- [x] Interactive review UI (Gradio Review tab)
+- [x] Ralph Wiggum Phase 6b (autonomous mutation, autoresearch pattern)
+- [~~L-ENRICH-3~~] Cancelled — SCOTUS dockets lack nature_of_suit/disposition on CourtListener
 
-| Step | Source | Predicates | Target |
-|------|--------|-----------|--------|
-| **1a** | COLD Cases (SCOTUS) | court, date_filed, judges, disposition, cited_by_count, nature_of_suit | ~500 cases, ~2,500 questions |
-| **1b** | CourtListener citations | cites (forward + reverse) | Citation graph for Tier 2 relational questions |
-| **1c** | CourtListener /people/ | appointing_president, law_school, birth_year, active_service | Judge biographical entity type |
+</details>
 
-- [x] **Phase 1a** — Bulk SCOTUS ingest from COLD Cases via HuggingFace streaming. Auto-accept all questions. 500 cases, 1,321 questions.
-- [x] **Phase 1b** — Citation graph from CourtListener `/opinions-cited/`. 200 cases searched, 316 citation triplets, 48 Tier 2 questions.
-- [ ] **Phase 1c** — Judge biographical data from CourtListener `/people/`. New entity type (judges as subjects).
+---
 
-### Phase 2: Unstructured text (Crystal proposes, human verifies)
+## Next Up — Demo Benchmark (A/B comparison)
 
-This is where the review UI earns its keep. Crystal proposes question + answer from NER/LLM extraction of opinion text. Human verifies or corrects. Still faster than authoring from scratch.
+The naked LLM baseline is a strawman. Lawyers paste real documents into ChatGPT. The demo needs a fair, realistic comparison.
+
+### Design
+
+**Three arms:**
+
+| Arm | What it tests | Simulates |
+|-----|---------------|-----------|
+| Naked LLM | `call_llm(question)` | Lawyer trusts training data |
+| LLM + document | `call_llm(real_opinion_text + question)` | Lawyer pastes case opinion into ChatGPT |
+| Crystal | Full pipeline | Crystal |
+
+**Three metrics:**
+
+| Metric | Why |
+|--------|-----|
+| Hallucination rate | Headline: "LLM fabricated 40%, Crystal 0%" |
+| Rubric quality (accuracy, specificity, no-hallucination) | Crystal is precise, not just non-hallucinatory |
+| Token cost | Crystal's `kg_answerable` path: 0 tokens vs. 30k for document-in-context |
+
+**Documents must be real opinion text** (5k-50k tokens from CourtListener), not synthetic docs from KG metadata. Synthetic docs are reformatted metadata — a critic would dismiss the comparison.
+
+**Not all predicates are document-answerable.** Fair A/B only on questions answerable from both KG and opinion text:
+
+| Category | Predicates | Fair A/B? |
+|----------|-----------|-----------|
+| Both | court, date_filed, judges, opinion_author, cites, attorneys | Yes |
+| KG only | cited_by_count, precedential_status, per_curiam | Show separately ("Crystal-only") |
+| Document only | holdings, doctrines, reasoning | Crystal can't answer yet (Phase 2a) |
+
+**Scaling:** Tier 1 (~50 hand-crafted cases, run live, cached). Tier 2 (~100-200 stratified sample from bulk corpus, run once, cached). Scoring works against cached result dicts.
+
+### Tasks
+
+- [ ] **B1. Opinion text downloader** — Fetch real opinion text from CourtListener for benchmark cases. Cache to `benchmarks/documents/`. Uses existing `courtlistener.py` client.
+- [ ] **B2. Document-answerability audit** — Read downloaded opinions, verify which predicates appear. Tag benchmark cases with `document_answerable`.
+- [ ] **B3. Document-context baseline runner** — New arm in `benchmarks/runners/`. LLM + real opinion text. Same scoring interface. Only runs on document-answerable questions.
+- [ ] **B4. Add obscure cases** — 10-15 cases from the long tail of the 500-case corpus. Cases no LLM would know from training data.
+- [ ] **B5. Stratified sampler** — `sample_benchmark_cases(all_cases, n, by='predicate')` for Tier 2.
+- [ ] **B6. Three-arm comparison report** — Side-by-side output with separate sections for fair A/B and Crystal-only questions.
+
+---
+
+## Ingestion — Open items
+
+### Structured API data
+
+- [ ] **Phase 1c** — Judge bios from CourtListener `/people/` (appointing_president, law_school, birth_year, active_service). New entity type.
+- [ ] **L-ENRICH-2** — CourtListener `/people/` endpoint for judge biographical data.
+- [ ] **L-ENRICH-4** — Supreme Court Database (SCDB): ~200 coded variables per case.
+
+### Unstructured text (Crystal proposes, human verifies)
 
 - [ ] **Phase 2a** — Opinion text extraction (holdings, doctrines, reasoning chains). NER + LLM pipeline with `ReviewableTriplet` workflow.
 - [ ] **Phase 2b** — Oral argument transcripts. New source adapter.
+- [ ] **D2 Phase 3** — Community detection (Leiden) for entity clusters. See also L3.
 
 ### Sufficiency threshold
 
-~500 cases / ~2,500 questions across all 6 predicates is sufficient for:
-- Ralph Wiggum to converge reliably (~50 cases per predicate)
-- Statistically significant benchmark comparisons vs. naked LLMs
-- Regression detection when adding new extraction methods
+~500 cases / ~2,500 questions across 6+ predicates — sufficient for Ralph Wiggum convergence (~50 per predicate), statistically significant benchmarks, and regression detection.
 
-### Operational pipeline (complete)
+---
 
-- [x] **L-OPS-1. Ingestion cron CLI** — `src/crystal/ingest/cron.py`
-- [x] **L-OPS-2. Batch-aware review API** — `src/crystal/review.py`
-- [x] **L-OPS-3. Interactive review UI** — Gradio Review tab
-- [x] **L-OPS-4. Ralph Wiggum Phase 6b (autonomous mutation)** — Autoresearch pattern
+## RAG as Ingestion Faucet
 
-### Structured data enrichment (deterministic golden answers)
+RAG is a **document discovery layer** that feeds the ingestion pipeline, not a competing answer delivery mechanism. Retrieval quality affects ingestion throughput, not answer quality. The review step is the quality firewall.
 
-- [x] **L-ENRICH-5. First real data run** — Bulk SCOTUS from COLD Cases, auto-accepted.
-- [ ] **L-ENRICH-1. COLD Cases field expansion** (Tier 2) — `opinions[].author_str`, `opinions[].type`, `per_curiam`, `attorneys`, `precedential_status`. ~4-5 new predicates.
-- [ ] **L-ENRICH-2. CourtListener /people/ endpoint** (Tier 2) — Judge biographical data.
-- [ ] **L-ENRICH-3. CourtListener /clusters/ + /dockets/** (Tier 2) — Procedural posture, cause of action, lower court info.
-- [ ] **L-ENRICH-4. Supreme Court Database (SCDB)** (Tier 3) — ~200 coded variables per case.
+**Feedback loop:** Ralph Wiggum finds gaps → gaps become retrieval queries → RAG retrieves documents → ingestion pipeline extracts triplets → human review → KG grows targeted at its own gaps → Ralph Wiggum re-evaluates.
 
-## Future — After the demo proves adoption potential
+- [ ] **R1.** Gap-to-query translator (Ralph Wiggum failure analysis → retrieval queries)
+- [ ] **R2.** Document retrieval layer (embeddings over CourtListener opinion corpus)
+- [ ] **R3.** Retrieved-document ingestion (wire into `ingest_with_llm()`)
+- [ ] **R4.** Autonomous growth loop (full cycle)
 
-- [ ] **F1. Dependent detection / multi-hop** — Planner resolves dependencies between tools.
-- [ ] **F2. Mixed prompts (independent)** — Both KG and calculator fire, compiler merges results.
-- [ ] **F3. KG-grounded reasoning chain** — KG confirms facts → calculator computes → LLM reasons.
-- [ ] **F4. Embedding-based KG matching** — Tier 4 resolution via sentence-transformers.
-- [ ] **F5. Full grading rubric** — Six weighted metrics with composite scoring.
-- [ ] **F6. Separate semantic eval from detector** — Move `evaluate_semantic_steps` out of detector.
+---
 
-## Infrastructure extensions
+## Future
 
-- [ ] **L1. Knowledge fusion layer** — Entity deduplication, citation normalization, conflict resolution.
-- [ ] **L2. Incremental sync CLI** — `python -m crystal.ingest sync --source courtlistener --since <date>`.
-- [ ] **L3. Community detection over citation graph** — Leiden clustering for doctrinal families.
+### Pipeline extensions
 
-## LLM-extracted content (requires human-verified golden answers)
+- [ ] **F1.** Dependent detection / multi-hop planner
+- [ ] **F2.** Mixed prompts (KG + calculator fire independently, compiler merges)
+- [ ] **F3.** KG-grounded reasoning chain (KG confirms → calculator computes → LLM reasons)
+- [ ] **F4.** Embedding-based KG matching (Tier 4 resolution via sentence-transformers)
+- [ ] **F5.** Full grading rubric (6 weighted metrics, composite score)
+- [ ] **F6.** Separate semantic eval from detector
 
-- [ ] **L4. Tier 4 LLM extraction** — Extract-Define-Canonicalize pipeline for holdings/doctrines from opinion text.
-- [ ] **L5. LLM-assisted ontology expansion** — CQ-based approach for predicate structure.
-- [ ] **L6. Temporal validity for legal facts** — Track `overruled_by`, `modified_by` with validity windows.
-- [ ] **L7. Corpus reasoning detector** — Routes to community cluster summaries for corpus-level questions.
-- [ ] **L8. LLM-generated test case pipeline** — Automated Ralph Wiggum: LLM generates test cases, failing tests reveal gaps, LLM proposes fixes.
+### Infrastructure
 
-Research references:
-[GraphRAG](https://www.microsoft.com/en-us/research/blog/graphrag-unlocking-llm-discovery-on-narrative-private-data/),
-[LLM-empowered KG Construction (Bian et al.)](https://arxiv.org/html/2510.20345v1),
+- [ ] **L1.** Knowledge fusion layer (entity dedup, citation normalization, conflict resolution)
+- [ ] **L2.** Incremental sync CLI (`crystal.ingest sync --source courtlistener --since <date>`)
+- [ ] **L3.** Community detection over citation graph (Leiden clustering for doctrinal families)
+
+### LLM-extracted content (requires human-verified golden answers)
+
+- [ ] **L4.** Tier 4 LLM extraction (Extract-Define-Canonicalize for holdings/doctrines)
+- [ ] **L5.** LLM-assisted ontology expansion (CQ-based predicate structure)
+- [ ] **L6.** Temporal validity for legal facts (`overruled_by`, `modified_by` with validity windows)
+- [ ] **L7.** Corpus reasoning detector (routes to community cluster summaries)
+- [ ] **L8.** LLM-generated test case pipeline (automated Ralph Wiggum)
+
+---
+
+**References:**
+[GraphRAG](https://www.microsoft.com/en-us/research/blog/graphrag-unlocking-llm-discovery-on-narrative-private-data/) ·
+[LLM-empowered KG Construction (Bian et al.)](https://arxiv.org/html/2510.20345v1) ·
 [KGGen (Mo et al.)](https://arxiv.org/html/2502.09956v1)

@@ -5,7 +5,8 @@ Launch:
     python -m crystal.ui
 
 Features:
-    - Pre-loaded Remulak KG (works out of the box)
+    - Legal KG loaded from SQLite by default (SCOTUS cases, citations)
+    - Remulak demo KG available as fallback
     - Upload documents (CSV, JSON, TXT) to build a custom KG
     - Ask questions with side-by-side Crystal vs. naked LLM comparison
     - KG explorer showing entities and facts
@@ -33,6 +34,7 @@ from crystal.review import (
 )
 from crystal.tools.kg import remulak_kg
 from crystal.tools.kg.graph import KnowledgeGraph
+from crystal.tools.kg.legal import load_legal_kg
 import crystal.llm
 
 
@@ -40,10 +42,22 @@ import crystal.llm
 
 _graph = build_crystal_graph()
 
+_ROOT = Path(__file__).parent.parent.parent
+_LEGAL_DB_PATH = _ROOT / "data" / "legal.sqlite"
+_legal_kg = load_legal_kg(_LEGAL_DB_PATH)
+
+KG_MODES = {}
+if _legal_kg is not None:
+    KG_MODES["Legal (SCOTUS — SQLite)"] = _legal_kg
+KG_MODES["Remulak (demo)"] = remulak_kg
+
+_DEFAULT_KG_MODE = "Legal (SCOTUS — SQLite)" if _legal_kg is not None else "Remulak (demo)"
+_default_kg = KG_MODES[_DEFAULT_KG_MODE]
+
 
 def _default_kg_info() -> dict:
-    """Return info dict for a KnowledgeGraph."""
-    return _kg_info(remulak_kg, "Remulak (built-in)")
+    """Return info dict for the default KG."""
+    return _kg_info(_default_kg, _DEFAULT_KG_MODE)
 
 
 def _kg_info(kg: KnowledgeGraph, source: str) -> dict:
@@ -113,25 +127,57 @@ def ingest_raw_text(text, kg_state):
 
 def reset_to_remulak():
     """Reset KG to the built-in Remulak dataset."""
-    info = _default_kg_info()
+    info = _kg_info(remulak_kg, "Remulak (demo)")
     return remulak_kg, "Reset to Remulak.", _format_kg_stats(info), _format_kg_facts(remulak_kg)
+
+
+def switch_kg_mode(mode: str):
+    """Switch the active KG by mode name."""
+    kg = KG_MODES.get(mode)
+    if kg is None:
+        return _default_kg, f"Unknown mode: {mode}", _format_kg_stats(_default_kg_info()), _format_kg_facts(_default_kg)
+    info = _kg_info(kg, mode)
+    return kg, f"Switched to {mode}.", _format_kg_stats(info), _format_kg_facts(kg)
+
+
+_ROUTE_LABELS = {
+    "kg_answerable": "KG Grounded (direct)",
+    "kg_augmented": "KG + LLM Reasoning",
+    "pure_math": "Calculator (direct)",
+    "math_answerable": "Calculator (direct)",
+    "math_augmented": "Calculator + LLM Reasoning",
+    "no_math": "LLM Fallback (ungrounded)",
+}
+
+_CONFIDENCE_BADGES = {
+    "kg_answerable": "HIGH — answer sourced directly from verified knowledge graph",
+    "kg_augmented": "MEDIUM — KG facts injected, LLM reasoning applied",
+    "pure_math": "HIGH — computed mathematically",
+    "math_answerable": "HIGH — computed mathematically",
+    "math_augmented": "MEDIUM — math computed, LLM reasoning applied",
+    "no_math": "LOW — no grounding, pure LLM generation",
+}
 
 
 def ask_question(question, kg_state):
     """Run a question through Crystal and naked LLM, return side-by-side results."""
     if not question or not question.strip():
-        return "", "", "", ""
+        return "", "", "", "", ""
 
     question = question.strip()
 
     state = make_initial_state(question, kg=kg_state)
+    grounding_info = ""
     try:
         final = _graph.invoke(state)
         crystal_response = final.get("final_response", "")
         prompt_type = final.get("prompt_type", "unknown")
         metrics = final.get("token_metrics", {})
 
-        crystal_meta = f"**Route:** `{prompt_type}`"
+        route_label = _ROUTE_LABELS.get(prompt_type, prompt_type)
+        confidence = _CONFIDENCE_BADGES.get(prompt_type, "UNKNOWN")
+        crystal_meta = f"**Route:** {route_label}\n**Confidence:** {confidence}"
+
         if metrics:
             if metrics.get("actual_prompt_tokens"):
                 crystal_meta += f"\n**Tokens:** {metrics['actual_prompt_tokens']} prompt, {metrics.get('actual_output_tokens', '?')} output"
@@ -139,6 +185,27 @@ def ask_question(question, kg_state):
                 crystal_meta += f", {metrics['actual_reasoning_tokens']} reasoning"
             if prompt_type in ("pure_math", "math_answerable", "kg_answerable"):
                 crystal_meta += "\n**LLM called:** No (direct return)"
+
+        tool_results = final.get("tool_results", [])
+        kg_results = [r for r in tool_results if r.get("tool") == "kg" and r.get("success")]
+        if kg_results:
+            facts = []
+            for r in kg_results:
+                for triplet in r.get("results", []):
+                    s, p, o = triplet.get("subject", ""), triplet.get("predicate", ""), triplet.get("object", "")
+                    facts.append(f"- **{s.title()}** — {p}: {o}")
+            if facts:
+                grounding_info = "### Grounding Facts\n" + "\n".join(facts[:20])
+                entity_spans = final.get("tool_detections", [])
+                for det in entity_spans:
+                    if det.get("tool") == "kg":
+                        tier = det.get("match_tier", "?")
+                        lookup = det.get("lookup_type", "?")
+                        grounding_info += f"\n\n*Match: {tier} | Lookup: {lookup}*"
+                        break
+        elif prompt_type in ("no_math",):
+            grounding_info = "*No KG facts found for this query — answer is ungrounded.*"
+
     except Exception as e:
         crystal_response = f"Error: {e}"
         crystal_meta = "**Route:** error"
@@ -155,7 +222,67 @@ def ask_question(question, kg_state):
         llm_response = f"Error: {e}"
         llm_meta = ""
 
-    return crystal_response, crystal_meta, llm_response, llm_meta
+    return crystal_response, crystal_meta, llm_response, llm_meta, grounding_info
+
+
+# ── KG Explorer helpers ───────────────────────────────────────────────────
+
+def _search_kg_entity(query: str, kg_state) -> str:
+    """Search for an entity in the active KG and return all facts."""
+    if not query or not query.strip():
+        return "Type a case name or entity to search."
+
+    query = query.strip()
+    resolved, tier = kg_state._resolve_entity(query)
+    if tier == "none":
+        return f"No entity found matching **{query}**."
+
+    facts = kg_state.lookup(subject=resolved)
+    if not facts:
+        return f"Entity **{resolved}** found (via {tier} match) but has no facts as a subject."
+
+    lines = [f"### {resolved.title()}\n*Matched via: {tier}*\n"]
+    for f in facts:
+        lines.append(f"- **{f['predicate']}:** {f['object']}")
+
+    return "\n".join(lines)
+
+
+def _get_kg_predicate_summary(kg_state) -> pd.DataFrame:
+    """Get a summary of predicates and their counts in the active KG."""
+    if not hasattr(kg_state, 'triplets'):
+        return pd.DataFrame(columns=["Predicate", "Count", "Sample Value"])
+
+    from collections import Counter
+    pred_counts: Counter = Counter()
+    pred_samples: dict[str, str] = {}
+    for s, p, o in kg_state.triplets:
+        pred_counts[p] += 1
+        if p not in pred_samples:
+            pred_samples[p] = o[:100]
+
+    rows = [
+        [pred, count, pred_samples.get(pred, "")]
+        for pred, count in pred_counts.most_common()
+    ]
+    return pd.DataFrame(rows, columns=["Predicate", "Count", "Sample Value"])
+
+
+def _get_kg_entity_list(kg_state, page: int = 0) -> pd.DataFrame:
+    """Get a paginated list of entities with fact counts."""
+    subjects = sorted(kg_state.subjects)
+    page_size = 50
+    start = page * page_size
+    end = start + page_size
+    page_subjects = subjects[start:end]
+
+    rows = []
+    for s in page_subjects:
+        facts = kg_state.lookup(subject=s)
+        preds = ", ".join(sorted(set(f["predicate"] for f in facts)))
+        rows.append([s.title(), len(facts), preds])
+
+    return pd.DataFrame(rows, columns=["Entity", "Facts", "Predicates"])
 
 
 # ── Review helpers ────────────────────────────────────────────────────────
@@ -309,45 +436,61 @@ def build_ui() -> gr.Blocks:
     ) as demo:
         gr.Markdown("# Crystal\n*Neuro-symbolic prompt compiler for LLMs — grounded answers, fewer hallucinations.*")
 
-        kg_state = gr.State(remulak_kg)
+        kg_state = gr.State(_default_kg)
 
         with gr.Tab("Ask"):
             gr.Markdown("Ask a question and compare Crystal's grounded answer against the naked LLM.")
 
+            _placeholder = (
+                "e.g. What court decided Miranda v. Arizona?"
+                if _legal_kg is not None
+                else "e.g. What is the capital of Remulak?"
+            )
             with gr.Row():
                 question_input = gr.Textbox(
                     label="Question",
-                    placeholder="e.g. What is the capital of Remulak?",
+                    placeholder=_placeholder,
                     scale=4,
                 )
                 ask_btn = gr.Button("Ask", variant="primary", scale=1)
 
             with gr.Row():
                 with gr.Column():
-                    gr.Markdown("### Crystal")
+                    gr.Markdown("### Crystal (Grounded)")
                     crystal_output = gr.Textbox(label="Response", lines=6, interactive=False)
                     crystal_meta_output = gr.Markdown("")
                 with gr.Column():
-                    gr.Markdown("### Naked LLM")
+                    gr.Markdown("### Naked LLM (Baseline)")
                     llm_output = gr.Textbox(label="Response", lines=6, interactive=False)
                     llm_meta_output = gr.Markdown("")
+
+            grounding_output = gr.Markdown("")
 
             ask_btn.click(
                 fn=ask_question,
                 inputs=[question_input, kg_state],
-                outputs=[crystal_output, crystal_meta_output, llm_output, llm_meta_output],
+                outputs=[crystal_output, crystal_meta_output, llm_output, llm_meta_output, grounding_output],
             )
             question_input.submit(
                 fn=ask_question,
                 inputs=[question_input, kg_state],
-                outputs=[crystal_output, crystal_meta_output, llm_output, llm_meta_output],
+                outputs=[crystal_output, crystal_meta_output, llm_output, llm_meta_output, grounding_output],
             )
 
         with gr.Tab("Knowledge Graph"):
-            gr.Markdown("Manage the active knowledge graph. Upload a document or paste text to build a custom KG.")
+            gr.Markdown("Manage the active knowledge graph. Switch between datasets, or upload custom data.")
+
+            with gr.Row():
+                kg_mode_selector = gr.Dropdown(
+                    choices=list(KG_MODES.keys()),
+                    value=_DEFAULT_KG_MODE,
+                    label="Active Knowledge Graph",
+                    interactive=True,
+                    scale=3,
+                )
 
             kg_stats = gr.Markdown(_format_kg_stats(_default_kg_info()))
-            status_msg = gr.Textbox(label="Status", interactive=False, value="Remulak KG loaded.")
+            status_msg = gr.Textbox(label="Status", interactive=False, value=f"{_DEFAULT_KG_MODE} loaded.")
 
             with gr.Row():
                 with gr.Column():
@@ -369,8 +512,13 @@ def build_ui() -> gr.Blocks:
             reset_btn = gr.Button("Reset to Remulak", variant="secondary")
 
             gr.Markdown("#### Facts")
-            kg_facts = gr.Markdown(_format_kg_facts(remulak_kg))
+            kg_facts = gr.Markdown(_format_kg_facts(_default_kg))
 
+            kg_mode_selector.change(
+                fn=switch_kg_mode,
+                inputs=[kg_mode_selector],
+                outputs=[kg_state, status_msg, kg_stats, kg_facts],
+            )
             upload_btn.click(
                 fn=load_document,
                 inputs=[file_input, kg_state],
@@ -385,6 +533,43 @@ def build_ui() -> gr.Blocks:
                 fn=reset_to_remulak,
                 inputs=[],
                 outputs=[kg_state, status_msg, kg_stats, kg_facts],
+            )
+
+        with gr.Tab("KG Explorer"):
+            gr.Markdown("Browse and search the active knowledge graph.")
+
+            with gr.Row():
+                entity_search = gr.Textbox(
+                    label="Search Entity",
+                    placeholder="e.g. Miranda v. Arizona, Roe v. Wade",
+                    scale=4,
+                )
+                search_btn = gr.Button("Search", variant="primary", scale=1)
+
+            entity_results = gr.Markdown("Type a case name or entity to search.")
+
+            gr.Markdown("---")
+            gr.Markdown("### Predicate Summary")
+            predicate_summary = gr.Dataframe(
+                value=_get_kg_predicate_summary(_default_kg),
+                interactive=False,
+            )
+
+            gr.Markdown("### Entities (first 50)")
+            entity_list = gr.Dataframe(
+                value=_get_kg_entity_list(_default_kg),
+                interactive=False,
+            )
+
+            search_btn.click(
+                fn=_search_kg_entity,
+                inputs=[entity_search, kg_state],
+                outputs=[entity_results],
+            )
+            entity_search.submit(
+                fn=_search_kg_entity,
+                inputs=[entity_search, kg_state],
+                outputs=[entity_results],
             )
 
         with gr.Tab("Review"):

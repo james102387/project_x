@@ -9,11 +9,30 @@ Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.
 
 Update this section each session with current priorities.
 
-- **Phase 1a+1b complete.** 500 SCOTUS cases from COLD Cases + 316 citation triplets from CourtListener. 1,469 auto-accepted golden answers. SQLite KG: 1,615 triplets, 496 subjects. Review UI fixed and functional.
-- **Tiered data strategy established.** Structured API data (Tier 0) auto-accepted. NER/LLM-extracted content (Tier 1+) goes through Crystal-proposes / human-verifies workflow.
-- **Known gaps: all resolved.** Citation-format spans detected via regex pre-scan; WH-word-aware predicate override ("who decided" → judges).
-- **Next milestones:** Run Ralph Wiggum loop on the 1,469 golden answers. Phase 1c (judge bios) when needed. Phase 2 (opinion text extraction) when ready for unstructured data.
-- **Test count:** 664 passing, 5 skipped.
+- **MVP readiness plan executed.** Legal KG wired into UI as default. 2,200+ triplets across 10 predicates, 496 subjects. 3,325 golden answers. 50 hand-crafted benchmark cases.
+- **Ralph Wiggum converged at 97.4%** on 3,325 test cases — above 90% threshold. No further dictionary additions needed.
+- **UI upgraded.** KG mode selector (Legal/Remulak), confidence indicators on answers, grounding transparency (shows source KG facts), KG Explorer tab for browsing entities.
+- **Next milestone: Demo benchmark (A/B comparison).** Three-arm comparison: naked LLM vs. LLM + real opinion text vs. Crystal. Requires downloading real opinion documents from CourtListener (not synthetic), auditing which predicates are document-answerable, adding obscure cases. See TODO.md "Next Up" section.
+- **After that:** Phase 1c (judge bios), Phase 2 (opinion text extraction). Citation re-ingestion running in background.
+- **Test count:** 729 passing, 5 skipped.
+
+---
+
+## 2026-04-11 — MVP Readiness Plan Execution
+
+### What changed
+- **Phase A: Legal KG wired into UI** — `src/crystal/tools/kg/legal.py`: added `load_legal_kg()` convenience function. `src/crystal/ui/app.py`: KG mode selector dropdown (Legal SQLite / Remulak demo), loads SQLite KG at startup when `data/legal.sqlite` exists, legal KG is the default experience.
+- **Phase B: Expanded COLD Cases extraction** — 4 new predicates: `opinion_author` (208 records), `per_curiam` (10), `attorneys` (182), `precedential_status` (496). Ontology updated with aliases. Question templates added. SQLite KG rebuilt: 2,206 triplets (up from 1,615). 1,956 auto-accepted questions generated.
+- **Phase C: Cancelled** — CourtListener `/dockets/` endpoint returns empty `nature_of_suit` and `disposition` for SCOTUS cases. These fields are only populated for district court PACER data.
+- **Phase D: Ralph Wiggum loop** — Ran on 3,325 accepted cases against expanded SQLite KG. 97.4% accuracy (3,237/3,325 correct). Converged immediately above 90% threshold. LLM proposals yielded no further improvements.
+- **Phase E: UI polish** — Confidence indicators (HIGH/MEDIUM/LOW based on route), grounding transparency (shows source KG facts for grounded answers), KG Explorer tab (entity search, predicate summary, entity list). Request verb and subject scan improvements.
+- **Phase F: Benchmarks expanded to 50** — `benchmarks/ground_truth/legal.py`: 40 positive + 10 negative cases covering all predicates, WH-word variation, citation-format entities, request verb variation, subject scan queries. `tests/fixtures/scotus_sample.py`: added `precedential_status`, `attorneys`, `opinions` fields to key records. All 94 integration tests pass.
+- **Test fixture updates** — SCOTUS sample records enriched with new fields for integration test coverage.
+
+### Decisions
+- CourtListener `/dockets/` skipped: SCOTUS cases lack `nature_of_suit`/`disposition` data. These fields are PACER-specific.
+- 97.4% Ralph Wiggum score accepted as sufficient — remaining 88 failures are entity resolution edge cases, not predicate mapping issues.
+- `_format_kg_facts()` reused for KG Explorer; `_search_kg_entity()` uses `_resolve_entity()` 3-tier cascade for search.
 
 ---
 
@@ -151,28 +170,6 @@ Update this section each session with current priorities.
 - LLM-extracted triplets are always `pending_review` — never auto-accepted into the KG. The human-in-the-loop design is intentional: LLM extraction is a suggestion engine, not a truth source
 - Review JSON format designed for hand-editing: flat list of dicts with a `status` field the reviewer changes to "accepted" or "rejected"
 - Batching (default 20 sentences/call) keeps LLM context manageable while reducing round-trips
-
----
-
-## 2026-03-16 — D2 Phase 1: KG ingestion pipeline (NER + hand-curated)
-
-### What changed
-- New `src/crystal/ingest/` package:
-  - `schema.py`: `Triplet` dataclass (subject/predicate/object), `IngestResult` dataclass (triplets + alias maps + source), `merge()` for combining results
-  - `ner.py`: spaCy dep-tree-based triplet extraction. Five sentence patterns: copular (`X is Y`, including `of`-flip), possessive (`X has Y`), active transitive (`X verbs Y`), passive (`X was Vd by Y`), prepositional (`X verb PREP Y`). Handles hyphenated entities, determiner stripping, passive predicate text (not lemma).
-  - `loader.py`: CSV loader (auto-detects header), JSON loader (object-with-aliases format + flat array format), `load_file()` auto-detect
-  - `__init__.py`: top-level `ingest(path)` auto-detects format, `build_kg(result)` converts to `KnowledgeGraph`
-  - `__main__.py`: CLI entry point `python -m crystal.ingest <document>` with `--output` and `--format` flags
-- Test fixtures: `sample_triplets.csv`, `sample_triplets_no_header.csv`, `sample_triplets.json`, `sample_triplets_flat.json`, `sample_text.txt`
-- 53 new tests: `test_schema.py` (7), `test_ner.py` (19), `test_loader.py` (18), `test_integration.py` (9)
-- 331/331 passing, 5 skipped
-
-### Decisions
-- NER uses dep tree patterns rather than NER entity labels because `en_core_web_sm` misses most fiction entities — noun chunks + dependency structure are more reliable
-- Passive predicates use `token.text.lower()` not `token.lemma_` to avoid unintuitive lemma forms ("born" → "bear")
-- Copular `of`-flip checks both subject and attr for `prep(of)` to handle both "The capital of X is Y" and "Y is the capital of X"
-- Determiner stripping in `_span_text` only (not in `_get_subject_span`) — subjects keep their structure, objects get cleaned
-- `_join_tokens` collapses spaces around hyphens to preserve "Dark-ore" from spaCy's "Dark", "-", "ore" tokenization
 
 ---
 

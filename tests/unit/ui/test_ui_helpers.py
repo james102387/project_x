@@ -28,7 +28,7 @@ def tiny_kg():
 class TestKgInfo:
     def test_default_kg_info(self):
         info = _default_kg_info()
-        assert info["source"] == "Remulak (built-in)"
+        assert info["source"] in ("Remulak (demo)", "Legal (SCOTUS — SQLite)")
         assert info["triplets"] > 0
         assert info["entities"] > 0
         assert info["subjects"] > 0

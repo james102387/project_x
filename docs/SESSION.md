@@ -1,23 +1,42 @@
-# Session — 2026-04-09 (continued)
+# Session — 2026-04-10
 
-## Detector Known Gaps — Resolved
+## Task: Demo benchmark strategy (A/B comparison design)
 
-### Citation-format entity spans
-- **Problem:** spaCy splits "384 U.S. 436" into three tokens (384, U.S., 436), so `find_entity_spans` never matched the full citation string against the KG.
-- **Fix:** Added a regex pre-scan (Tier 0) in `find_entity_spans` that runs `_CITATION_PATTERN` over raw text before the spaCy-based cascade. Reuses the same citation regex from `legal_ontology.py`. Matched citations are resolved via `kg._resolve_entity()` and injected into matched_ranges to prevent overlap with later tiers.
+Designed the three-arm benchmark comparison for the MVP demo.
 
-### WH-word-aware predicate resolution
-- **Problem:** "decided" always mapped to `date_filed` via `QUESTION_PREDICATE_MAP`, but "Who decided X?" expects judges.
-- **Fix:** Added `_WH_PREDICATE_OVERRIDES` dict keyed on `(predicate_phrase, wh_word)` tuples. New `_leading_wh_word(doc)` helper extracts the first non-punctuation token if it's a question word. Override is checked before the default map in `detect_kg_query`.
-- Override pairs: `("decided", "who") → "judges"`, `("ruled", "who") → "judges"`.
+### Three arms
 
-### Tests added
-- `TestCitationSpanDetection`: 2 tests (entity found + targeted lookup)
-- `TestWhWordPredicateOverride`: 3 tests (who→judges, when→date, wh-word extraction)
-- Full suite: 664 passed, 5 skipped
+1. **Naked LLM** — `call_llm(question)`, no context. Useful as a floor but is a strawman — nobody uses LLMs this way for obscure cases. Fails 100% on cases outside training data.
+2. **LLM + real opinion text** — Lawyer pastes actual case opinion into ChatGPT. This is the realistic comparison. Must use real opinion documents from CourtListener, not synthetic docs constructed from KG metadata.
+3. **Crystal** — Full pipeline (`kg_answerable` / `kg_augmented` / `fallback`).
 
-### Files changed
-- `src/crystal/detectors/kg.py` — regex pre-scan, WH-word override, `_leading_wh_word()`
-- `tests/unit/detectors/test_kg.py` — 5 new tests with legal KG fixture
-- `benchmarks/ground_truth/legal.py` — `LEGAL_KNOWN_GAPS` emptied, resolution comments added
-- `docs/DEVLOG.md` — Active Focus updated (gaps resolved, test count)
+### Key concerns and decisions
+
+**Why not synthetic documents?** A critic would say "you gave the LLM junk to work with." Reformatting KG metadata as prose tests the LLM's ability to parse our synthetic format, not its ability to extract facts from real legal text. Must download actual opinion text (5k-50k tokens).
+
+**Metadata vs. document content mismatch.** The KG was trained on structured API metadata. The opinion documents contain different information. Not all KG predicates appear in opinion text:
+- **In both:** court, date_filed, judges, opinion_author, cites, attorneys
+- **KG only:** cited_by_count, precedential_status, per_curiam (these are CourtListener index fields, not in the opinion)
+- **Document only:** holdings, doctrines, reasoning (Phase 2a, Crystal can't answer yet)
+
+Fair A/B comparison can only run on "both" category questions. KG-only questions shown separately as a second value proposition.
+
+**Requires manual audit (B2):** Must download a few opinions and verify which predicates actually appear in the text before building the benchmark.
+
+**Document grouping.** One opinion per case, multiple questions per document. Questions reference cases by name — entity detection (already built) resolves to canonical case name = document key. Alias and citation-format questions resolve through existing 3-tier cascade.
+
+**Scaling.** ~1,500 questions through an LLM is expensive. Two-tier approach:
+- Tier 1: ~50 hand-crafted cases, run live, cache results to JSON
+- Tier 2: ~100-200 stratified sample from bulk corpus, run once, cache. `score_batch_rubric()` works on cached dicts.
+
+**Must add obscure cases (B4).** Current `LEGAL_BENCHMARK_CASES` are all famous (Miranda, Brown, Roe). LLM might know these from training data. Need 10-15 long-tail cases.
+
+**Three metrics:** hallucination rate (headline), rubric quality (depth), token cost (economics).
+
+**RAG as ingestion faucet.** RAG is not a competitor to Crystal — it's a future document discovery layer. RAG retrieves documents targeted at KG gaps (identified by Ralph Wiggum failure analysis). Documents go through the existing ingestion pipeline. The review step is the quality firewall.
+
+### Changes made
+
+- Restructured `TODO.md` — collapsed completed work into `<details>` blocks, "Next Up" is the benchmark section
+- Added B1-B6 implementation tasks for demo benchmark
+- Added R1-R4 tasks for RAG-as-faucet (post-demo)

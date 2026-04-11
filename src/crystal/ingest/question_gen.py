@@ -176,6 +176,22 @@ _PREDICATE_QUESTION_FORMS: dict[str, list[str]] = {
         "What type of case was {subject}?",
         "What was the nature of suit in {subject}?",
     ],
+    "opinion_author": [
+        "Who wrote the opinion in {subject}?",
+        "Who authored the opinion in {subject}?",
+    ],
+    "per_curiam": [
+        "Was {subject} a per curiam opinion?",
+        "Is {subject} a per curiam decision?",
+    ],
+    "attorneys": [
+        "Who were the attorneys in {subject}?",
+        "Who represented the parties in {subject}?",
+    ],
+    "precedential_status": [
+        "What is the precedential status of {subject}?",
+        "Is {subject} a published opinion?",
+    ],
     "capital": [
         "What is the capital of {subject}?",
     ],

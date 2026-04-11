@@ -71,6 +71,32 @@ def _record_to_triplets(record: dict) -> tuple[list[Triplet], dict[str, str]]:
             subject=canonical, predicate="nature_of_suit", object=nature.strip(),
         ))
 
+    attorneys = record.get("attorneys")
+    if attorneys and attorneys.strip():
+        triplets.append(Triplet(
+            subject=canonical, predicate="attorneys", object=attorneys.strip(),
+        ))
+
+    prec_status = record.get("precedential_status")
+    if prec_status and prec_status.strip():
+        triplets.append(Triplet(
+            subject=canonical, predicate="precedential_status", object=prec_status.strip(),
+        ))
+
+    opinions = record.get("opinions") or []
+    for op in opinions:
+        if not isinstance(op, dict):
+            continue
+        author = op.get("author_str")
+        if author and author.strip():
+            triplets.append(Triplet(
+                subject=canonical, predicate="opinion_author", object=author.strip(),
+            ))
+        if op.get("per_curiam"):
+            triplets.append(Triplet(
+                subject=canonical, predicate="per_curiam", object="Yes",
+            ))
+
     aliases = generate_case_aliases(
         case_name=case_name,
         case_name_short=record.get("case_name_short", ""),
