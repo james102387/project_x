@@ -127,8 +127,7 @@ def print_report(name: str, scored: dict) -> None:
         print(f"  --- Rubric Scores (averages) ---")
         rubric = scored["rubric_averages"]
         print(f"  Factual Accuracy:  {rubric['accuracy']:.2f}")
-        print(f"  Specificity:       {rubric['specificity']:.2f}")
-        print(f"  No-Hallucination:  {rubric['no_hallucination']:.2f}")
+        print(f"  Abstention:        {rubric['abstention']:.2f}")
         print()
         print(f"  Positive cases:    {scored['positive_cases']}")
         print(f"  Negative cases:    {scored['negative_cases']}")
@@ -146,8 +145,7 @@ def print_report(name: str, scored: dict) -> None:
             if "rubric" in d:
                 r = d["rubric"]
                 print(f"    Rubric: acc={r['accuracy']:.2f} "
-                      f"spec={r['specificity']:.2f} "
-                      f"no_hal={r['no_hallucination']:.2f}")
+                      f"abstention={r['abstention']:.2f}")
             print()
 
 
@@ -200,7 +198,7 @@ def main():
         if "rubric_averages" in baseline_scored and "rubric_averages" in treatment_scored:
             print()
             print(f"  --- Rubric Comparison ---")
-            for dim in ("accuracy", "specificity", "no_hallucination"):
+            for dim in ("accuracy", "abstention"):
                 b = baseline_scored["rubric_averages"][dim]
                 t = treatment_scored["rubric_averages"][dim]
                 print(f"  {dim:20s}  {b:.2f} → {t:.2f}  ({t - b:+.2f})")

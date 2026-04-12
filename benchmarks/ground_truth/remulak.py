@@ -184,7 +184,7 @@ BENCHMARK_CASES: list[tuple[str, str, list[str], bool]] = [
 #
 # Format: (question, ground_truth_answer, match_strings, is_negative)
 # match_strings check for KG values or computed results that prove grounding.
-# The rubric (accuracy, specificity, no-hallucination) measures quality.
+# The rubric (accuracy, abstention) measures quality.
 
 AUGMENTED_BENCHMARK_CASES: list[tuple[str, str, list[str], bool]] = [
     # --- KG augmented: Crystal injects verified facts, LLM reasons over them ---

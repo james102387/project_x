@@ -40,32 +40,66 @@ class TestGenerateQuestionsFromTriplets:
         assert "Roe" in qs[1]
 
     def test_uses_templates(self):
-        triplets = [("case x", "court", "Court Y")]
+        triplets = [("smith v. jones", "court", "Court Y")]
         qs = generate_questions_from_triplets(triplets)
         assert "court" in qs[0].lower()
 
     def test_respects_max(self):
-        triplets = [(f"case {i}", "court", "ct") for i in range(20)]
+        triplets = [(f"alpha v. beta{i}", "court", "ct") for i in range(20)]
         qs = generate_questions_from_triplets(triplets, max_questions=3)
         assert len(qs) == 3
 
-    def test_deduplicates_subjects(self):
+    def test_multiple_predicates_per_subject(self):
         triplets = [
-            ("case a", "court", "ct1"),
-            ("case a", "date_filed", "2020"),
-            ("case b", "court", "ct2"),
+            ("smith v. jones", "court", "ct1"),
+            ("smith v. jones", "date_filed", "2020"),
+            ("doe v. roe", "court", "ct2"),
         ]
         qs = generate_questions_from_triplets(triplets)
-        assert len(qs) == 2
+        assert len(qs) == 3
+        assert any("court" in q.lower() for q in qs)
+        assert any("decided" in q.lower() for q in qs)
+
+    def test_deduplicates_same_subject_predicate(self):
+        triplets = [
+            ("smith v. jones", "court", "ct1"),
+            ("smith v. jones", "court", "ct2"),
+        ]
+        qs = generate_questions_from_triplets(triplets)
+        assert len(qs) == 1
 
     def test_empty_triplets(self):
         assert generate_questions_from_triplets([]) == []
 
-    def test_unknown_predicate_fallback(self):
-        triplets = [("case x", "custom_pred", "value")]
+    def test_unknown_predicate_skipped(self):
+        triplets = [("smith v. jones", "custom_pred", "value")]
+        qs = generate_questions_from_triplets(triplets)
+        assert len(qs) == 0
+
+    def test_mixed_known_unknown_predicates(self):
+        triplets = [
+            ("smith v. jones", "garbage_pred", "value"),
+            ("smith v. jones", "court", "Supreme Court"),
+            ("doe v. roe", "take_of", "something"),
+        ]
         qs = generate_questions_from_triplets(triplets)
         assert len(qs) == 1
-        assert "custom_pred" in qs[0]
+        assert "court" in qs[0].lower()
+
+    def test_filters_junk_subjects(self):
+        triplets = [
+            ("i", "court", "Supreme Court"),
+            ("he", "date_filed", "2020"),
+            ("this case", "court", "Court"),
+            ("court", "disposition", "affirmed"),
+        ]
+        qs = generate_questions_from_triplets(triplets)
+        assert len(qs) == 0
+
+    def test_accepts_proper_nouns(self):
+        triplets = [("Brown", "court", "Supreme Court")]
+        qs = generate_questions_from_triplets(triplets)
+        assert len(qs) == 1
 
 
 class TestBeforeAfterComparison:

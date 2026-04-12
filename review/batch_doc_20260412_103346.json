@@ -1,0 +1,143 @@
+{
+  "batch": {
+    "id": "doc_20260412_103346",
+    "source": "brown-v-board-of-education, loving-v-virginia, gideon-v-wainwright (+2 more)",
+    "records_ingested": 7,
+    "timestamp": "2026-04-12T10:33:46.724785+00:00",
+    "type": "document_extraction"
+  },
+  "description": "Questions generated from document extraction (brown-v-board-of-education, loving-v-virginia, gideon-v-wainwright (+2 more)). Crystal proposed answers; human must verify golden_answer.",
+  "total": 7,
+  "pending": 7,
+  "cases": [
+    {
+      "question": "When was Lovings decided?",
+      "golden_answer": "lovings — date_filed: charged with violating § 20-58 of the Virginia Code\nlovings — date_filed: convicted of violating § 20-58 of Virginia Code",
+      "match_strings": [
+        "lovings — date_filed: charged with violating § 20-58 of the virginia code\nlovings — date_filed: convicted of violating § 20-58 of virginia code"
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "pending_review",
+      "crystal_proposed": "lovings — date_filed: charged with violating § 20-58 of the Virginia Code\nlovings — date_filed: convicted of violating § 20-58 of Virginia Code",
+      "crystal_route": "kg_answerable",
+      "crystal_confidence": "kg_answerable",
+      "source_triplet": [
+        "Lovings",
+        "date_filed",
+        "convicted of violating § 20-58 of Virginia Code"
+      ]
+    },
+    {
+      "question": "When was Betts V. Brady decided?",
+      "golden_answer": "betts v. brady — date_filed: Decided ten years before current case",
+      "match_strings": [
+        "betts v. brady — date_filed: decided ten years before current case"
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "pending_review",
+      "crystal_proposed": "betts v. brady — date_filed: Decided ten years before current case",
+      "crystal_route": "kg_answerable",
+      "crystal_confidence": "kg_answerable",
+      "source_triplet": [
+        "Betts v. Brady",
+        "date_filed",
+        "Decided ten years before current case"
+      ]
+    },
+    {
+      "question": "What cases does Powell V. Alabama cite?",
+      "golden_answer": "powell v. alabama — cites: right to be heard by counsel",
+      "match_strings": [
+        "powell v. alabama — cites: right to be heard by counsel"
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "pending_review",
+      "crystal_proposed": "powell v. alabama — cites: right to be heard by counsel",
+      "crystal_route": "kg_answerable",
+      "crystal_confidence": "kg_answerable",
+      "source_triplet": [
+        "Powell v. Alabama",
+        "cites",
+        "right to be heard by counsel"
+      ]
+    },
+    {
+      "question": "When was Poe V. Ullman decided?",
+      "golden_answer": "poe v. ullman — date_filed: 1962 or earlier",
+      "match_strings": [
+        "poe v. ullman — date_filed: 1962 or earlier"
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "pending_review",
+      "crystal_proposed": "poe v. ullman — date_filed: 1962 or earlier",
+      "crystal_route": "kg_answerable",
+      "crystal_confidence": "kg_answerable",
+      "source_triplet": [
+        "Poe v. Ullman",
+        "date_filed",
+        "1962 or earlier"
+      ]
+    },
+    {
+      "question": "Who were the judges in Walker V. Sauvinet?",
+      "golden_answer": "# Judges in Walker v. Sauvinet\n\nAccording to the knowledge graph, the judges in Walker v. Sauvinet were:\n\n- **Justice Clifford**\n- **Justice Field**\n\nWalker v. Sauvinet was an 1875 U.S. Supreme Court case that dealt with the application of the Seventh Amendment right to jury trial in state courts. Justice Field wrote the majority opinion, which held that the Seventh Amendment did not apply to the states.",
+      "match_strings": [
+        "# judges in walker v. sauvinet\n\naccording to the knowledge graph, the judges in walker v. sauvinet were:\n\n- **justice clifford**\n- **justice field**\n\nwalker v. sauvinet was an 1875 u.s. supreme court case that dealt with the application of the seventh amendment right to jury trial in state courts. justice field wrote the majority opinion, which held that the seventh amendment did not apply to the states.",
+        "# judges in walker v. sauvinet\n\naccording to the knowledge graph",
+        "the judges in walker v. sauvinet were:\n\n- **justice clifford**\n- **justice field**\n\nwalker v. sauvinet was an 1875 u.s. supreme court case that dealt with the application of the seventh amendment right to jury trial in state courts. justice field wrote the majority opinion",
+        "which held that the seventh amendment did not apply to the states."
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "pending_review",
+      "crystal_proposed": "# Judges in Walker v. Sauvinet\n\nAccording to the knowledge graph, the judges in Walker v. Sauvinet were:\n\n- **Justice Clifford**\n- **Justice Field**\n\nWalker v. Sauvinet was an 1875 U.S. Supreme Court case that dealt with the application of the Seventh Amendment right to jury trial in state courts. Justice Field wrote the majority opinion, which held that the Seventh Amendment did not apply to the states.",
+      "crystal_route": "kg_augmented",
+      "crystal_confidence": "kg_augmented",
+      "source_triplet": [
+        "Walker v. Sauvinet",
+        "judges",
+        "Justice Clifford, Justice Field"
+      ]
+    },
+    {
+      "question": "What cases does Erie R. Co. V. Tompkins cite?",
+      "golden_answer": "erie r. co. v. tompkins — cites: 304 U.S. 64",
+      "match_strings": [
+        "erie r. co. v. tompkins — cites: 304 u.s. 64"
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "pending_review",
+      "crystal_proposed": "erie r. co. v. tompkins — cites: 304 U.S. 64",
+      "crystal_route": "kg_answerable",
+      "crystal_confidence": "kg_answerable",
+      "source_triplet": [
+        "Erie R. Co. v. Tompkins",
+        "cites",
+        "304 U.S. 64"
+      ]
+    },
+    {
+      "question": "When was Terry decided?",
+      "golden_answer": "terry — date_filed: 1966",
+      "match_strings": [
+        "terry — date_filed: 1966"
+      ],
+      "is_negative": false,
+      "tier": 2,
+      "status": "pending_review",
+      "crystal_proposed": "terry — date_filed: 1966",
+      "crystal_route": "kg_answerable",
+      "crystal_confidence": "kg_answerable",
+      "source_triplet": [
+        "Terry",
+        "date_filed",
+        "1966"
+      ]
+    }
+  ]
+}

@@ -353,3 +353,93 @@ def collect_accepted_cases(review_dir: Path | None = None) -> list[tuple[str, st
                 ))
 
     return accepted
+
+
+def save_proposed_as_batch(
+    proposed_rows: list[dict],
+    source: str = "document_extraction",
+    review_dir: Path | None = None,
+) -> Path | None:
+    """Save Crystal's proposed Q&A pairs as a review batch for human verification.
+
+    Each row should have: question, crystal_answer, route, confidence, expected,
+    and optionally golden_answer (user-corrected) and source_triplet.
+
+    The user edits golden_answer to provide ground truth before accepting.
+    """
+    review_dir = review_dir or REVIEW_DIR
+    review_dir.mkdir(parents=True, exist_ok=True)
+
+    if not proposed_rows:
+        return None
+
+    from datetime import datetime, timezone
+
+    ts = datetime.now(timezone.utc)
+    batch_id = f"doc_{ts.strftime('%Y%m%d_%H%M%S')}"
+
+    cases = []
+    for row in proposed_rows:
+        golden = row.get("golden_answer", "").strip()
+        crystal_answer = row.get("crystal_answer", "")
+        question = row.get("question", "")
+
+        if not golden:
+            golden = crystal_answer
+
+        match_strings = _derive_match_strings(golden)
+
+        status = "pending_review"
+        if row.get("status") in ("accepted", "rejected"):
+            status = row["status"]
+
+        cases.append({
+            "question": question,
+            "golden_answer": golden,
+            "match_strings": match_strings,
+            "is_negative": False,
+            "tier": 2,
+            "status": status,
+            "crystal_proposed": crystal_answer,
+            "crystal_route": row.get("route", ""),
+            "crystal_confidence": row.get("confidence", ""),
+            "source_triplet": row.get("source_triplet", []),
+        })
+
+    data = {
+        "batch": {
+            "id": batch_id,
+            "source": source,
+            "records_ingested": len(cases),
+            "timestamp": ts.isoformat(),
+            "type": "document_extraction",
+        },
+        "description": (
+            f"Questions generated from document extraction ({source}). "
+            "Crystal proposed answers; human must verify golden_answer."
+        ),
+        "total": len(cases),
+        "pending": sum(1 for c in cases if c["status"] == "pending_review"),
+        "cases": cases,
+    }
+
+    path = review_dir / f"batch_{batch_id}.json"
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+    return path
+
+
+def _derive_match_strings(golden_answer: str) -> list[str]:
+    """Derive match_strings from a golden answer for benchmark scoring."""
+    if not golden_answer:
+        return []
+    answer = golden_answer.strip()
+    strings = [answer.lower()]
+    for sep in [",", ";", " and "]:
+        if sep in answer:
+            parts = [p.strip().lower() for p in answer.split(sep) if p.strip()]
+            if len(parts) > 1:
+                strings.extend(parts)
+                break
+    return list(dict.fromkeys(strings))

@@ -31,6 +31,7 @@ from crystal.review import (
     load_batch_questions,
     load_known_gaps,
     load_pending_questions,
+    save_proposed_as_batch,
     save_review_decisions,
 )
 from crystal.tools.kg import remulak_kg
@@ -373,6 +374,125 @@ def save_pending_decisions(ingest_result, table_data, kg_state):
     )
 
 
+# ── Proposed answers helpers ──────────────────────────────────────────────
+
+_PROPOSED_HEADERS = ["Question", "Crystal Answer", "Route", "Confidence", "Expected", "Golden Answer"]
+
+
+def run_proposed_answers(ingest_result, kg_state):
+    """Generate questions from extracted facts and show Crystal's proposed answers.
+
+    The "Golden Answer" column is pre-filled with Crystal's answer for the user
+    to verify or correct. This is the ground truth the user provides.
+    """
+    if ingest_result is None or not isinstance(ingest_result, DocumentIngestionResult):
+        return "Run ingestion first.", pd.DataFrame(columns=_PROPOSED_HEADERS)
+
+    all_triplets = [st.as_tuple() for st in ingest_result.auto_accepted]
+    if not all_triplets:
+        return "No extracted facts to generate questions from.", pd.DataFrame(columns=_PROPOSED_HEADERS)
+
+    questions = generate_questions_from_triplets(all_triplets, max_questions=15)
+    if not questions:
+        return "Could not generate questions from extracted facts.", pd.DataFrame(columns=_PROPOSED_HEADERS)
+
+    rows = []
+    for q_text in questions:
+        try:
+            state = make_initial_state(q_text, kg=kg_state)
+            final = _graph.invoke(state)
+            answer = final.get("final_response", "")
+            prompt_type = final.get("prompt_type", "unknown")
+            route_label = _ROUTE_LABELS.get(prompt_type, prompt_type)
+            confidence = _CONFIDENCE_BADGES.get(prompt_type, "UNKNOWN").split(" — ")[0]
+        except Exception as e:
+            answer = f"[Error: {e}]"
+            route_label = "error"
+            confidence = "N/A"
+
+        expected = ""
+        for s, p, o in all_triplets:
+            if s.lower() in q_text.lower() and p.lower() in q_text.lower():
+                expected = f"{o}"
+                break
+            if s.lower() in q_text.lower():
+                expected = f"{o}"
+                break
+
+        golden = answer[:200]
+
+        rows.append([q_text, answer[:200], route_label, confidence, expected[:100], golden])
+
+    status = (
+        f"Generated {len(rows)} questions from extracted facts. "
+        "**Review the 'Golden Answer' column** — edit to correct Crystal's answer, "
+        "then click 'Save to Review' to create ground truth."
+    )
+    return status, pd.DataFrame(rows, columns=_PROPOSED_HEADERS)
+
+
+def save_proposed_to_review(proposed_table, ingest_result):
+    """Save the proposed answers table as a review batch for ground truth generation."""
+    if proposed_table is None:
+        return "No proposed answers to save."
+
+    if isinstance(proposed_table, pd.DataFrame):
+        rows_data = proposed_table.values.tolist()
+    else:
+        rows_data = proposed_table
+
+    if not rows_data or len(rows_data) == 0:
+        return "No proposed answers to save."
+
+    source = "document_extraction"
+    if ingest_result and isinstance(ingest_result, DocumentIngestionResult):
+        source = ingest_result.stats.get("source", "document_extraction")
+
+    all_triplets = []
+    if ingest_result and isinstance(ingest_result, DocumentIngestionResult):
+        all_triplets = [st.as_tuple() for st in ingest_result.auto_accepted]
+
+    proposed_rows = []
+    for row in rows_data:
+        try:
+            question = str(row[0])
+            crystal_answer = str(row[1])
+            route = str(row[2])
+            confidence = str(row[3])
+            expected = str(row[4]) if len(row) > 4 else ""
+            golden = str(row[5]) if len(row) > 5 else crystal_answer
+
+            src_triplet = []
+            for s, p, o in all_triplets:
+                if s.lower() in question.lower():
+                    src_triplet = [s, p, o]
+                    break
+
+            proposed_rows.append({
+                "question": question,
+                "crystal_answer": crystal_answer,
+                "route": route,
+                "confidence": confidence,
+                "expected": expected,
+                "golden_answer": golden,
+                "source_triplet": src_triplet,
+            })
+        except (IndexError, ValueError):
+            continue
+
+    if not proposed_rows:
+        return "No valid rows to save."
+
+    batch_path = save_proposed_as_batch(proposed_rows, source=source)
+    if batch_path is None:
+        return "Failed to save batch."
+
+    return (
+        f"Saved **{len(proposed_rows)} questions** to review batch: "
+        f"`{batch_path.name}`. Go to the **Review** tab to accept/reject."
+    )
+
+
 # ── Before/after comparison helpers ───────────────────────────────────────
 
 _COMPARE_HEADERS = ["Question", "Crystal (KG-grounded)", "Route", "LLM + Docs", "Naked LLM"]
@@ -712,6 +832,35 @@ def build_ui() -> gr.Blocks:
                 save_pending_btn = gr.Button("Save & Accept Pending")
 
             ingest_decision_status = gr.Markdown("")
+
+            gr.Markdown("---")
+            gr.Markdown("### Crystal's Proposed Answers → Ground Truth")
+            gr.Markdown(
+                "After ingestion, Crystal generates questions from extracted facts and proposes answers. "
+                "**Your job:** review the **Golden Answer** column. If Crystal got it wrong, edit the cell "
+                "with the correct answer. Then click **Save to Review** to create verified ground truth."
+            )
+            proposed_btn = gr.Button("Generate & Answer", variant="secondary")
+            proposed_status = gr.Markdown("")
+            proposed_table = gr.Dataframe(
+                value=pd.DataFrame(columns=_PROPOSED_HEADERS),
+                interactive=True,
+            )
+            with gr.Row():
+                save_proposed_btn = gr.Button("Save to Review", variant="primary")
+            proposed_save_status = gr.Markdown("")
+
+            proposed_btn.click(
+                fn=run_proposed_answers,
+                inputs=[ingest_result_state, kg_state],
+                outputs=[proposed_status, proposed_table],
+            )
+
+            save_proposed_btn.click(
+                fn=save_proposed_to_review,
+                inputs=[proposed_table, ingest_result_state],
+                outputs=[proposed_save_status],
+            )
 
             ingest_btn.click(
                 fn=run_ingestion,

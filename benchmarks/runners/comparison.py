@@ -502,13 +502,6 @@ def print_report(report: dict) -> None:
           f"{_fmt_pct(a2 and a2.get('hallucination_rate')):>12s} "
           f"{_fmt_pct(a3 and a3.get('hallucination_rate')):>12s}")
 
-    for dim in ("accuracy", "specificity", "no_hallucination"):
-        r1 = (a1 or {}).get("rubric_averages", {}).get(dim)
-        r2 = (a2 or {}).get("rubric_averages", {}).get(dim)
-        r3 = (a3 or {}).get("rubric_averages", {}).get(dim)
-        label = f"Rubric: {dim}"
-        print(f"  {label:24s} {_fmt_score(r1):>12s} {_fmt_score(r2):>12s} {_fmt_score(r3):>12s}")
-
     print(f"  {'Avg input tokens':24s} {_avg_tokens(a1):>12s} {_avg_tokens(a2):>12s} {_avg_tokens(a3):>12s}")
     print(f"  {'Avg output tokens':24s} {_avg_tokens(a1, 'output_tokens'):>12s} "
           f"{_avg_tokens(a2, 'output_tokens'):>12s} "

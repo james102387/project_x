@@ -21,6 +21,7 @@ from benchmarks.ralph_wiggum.base import (
 from benchmarks.ralph_wiggum.predicate_loop import PredicateLoop
 from benchmarks.ralph_wiggum.entity_loop import EntityLoop
 from benchmarks.ralph_wiggum.threshold_loop import ThresholdLoop
+from benchmarks.ralph_wiggum.extraction_loop import ExtractionLoop
 
 logger = logging.getLogger(__name__)
 

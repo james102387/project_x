@@ -137,13 +137,13 @@ class TestPrintReport:
             "partition": {"total": 6, "document_answerable": 2, "kg_only": 2, "negative": 1, "subject_scan": 1, "by_predicate": {}},
             "fair_ab": {
                 "cases": 3,
-                "arm1_naked_llm": {"accuracy": 0.33, "hallucination_rate": 0.67, "rubric_averages": {"accuracy": 0.5, "specificity": 0.3, "no_hallucination": 0.8}, "details": [], "total": 3, "correct": 1, "positive_cases": 3, "negative_cases": 0},
-                "arm2_llm_document": {"accuracy": 0.67, "hallucination_rate": 0.33, "rubric_averages": {"accuracy": 0.7, "specificity": 0.5, "no_hallucination": 0.9}, "details": [], "total": 3, "correct": 2, "positive_cases": 3, "negative_cases": 0},
-                "arm3_crystal": {"accuracy": 1.0, "hallucination_rate": 0.0, "rubric_averages": {"accuracy": 1.0, "specificity": 1.0, "no_hallucination": 1.0}, "details": [], "total": 3, "correct": 3, "positive_cases": 3, "negative_cases": 0},
+                "arm1_naked_llm": {"accuracy": 0.33, "hallucination_rate": 0.67, "rubric_averages": {"accuracy": 0.5, "abstention": 0.8}, "details": [], "total": 3, "correct": 1, "positive_cases": 3, "negative_cases": 0},
+                "arm2_llm_document": {"accuracy": 0.67, "hallucination_rate": 0.33, "rubric_averages": {"accuracy": 0.7, "abstention": 0.9}, "details": [], "total": 3, "correct": 2, "positive_cases": 3, "negative_cases": 0},
+                "arm3_crystal": {"accuracy": 1.0, "hallucination_rate": 0.0, "rubric_averages": {"accuracy": 1.0, "abstention": 1.0}, "details": [], "total": 3, "correct": 3, "positive_cases": 3, "negative_cases": 0},
             },
             "kg_only": {
                 "cases": 2,
-                "arm3_crystal": {"accuracy": 1.0, "hallucination_rate": 0.0, "rubric_averages": {"accuracy": 1.0, "specificity": 1.0, "no_hallucination": 1.0}, "details": [], "total": 2, "correct": 2, "positive_cases": 2, "negative_cases": 0},
+                "arm3_crystal": {"accuracy": 1.0, "hallucination_rate": 0.0, "rubric_averages": {"accuracy": 1.0, "abstention": 1.0}, "details": [], "total": 2, "correct": 2, "positive_cases": 2, "negative_cases": 0},
             },
             "negatives": {
                 "cases": 1,

@@ -108,33 +108,90 @@ def before_after_comparison(
     return result
 
 
-def generate_questions_from_triplets(triplets: list[tuple[str, str, str]], max_questions: int = 5) -> list[str]:
-    """Generate simple questions from extracted triplets for comparison."""
-    questions = []
-    seen_subjects = set()
+_PRED_TEMPLATES = {
+    "court": "What court decided {subject}?",
+    "date_filed": "When was {subject} decided?",
+    "judges": "Who were the judges in {subject}?",
+    "opinion_author": "Who wrote the opinion in {subject}?",
+    "cites": "What cases does {subject} cite?",
+    "attorneys": "Who were the attorneys in {subject}?",
+    "disposition": "What was the outcome of {subject}?",
+    "cited_by_count": "What is the citation count for {subject}?",
+    "precedential_status": "What is the precedential status of {subject}?",
+    "per_curiam": "Was {subject} a per curiam decision?",
+}
 
-    _PRED_TEMPLATES = {
-        "court": "What court decided {subject}?",
-        "date_filed": "When was {subject} decided?",
-        "judges": "Who were the judges in {subject}?",
-        "opinion_author": "Who wrote the opinion in {subject}?",
-        "cites": "What cases does {subject} cite?",
-        "attorneys": "Who were the attorneys in {subject}?",
-        "disposition": "What was the outcome of {subject}?",
-    }
+
+_JUNK_SUBJECTS = {
+    "i", "he", "she", "it", "we", "they", "this", "that", "court",
+    "courts", "state", "states", "law", "case", "cases", "the court",
+    "this case", "the state", "defendant", "plaintiff", "petitioner",
+    "respondent", "appellant", "appellee", "parties", "conclusions",
+    "provisions", "progress", "burden", "equity", "presentations",
+    "opinion", "dissent", "concurrence", "judgment", "order",
+}
+
+_JUNK_PREFIXES = ("this ", "the ", "said ", "such ", "that ")
+
+
+def _is_plausible_case_name(subject: str) -> bool:
+    """Check if a subject looks like a legal case name, not NER noise."""
+    s = subject.strip().lower()
+    if len(s) < 3 or len(s) > 120:
+        return False
+    if s in _JUNK_SUBJECTS:
+        return False
+    if any(s.startswith(p) and " v" not in s for p in _JUNK_PREFIXES):
+        return False
+
+    if " v. " in s or " v " in s:
+        parts = s.replace(" v. ", " v ").split(" v ", 1)
+        left = parts[0].strip()
+        right = parts[1].strip() if len(parts) > 1 else ""
+        if left in _JUNK_SUBJECTS or right in _JUNK_SUBJECTS:
+            return False
+        if len(left) < 2 or len(right) < 2:
+            return False
+        return True
+
+    words = subject.strip().split()
+    if len(words) > 6:
+        return False
+    if not any(w[0].isupper() for w in words if w):
+        return False
+    if all(w[0].islower() for w in words if w):
+        return False
+    if s.startswith("justice ") or s.startswith("chief justice "):
+        return False
+    return True
+
+
+def generate_questions_from_triplets(triplets: list[tuple[str, str, str]], max_questions: int = 5) -> list[str]:
+    """Generate questions from extracted triplets using known predicate templates.
+
+    Only generates questions for predicates we have templates for and subjects
+    that look like real case names or legal entities.
+    Allows multiple questions per subject (one per predicate).
+    """
+    questions = []
+    seen = set()
 
     for subj, pred, obj in triplets:
         if len(questions) >= max_questions:
             break
-        if subj in seen_subjects:
-            continue
 
         template = _PRED_TEMPLATES.get(pred.lower())
-        if template:
-            questions.append(template.format(subject=subj.title()))
-            seen_subjects.add(subj)
-        elif pred and subj:
-            questions.append(f"What is the {pred} of {subj.title()}?")
-            seen_subjects.add(subj)
+        if not template:
+            continue
+
+        if not _is_plausible_case_name(subj):
+            continue
+
+        key = (subj.lower(), pred.lower())
+        if key in seen:
+            continue
+        seen.add(key)
+
+        questions.append(template.format(subject=subj.title()))
 
     return questions

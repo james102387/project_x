@@ -5,10 +5,8 @@ from benchmarks.scoring.rubric import (
     RubricResult,
     accuracy_score,
     calibration_score,
-    grounding_score,
     is_abstention,
     score_rubric,
-    specificity_score,
 )
 
 __all__ = [
@@ -16,8 +14,6 @@ __all__ = [
     "RubricResult",
     "accuracy_score",
     "calibration_score",
-    "grounding_score",
     "is_abstention",
     "score_rubric",
-    "specificity_score",
 ]

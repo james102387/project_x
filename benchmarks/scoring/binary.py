@@ -63,7 +63,7 @@ def score_batch_rubric(
     """
     scored = []
     correct = 0
-    totals = {"accuracy": 0.0, "specificity": 0.0, "no_hallucination": 0.0}
+    totals = {"accuracy": 0.0, "abstention": 0.0}
     positive_count = 0
     negative_count = 0
 
@@ -88,8 +88,7 @@ def score_batch_rubric(
             positive_count += 1
 
         totals["accuracy"] += rubric.accuracy
-        totals["specificity"] += rubric.specificity
-        totals["no_hallucination"] += rubric.no_hallucination
+        totals["abstention"] += rubric.abstention
 
         scored.append({
             **r,

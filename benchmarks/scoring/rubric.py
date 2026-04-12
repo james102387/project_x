@@ -1,12 +1,14 @@
 """
 Quality rubric scorers for benchmark evaluation.
 
-Three dimensions scored per-response as floats in [0.0, 1.0]:
+Two dimensions scored per-response as floats in [0.0, 1.0]:
   - Factual Accuracy: ratio of match_strings present in the response
-  - Specificity: ratio of exact KG object values present in the response
-  - No-Hallucination: grounding check (positive cases) or abstention check (negative cases)
+  - Abstention: for negative cases, did the system refuse rather than fabricate?
 
-No weighting, no composite score. Each dimension reported independently.
+The three customer-facing metrics derived from these:
+  1. Accuracy (% questions answered correctly)
+  2. Hallucination rate (1 - accuracy)
+  3. Token cost (measured externally by the runner, not scored here)
 """
 
 from __future__ import annotations
@@ -79,8 +81,7 @@ _ABSTENTION_PATTERN = re.compile(
 class RubricResult:
     """Per-response rubric scores."""
     accuracy: float
-    specificity: float
-    no_hallucination: float
+    abstention: float
 
 
 def accuracy_score(response: str, match_strings: list[str]) -> float:
@@ -183,23 +184,8 @@ def score_rubric(
     kg_results: list[dict] | None = None,
     is_negative: bool = False,
 ) -> RubricResult:
-    """Score a single response across all three rubric dimensions."""
-    flat_kg = _flatten_kg_results(kg_results or [])
+    """Score a single response on accuracy and abstention."""
     return RubricResult(
         accuracy=accuracy_score(response, match_strings),
-        specificity=specificity_score(response, flat_kg),
-        no_hallucination=_no_hallucination_score(
-            response, flat_kg, is_negative
-        ),
+        abstention=calibration_score(response, is_negative=is_negative),
     )
-
-
-def _no_hallucination_score(
-    response: str,
-    kg_results: list[dict],
-    is_negative: bool,
-) -> float:
-    """Combined no-hallucination score: grounding for positive, calibration for negative."""
-    if is_negative:
-        return calibration_score(response, is_negative=True)
-    return grounding_score(response, kg_results)

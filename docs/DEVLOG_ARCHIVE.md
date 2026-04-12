@@ -5,6 +5,38 @@ Only the most recent ~5 entries stay in `DEVLOG.md`.
 
 ---
 
+## 2026-04-11 — Planner Confidence Gate ("Never Worse Than LLM")
+
+### What changed
+- **Confidence gate in `plan_builder_node`** — `src/crystal/nodes/planner.py`: `_kg_detection_is_confident()` checks entity match quality before using KG results. Exact and alias matches are always trusted. Fuzzy matches require `match_score >= 90.0` (threshold: `KG_FUZZY_CONFIDENCE_THRESHOLD`). Below that, the KG detection is filtered out and Crystal falls back to the raw LLM.
+- **17 unit tests** — `tests/unit/nodes/test_planner.py`: covers exact/alias/fuzzy confident, fuzzy below threshold, mixed detections, math-survives-filtered-KG, all-low-confidence-falls-back.
+- **4 integration tests** — `tests/integration/test_confidence_gate.py`: end-to-end LangGraph pipeline with custom KG and mocked LLM. Verifies exact match → KG facts, missing entity → LLM fallback, close-wrong-entity → safe fallback, no cross-contamination.
+
+### Decisions
+- Gate is in the planner (not in `detect_kg_query`) so detection remains sensitive while the trust decision is centralized.
+- Threshold at 90 (not 85): the "never worse than LLM" contract means false negatives are always safer than false positives.
+- The 28.6% Crystal-Only failure was the LLM fallback path working correctly.
+
+---
+
+## 2026-04-11 — B1-B6 Demo Benchmark Implementation
+
+### What changed
+- **B1: Opinion text downloader** — `scripts/download_opinions.py`: searches CourtListener by case name → cluster → lead opinion, fetches `html_with_citations`, strips HTML to plain text, caches to `benchmarks/documents/{slug}.json`. `benchmarks/documents.py`: loader utilities (`load_opinion`, `load_all_opinions`, `opinion_token_estimate`, `list_cached_opinions`). Rate-limited at 0.6s/request. 16 tests.
+- **B2: Document-answerability audit** — `benchmarks/answerability.py`: classifies predicates as document-answerable (court, date_filed, judges, opinion_author, cites, attorneys) vs KG-only (cited_by_count, precedential_status, per_curiam). `partition_cases()` splits benchmark cases into 4 buckets. Regex-based predicate inference from question text. 18 tests.
+- **B3: Document-context baseline runner** — `benchmarks/runners/document.py`: Arm 2 (LLM + real opinion text). Extracts case name from question (handles "v." names + citation formats), looks up cached opinion, builds realistic prompt. Injectable `call_llm_fn` for testing. 13 tests.
+- **B4: Obscure long-tail cases** — `scripts/select_obscure_cases.py`: queries SQLite KG for low-citation cases not in SCOTUS_SAMPLE. 15 obscure cases added (Coventry Health Care v. Nevils, Flanders v. Seelye, Gray v. Coan, Richards v. Mackall, etc.). 32 new benchmark questions in `benchmarks/ground_truth/legal.py`. 15 fixture records in `tests/fixtures/scotus_sample.py`.
+- **B5: Stratified sampler** — `benchmarks/sampling.py`: `sample_from_review_cases()` groups by predicate from `source_triplet`, proportional sampling with minimum per stratum. `sample_benchmark_cases()` for tuple-format cases. Export/load for Tier 2 caching. 15 tests.
+- **B6: Three-arm comparison report** — `benchmarks/runners/comparison.py`: orchestrates all 3 arms across partitioned cases (fair A/B on document-answerable, Crystal-only on KG metadata, abstention on negatives). Results cached per-arm to JSON. `print_report()` with table formatting. CLI with `--from-cache`, `--tier2` flags. 8 tests.
+
+### Decisions
+- Predicate answerability is structural (predicate-level), not per-question text search — `cited_by_count` never appears in any opinion text regardless of the case.
+- Case name extraction from questions uses " v. " as anchor and expands outward by capitalization, rather than a monolithic regex.
+- Subject-scan questions ("Tell me about X") included in the fair A/B comparison since they test entity detection, which works identically across all arms.
+- 15 obscure cases selected: zero citation count in CourtListener index, most from 1850s-1920s. Mix of modern obscure (Coventry 2017, Zubik 2015) and historical deep cuts (Gray v. Coan 1871, Sturgis v. Clough 1863).
+
+---
+
 ## 2026-04-11 — MVP Readiness Plan Execution
 
 ### What changed

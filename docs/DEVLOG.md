@@ -9,14 +9,45 @@ Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.
 
 Update this section each session with current priorities.
 
-- **Document Ingestion MVP (Phase 2a) implemented.** Full pipeline: NER + LLM extraction → confidence scoring → auto-accept/review → SQLite KG persistence. Progressive trust model with configurable threshold.
-- **New UI "Ingest Documents" tab.** Multi-file upload, extraction with progress, auto-accepted/pending review tables, bulk accept/reject, before/after comparison.
-- **Legal-tuned extraction prompt.** `LEGAL_EXTRACTION_PROMPT` steers LLM toward ontology predicates. `normalize_predicate()` maps extracted predicates to canonical forms.
-- **Validated on real SCOTUS opinions.** 543 triplets extracted from 5 opinions (Brown, Gideon, Loving, Terry, Hibbs). All NER-based extractions auto-accepted at 0.85+ confidence.
-- **Test count:** 1038 passing, 5 skipped.
-- **Scaffold hit rate analysis:** 20.7% of case citations in 323 cached opinions match KG entities. 39.9% of documents have ≥1 KG link. Top-connected: Berisha (28 matches), Smith v. Arizona (19), Citizens United (13).
-- **Product direction:** Crystal (engine) + pre-built legal KG (scaffold) + customer document uploads. Scaffold provides day-one value; segmented by jurisdiction/practice area with delta updates via webhook.
-- **Next:** Expand scaffold from 543 to ~5K subjects (target 70%+ hit rate). Run LLM extraction on real opinions. Phase 1c (judge bios). Segmented KG distribution.
+- **Extraction baselines established.** NER-only: 59.1% accuracy (13/22). NER+LLM: 63.6% (14/22). 2,575 vs 3,241 KG facts from 15 SCOTUS opinions.
+- **Review pipeline ready.** Document → extract → generate questions → Crystal proposes → human verifies → review batch → Ralph Wiggum. First batch: `review/batch_doc_20260412_103346.json` (7 questions from 5 landmark cases).
+- **Test count:** 769 unit tests passing.
+- **Product direction:** Crystal (engine) + pre-built legal KG (scaffold) + customer document uploads.
+- **Path to demo:** (1) Get extraction to 80%+ via Ralph Wiggum iterations, (2) expand scaffold 543→5K subjects, (3) pick practice area + curate demo batch, (4) three-arm comparison → marketing materials.
+- **Next:** Human review of proposed answers → Ralph Wiggum → re-benchmark → iterate.
+
+---
+
+## 2026-04-12 — Extraction Baselines + Review Pipeline
+
+### What changed
+- **NER-only extraction baseline** — 59.1% accuracy (13/22) on 15 SCOTUS opinions, 2,575 KG facts. NER handles court, judges, attorneys for well-known cases. Fails on citation counts (metadata-only), opinion authors for obscure cases, and older opinion formats.
+- **NER+LLM extraction** — 63.6% accuracy (14/22), 3,241 facts (+26%). LLM adds 666 triplets. Fixed Pennsylvania Railroad court question. Remaining 8 failures are extraction quality issues (opinion author, court for obscure cases) and one routing bug (Coventry returned date_filed instead of court on kg_answerable route).
+- **Review pipeline** — `src/crystal/ingest/review_pipeline.py`: CLI tool ingests documents, generates questions from extracted facts, has Crystal propose answers, saves as review batch. `review.py`: new `save_proposed_as_batch()` + `_derive_match_strings()`. UI: editable "Golden Answer" column + "Save to Review" button in Ingest Documents tab.
+- **Question generator hardened** — `src/crystal/compare.py`: only generates questions for known predicate templates (court, date_filed, judges, etc.). `_is_plausible_case_name()` filters NER noise subjects (pronouns, common nouns, "this case", "justice X"). Prevents garbage questions like "What is the take of I?".
+- **Switched to Anthropic Haiku** for benchmarks — Gemini 2.5 Flash had severe rate limiting (5 retries/question, ~3 min each). Haiku completes 22 questions in ~100s.
+- **10 new review tests, 6 updated compare tests** — 769 unit tests passing.
+
+### Decisions
+- Question generation rejects unknown predicates entirely instead of generating "What is the {pred} of {subj}?" — the NER dep-tree predicates ("deliver of", "yield to of") produce meaningless questions.
+- Review batch format extends existing batch_*.json schema with `crystal_proposed`, `crystal_route`, `crystal_confidence` fields so the user can see what Crystal thought vs their correction.
+- Path to demo crystallized: extraction quality iterations → scaffold density → demo batch → marketing. Structured metadata is table stakes; citation network and hallucination prevention are the selling points.
+
+---
+
+## 2026-04-12 — Extraction Quality + Metrics Overhaul
+
+### What changed
+- **Simplified benchmark metrics** — `benchmarks/scoring/rubric.py`: Removed `specificity_score()` and `grounding_score()` from the active rubric. `RubricResult` now has `accuracy` + `abstention` (was accuracy + specificity + no_hallucination). All runners (comparison, baseline, augmented) updated. Report prints accuracy, hallucination rate, and token cost — the three metrics customers care about.
+- **Extraction quality benchmark** — `benchmarks/extraction_quality.py`: Runs `ingest_document()` on 15 cached SCOTUS opinions (NER or NER+LLM), builds an ephemeral `SqliteKnowledgeGraph` from only extracted facts, then runs benchmark questions through the Crystal pipeline against this document-only KG. Directly measures "can Crystal learn from documents and answer questions?"
+- **ExtractionLoop** — `benchmarks/ralph_wiggum/extraction_loop.py`: New Ralph Wiggum loop targeting ingestion quality. Evaluates by comparing extracted triplets against CourtListener ground truth. Four diagnosis categories: subject_mismatch, predicate_mismatch, missing_fact, hallucinated_fact. Mutation targets: `LEGAL_EXTRACTION_PROMPT` hints, `LEGAL_PREDICATE_ALIASES` additions. Wired into Orchestrator.
+- **Crystal-proposed answers in UI** — `src/crystal/ui/app.py`: New "Crystal's Proposed Answers" section in Ingest Documents tab. After ingestion, generates questions from extracted facts, runs each through Crystal with the updated KG, shows results in a table (Question, Crystal Answer, Route, Confidence, Expected). Verifies the system is actually learning post-ingestion.
+- **25 new tests** — 11 extraction quality, 14 extraction loop.
+
+### Decisions
+- Dropped specificity/no_hallucination rather than fixing them — they measured KG triple regurgitation, not answer quality. The asymmetry (vacuously 1.0 when `kg_results` empty) made them misleading for naked LLM and LLM+doc arms.
+- Extraction benchmark uses `SqliteKnowledgeGraph(":memory:")` so each run starts fresh with no scaffold contamination.
+- ExtractionLoop doesn't inherit from BaseLoop in the usual way (it has a different iteration model — extract + compare vs pipeline eval) but follows the same interface contract.
 
 ---
 
@@ -79,38 +110,6 @@ Update this section each session with current priorities.
 - Entity confidence dominates the scorer via piecewise bands (not linear mapping): <90% fuzzy = 0.4, 90-95% = 0.8, ≥95% = 0.95. This preserves the original 90% threshold behavior while allowing nuanced routing.
 - `_safe_node` sets all fields needed for clean downstream routing — not just `fallback_to_llm` but also `prompt_type`, `compiled_prompt`, `final_response`. This handles crashes in post-planner nodes where the graph can't re-route to `llm_fallback_node`.
 - Confidence threshold mutation bounded at [0.5, 0.85] — low enough to be useful for experimentation but can't accidentally disable the safety gate entirely.
-
----
-
-## 2026-04-11 — Planner Confidence Gate ("Never Worse Than LLM")
-
-### What changed
-- **Confidence gate in `plan_builder_node`** — `src/crystal/nodes/planner.py`: `_kg_detection_is_confident()` checks entity match quality before using KG results. Exact and alias matches are always trusted. Fuzzy matches require `match_score >= 90.0` (threshold: `KG_FUZZY_CONFIDENCE_THRESHOLD`). Below that, the KG detection is filtered out and Crystal falls back to the raw LLM.
-- **17 unit tests** — `tests/unit/nodes/test_planner.py`: covers exact/alias/fuzzy confident, fuzzy below threshold, mixed detections, math-survives-filtered-KG, all-low-confidence-falls-back.
-- **4 integration tests** — `tests/integration/test_confidence_gate.py`: end-to-end LangGraph pipeline with custom KG and mocked LLM. Verifies exact match → KG facts, missing entity → LLM fallback, close-wrong-entity → safe fallback, no cross-contamination.
-
-### Decisions
-- Gate is in the planner (not in `detect_kg_query`) so detection remains sensitive while the trust decision is centralized. The detection still captures fuzzy matches for diagnostics; the planner decides whether to act on them.
-- Threshold at 90 (not 85): the "never worse than LLM" contract means false negatives (rejecting a valid fuzzy match → LLM answers) are always safer than false positives (accepting a wrong entity → confidently wrong answer). A rejected fuzzy match just means the LLM answers instead — by definition not worse.
-- The 28.6% Crystal-Only failure in the benchmark was actually the LLM fallback path working correctly — entities weren't in the KG, detection returned None, LLM answered but couldn't provide exact citation counts. The confidence gate adds protection for the edge case where a fuzzy match DOES fire (80-89% score) but resolves to the wrong entity.
-
----
-
-## 2026-04-11 — B1-B6 Demo Benchmark Implementation
-
-### What changed
-- **B1: Opinion text downloader** — `scripts/download_opinions.py`: searches CourtListener by case name → cluster → lead opinion, fetches `html_with_citations`, strips HTML to plain text, caches to `benchmarks/documents/{slug}.json`. `benchmarks/documents.py`: loader utilities (`load_opinion`, `load_all_opinions`, `opinion_token_estimate`, `list_cached_opinions`). Rate-limited at 0.6s/request. 16 tests.
-- **B2: Document-answerability audit** — `benchmarks/answerability.py`: classifies predicates as document-answerable (court, date_filed, judges, opinion_author, cites, attorneys) vs KG-only (cited_by_count, precedential_status, per_curiam). `partition_cases()` splits benchmark cases into 4 buckets. Regex-based predicate inference from question text. 18 tests.
-- **B3: Document-context baseline runner** — `benchmarks/runners/document.py`: Arm 2 (LLM + real opinion text). Extracts case name from question (handles "v." names + citation formats), looks up cached opinion, builds realistic prompt. Injectable `call_llm_fn` for testing. 13 tests.
-- **B4: Obscure long-tail cases** — `scripts/select_obscure_cases.py`: queries SQLite KG for low-citation cases not in SCOTUS_SAMPLE. 15 obscure cases added (Coventry Health Care v. Nevils, Flanders v. Seelye, Gray v. Coan, Richards v. Mackall, etc.). 32 new benchmark questions in `benchmarks/ground_truth/legal.py`. 15 fixture records in `tests/fixtures/scotus_sample.py`.
-- **B5: Stratified sampler** — `benchmarks/sampling.py`: `sample_from_review_cases()` groups by predicate from `source_triplet`, proportional sampling with minimum per stratum. `sample_benchmark_cases()` for tuple-format cases. Export/load for Tier 2 caching. 15 tests.
-- **B6: Three-arm comparison report** — `benchmarks/runners/comparison.py`: orchestrates all 3 arms across partitioned cases (fair A/B on document-answerable, Crystal-only on KG metadata, abstention on negatives). Results cached per-arm to JSON. `print_report()` with table formatting. CLI with `--from-cache`, `--tier2` flags. 8 tests.
-
-### Decisions
-- Predicate answerability is structural (predicate-level), not per-question text search — `cited_by_count` never appears in any opinion text regardless of the case.
-- Case name extraction from questions uses " v. " as anchor and expands outward by capitalization, rather than a monolithic regex.
-- Subject-scan questions ("Tell me about X") included in the fair A/B comparison since they test entity detection, which works identically across all arms.
-- 15 obscure cases selected: zero citation count in CourtListener index, most from 1850s-1920s. Mix of modern obscure (Coventry 2017, Zubik 2015) and historical deep cuts (Gray v. Coan 1871, Sturgis v. Clough 1863).
 
 ---
 

@@ -1,3 +1,3 @@
-# Crystal Session Notes
+# Session Notes
 
-(cleared — session complete)
+(cleared at session end)

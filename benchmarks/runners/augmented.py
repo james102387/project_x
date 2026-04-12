@@ -6,8 +6,8 @@ Runs identical questions through:
   1. Naked LLM (baseline) — no grounding context
   2. Crystal pipeline with real LLM (treatment) — augmented with KG facts or math
 
-Scores both with the D1 rubric (accuracy, specificity, no-hallucination)
-to verify the augmentation helps rather than misleads.
+Scores both with the rubric (accuracy, abstention) to verify the
+augmentation helps rather than misleads.
 
 Usage:
     python -m benchmarks.run_augmented_benchmark
@@ -99,12 +99,7 @@ def score_results(
     results: list[dict],
     kg_results_from_treatment: dict[str, list[dict]] | None = None,
 ) -> list[dict]:
-    """Score a result set with both binary accuracy and rubric dimensions.
-
-    If kg_results_from_treatment is provided (keyed by question), use those
-    KG results for rubric specificity/grounding — this lets us score the
-    baseline against the same KG facts Crystal would inject.
-    """
+    """Score a result set with both binary accuracy and rubric dimensions."""
     scored = []
     for r in results:
         correct = score_response(r["response"], r["match_strings"])
@@ -128,7 +123,7 @@ def summarize_scored(scored: list[dict]) -> dict:
         return {"count": 0, "accuracy": 0.0, "rubric_averages": {}}
 
     correct = sum(1 for s in scored if s["correct"])
-    totals = {"accuracy": 0.0, "specificity": 0.0, "no_hallucination": 0.0}
+    totals = {"accuracy": 0.0, "abstention": 0.0}
     for s in scored:
         for dim in totals:
             totals[dim] += s["rubric"][dim]
@@ -166,7 +161,7 @@ def print_report(
         print(f"  {'Binary accuracy':24s} {b_summary['accuracy']:10.1%} "
               f"{t_summary['accuracy']:10.1%} "
               f"{t_summary['accuracy'] - b_summary['accuracy']:+10.1%}")
-        for dim in ("accuracy", "specificity", "no_hallucination"):
+        for dim in ("accuracy", "abstention"):
             b, t = ba[dim], ta[dim]
             print(f"  {dim:24s} {b:10.2f} {t:10.2f} {t - b:+10.2f}")
         print()
@@ -178,8 +173,7 @@ def print_report(
             mark = "✓" if s["correct"] else "✗"
             route = s.get("prompt_type", "?")
             print(f"  {mark} [{route:15s}] {s['question'][:50]:50s}  "
-                  f"acc={r['accuracy']:.1f} spec={r['specificity']:.2f} "
-                  f"hal={r['no_hallucination']:.2f}")
+                  f"acc={r['accuracy']:.1f} abstention={r['abstention']:.2f}")
         print()
 
     if baseline_scored:
@@ -200,8 +194,7 @@ def _print_arm(name: str, summary: dict) -> None:
           f"({summary['accuracy']:.0%})")
     ra = summary["rubric_averages"]
     print(f"    Rubric:   accuracy={ra['accuracy']:.2f}  "
-          f"specificity={ra['specificity']:.2f}  "
-          f"no_hallucination={ra['no_hallucination']:.2f}")
+          f"abstention={ra['abstention']:.2f}")
     print()
 
 

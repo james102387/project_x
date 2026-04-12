@@ -1,9 +1,10 @@
 """Ralph Wiggum v3 — multi-loop self-improvement engine.
 
 Each loop owns exactly one failure category and one code area:
-  - PredicateLoop:  predicate_mismatch → QUESTION_PREDICATE_MAP + LEGAL_PREDICATE_ALIASES
-  - EntityLoop:     entity_mismatch   → entity alias tables
-  - ThresholdLoop:  routing_error     → CONFIDENCE_LOW/HIGH numeric thresholds
+  - PredicateLoop:   predicate_mismatch → QUESTION_PREDICATE_MAP + LEGAL_PREDICATE_ALIASES
+  - EntityLoop:      entity_mismatch   → entity alias tables
+  - ThresholdLoop:   routing_error     → CONFIDENCE_LOW/HIGH numeric thresholds
+  - ExtractionLoop:  extraction quality → LEGAL_EXTRACTION_PROMPT + predicate aliases + threshold
 
 Shared infrastructure lives in BaseLoop: evaluation, diagnosis, scoring,
 reporting, git operations.
@@ -31,6 +32,7 @@ from benchmarks.ralph_wiggum.base import (
 from benchmarks.ralph_wiggum.predicate_loop import PredicateLoop
 from benchmarks.ralph_wiggum.entity_loop import EntityLoop
 from benchmarks.ralph_wiggum.threshold_loop import ThresholdLoop, _update_threshold
+from benchmarks.ralph_wiggum.extraction_loop import ExtractionLoop, ExtractionCase, ExtractionFailureCategory
 from benchmarks.ralph_wiggum.orchestrator import Orchestrator, OrchestratorResult
 
 # Backward-compatible aliases (v2 names → v3 locations)
@@ -118,6 +120,9 @@ __all__ = [
     "PredicateLoop",
     "EntityLoop",
     "ThresholdLoop",
+    "ExtractionLoop",
+    "ExtractionCase",
+    "ExtractionFailureCategory",
     "Orchestrator",
     "OrchestratorResult",
     # backward compat

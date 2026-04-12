@@ -173,3 +173,126 @@ class TestCollectAcceptedCases:
             _make_case("Q1", status="pending_review"),
         ])
         assert collect_accepted_cases(review_dir) == []
+
+
+class TestSaveProposedAsBatch:
+    def test_creates_batch_file(self, review_dir):
+        from crystal.review import save_proposed_as_batch
+        rows = [
+            {
+                "question": "What court decided Brown v. Board of Education?",
+                "crystal_answer": "Supreme Court of the United States",
+                "route": "KG Grounded (direct)",
+                "confidence": "HIGH",
+                "golden_answer": "Supreme Court of the United States",
+            },
+        ]
+        path = save_proposed_as_batch(rows, source="test_doc", review_dir=review_dir)
+        assert path is not None
+        assert path.exists()
+        assert path.name.startswith("batch_doc_")
+
+    def test_batch_structure(self, review_dir):
+        from crystal.review import save_proposed_as_batch
+        rows = [
+            {
+                "question": "What court?",
+                "crystal_answer": "SCOTUS",
+                "golden_answer": "Supreme Court of the United States",
+                "route": "KG",
+                "confidence": "HIGH",
+                "source_triplet": ["brown v. board of education", "court", "Supreme Court of the United States"],
+            },
+            {
+                "question": "When was it decided?",
+                "crystal_answer": "1954",
+                "golden_answer": "1954",
+                "route": "KG",
+                "confidence": "HIGH",
+            },
+        ]
+        path = save_proposed_as_batch(rows, review_dir=review_dir)
+        data = json.loads(path.read_text())
+
+        assert data["batch"]["type"] == "document_extraction"
+        assert len(data["cases"]) == 2
+        assert data["total"] == 2
+
+        case = data["cases"][0]
+        assert case["question"] == "What court?"
+        assert case["golden_answer"] == "Supreme Court of the United States"
+        assert case["crystal_proposed"] == "SCOTUS"
+        assert case["status"] == "pending_review"
+        assert case["tier"] == 2
+
+    def test_golden_answer_defaults_to_crystal_answer(self, review_dir):
+        from crystal.review import save_proposed_as_batch
+        rows = [{"question": "Q?", "crystal_answer": "Crystal says X"}]
+        path = save_proposed_as_batch(rows, review_dir=review_dir)
+        data = json.loads(path.read_text())
+        assert data["cases"][0]["golden_answer"] == "Crystal says X"
+
+    def test_empty_rows_returns_none(self, review_dir):
+        from crystal.review import save_proposed_as_batch
+        assert save_proposed_as_batch([], review_dir=review_dir) is None
+
+    def test_match_strings_derived(self, review_dir):
+        from crystal.review import save_proposed_as_batch
+        rows = [{
+            "question": "Who?",
+            "crystal_answer": "John, Jane, Bob",
+            "golden_answer": "John, Jane, Bob",
+        }]
+        path = save_proposed_as_batch(rows, review_dir=review_dir)
+        data = json.loads(path.read_text())
+        ms = data["cases"][0]["match_strings"]
+        assert "john, jane, bob" in ms
+        assert "john" in ms
+        assert "jane" in ms
+
+    def test_saved_batch_discoverable(self, review_dir):
+        from crystal.review import save_proposed_as_batch, list_batches
+        rows = [{"question": "Q?", "crystal_answer": "A", "golden_answer": "A"}]
+        save_proposed_as_batch(rows, review_dir=review_dir)
+        batches = list_batches(review_dir)
+        assert len(batches) == 1
+        assert batches[0]["source"] == "document_extraction"
+
+    def test_accepted_cases_after_review(self, review_dir):
+        from crystal.review import (
+            save_proposed_as_batch,
+            save_review_decisions,
+            collect_accepted_cases,
+        )
+        rows = [
+            {"question": "Q1?", "crystal_answer": "A1", "golden_answer": "A1 corrected"},
+            {"question": "Q2?", "crystal_answer": "A2", "golden_answer": "A2"},
+        ]
+        path = save_proposed_as_batch(rows, review_dir=review_dir)
+        batch_id = json.loads(path.read_text())["batch"]["id"]
+
+        save_review_decisions(batch_id, {0: "accepted", 1: "rejected"}, review_dir)
+
+        accepted = collect_accepted_cases(review_dir)
+        assert len(accepted) == 1
+        assert accepted[0][0] == "Q1?"
+        assert accepted[0][1] == "A1 corrected"
+
+
+class TestDeriveMatchStrings:
+    def test_simple_answer(self):
+        from crystal.review import _derive_match_strings
+        ms = _derive_match_strings("Supreme Court")
+        assert "supreme court" in ms
+
+    def test_comma_separated(self):
+        from crystal.review import _derive_match_strings
+        ms = _derive_match_strings("John Smith, Jane Doe, Bob Jones")
+        assert "john smith" in ms
+        assert "jane doe" in ms
+        assert "bob jones" in ms
+
+    def test_empty_returns_empty(self):
+        from crystal.review import _derive_match_strings
+        assert _derive_match_strings("") == []
+        assert _derive_match_strings(None) == []

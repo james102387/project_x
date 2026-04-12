@@ -19,9 +19,9 @@
 <details>
 <summary>Demo tooling (6/6)</summary>
 
-- [x] D1. Quality rubric — 3-dimension scoring (accuracy, specificity, no-hallucination)
+- [x] D1. Quality rubric — accuracy + abstention scoring
 - [x] D2. KG ingestion pipeline — NER (5 dep-tree patterns), CSV/JSON loaders, LLM-assisted extraction
-- [x] D3. Web UI — Gradio (Ask, KG, Review tabs)
+- [x] D3. Web UI — Gradio (Ask, KG Explorer, Ingest Documents, Review tabs)
 - [x] D4. Augmented benchmark cases (5 KG + 3 math)
 - [x] D5. Entity aliases + fuzzy matching + multi-hop (3-tier resolution cascade)
 - [x] D6. Reasoning cost benchmark (K-reduction, token-level comparison)
@@ -42,54 +42,70 @@
 
 </details>
 
+<details>
+<summary>Extraction Quality + Metrics (complete)</summary>
+
+- [x] Simplified benchmark metrics — accuracy + abstention (dropped specificity/no_hallucination)
+- [x] Extraction quality benchmark (`benchmarks/extraction_quality.py`) — NER-only: 59.1%, NER+LLM: 63.6%
+- [x] ExtractionLoop for Ralph Wiggum — targets ingestion quality
+- [x] Crystal-proposed answers in UI — generates questions from extracted facts, shows Crystal's answers
+- [x] Review pipeline (`src/crystal/ingest/review_pipeline.py`) — document → KG → questions → Crystal proposes → review batch
+- [x] Ground truth workflow — editable golden answers, save to review, flows into Ralph Wiggum
+- [x] Question generator filters — predicate templates + subject plausibility (no NER noise)
+
+</details>
+
 ---
 
-## Next Up — Demo Benchmark (A/B comparison)
+## Path to Demo
 
-The naked LLM baseline is a strawman. Lawyers paste real documents into ChatGPT. The demo needs a fair, realistic comparison.
+The demo proves: Crystal + scaffold KG eliminates hallucinations, provides grounded answers, and costs 10x less than document-in-context. The selling points are citation network verification and zero hallucination, not yet holdings/doctrines extraction.
 
-### Design
+### Phase 1: Extraction Quality (current — iterate 3-5 times)
 
-**Three arms:**
+Target: 80%+ accuracy on document-derived questions.
 
-| Arm | What it tests | Simulates |
-|-----|---------------|-----------|
-| Naked LLM | `call_llm(question)` | Lawyer trusts training data |
-| LLM + document | `call_llm(real_opinion_text + question)` | Lawyer pastes case opinion into ChatGPT |
-| Crystal | Full pipeline | Crystal |
+1. [ ] **EQ-1. Human ground truth** — Review `review/batch_doc_*.json`, correct golden answers, accept/reject. Need ~50 accepted cases for Ralph Wiggum.
+2. [ ] **EQ-2. Run Ralph Wiggum loops** — ExtractionLoop improves extraction prompts/aliases. PredicateLoop + EntityLoop + ThresholdLoop improve routing/matching. `python -m benchmarks.ralph_wiggum`
+3. [ ] **EQ-3. Re-run extraction benchmark** — Measure improvement: `LLM_PROVIDER=anthropic LLM_MODEL=claude-haiku-4-5 python -m benchmarks.extraction_quality`
+4. [ ] **EQ-4. Iterate** — Repeat EQ-1 → EQ-3 until accuracy ≥ 80% and hallucination ≤ 10%.
 
-**Three metrics:**
+### Phase 2: Scaffold Density
 
-| Metric | Why |
-|--------|-----|
-| Hallucination rate | Headline: "LLM fabricated 40%, Crystal 0%" |
-| Rubric quality (accuracy, specificity, no-hallucination) | Crystal is precise, not just non-hallucinatory |
-| Token cost | Crystal's `kg_answerable` path: 0 tokens vs. 30k for document-in-context |
+Target: 70%+ citation hit rate (currently 20.7% with 543 subjects).
 
-**Documents must be real opinion text** (5k-50k tokens from CourtListener), not synthetic docs from KG metadata. Synthetic docs are reformatted metadata — a critic would dismiss the comparison.
+5. [ ] **S1. Expand scaffold** — CourtListener: 543 → ~5,000 subjects. Top-cited cases first (highest connectivity value per case).
+6. [ ] **S2. Priority ingestion** — Rank cases by cited_by_count, ingest top-N first.
+7. [ ] **Phase 1c** — Judge bios from CourtListener `/people/` (appointing_president, law_school, birth_year). Links judge entities across cases.
 
-**Not all predicates are document-answerable.** Fair A/B only on questions answerable from both KG and opinion text:
+### Phase 3: Demo Batch
 
-| Category | Predicates | Fair A/B? |
-|----------|-----------|-----------|
-| Both | court, date_filed, judges, opinion_author, cites, attorneys | Yes |
-| KG only | cited_by_count, precedential_status, per_curiam | Show separately ("Crystal-only") |
-| Document only | holdings, doctrines, reasoning | Crystal can't answer yet (Phase 2a) |
+Target: A compelling three-arm comparison on a realistic practice area.
 
-**Scaling:** Tier 1 (~50 hand-crafted cases, run live, cached). Tier 2 (~100-200 stratified sample from bulk corpus, run once, cached). Scoring works against cached result dicts.
+8. [ ] **DEMO-1. Pick practice area** — Choose a specific area with good scaffold coverage (e.g., 4th Amendment, equal protection, commerce clause).
+9. [ ] **DEMO-2. Curate demo documents** — 5-10 real briefs/opinions. Must include citations to cases in the scaffold.
+10. [ ] **DEMO-3. Run three-arm comparison** — Naked LLM vs LLM+document vs Crystal. On the demo documents.
+11. [ ] **DEMO-4. Package results** — "LLM fabricated 40% of citations, Crystal 0%. 95% accuracy, 10x cheaper."
+12. [ ] **DEMO-5. Marketing materials** — Demo video, one-pager, pitch deck from comparison results.
+
+---
+
+## Demo Benchmark (A/B Comparison)
+
+Three arms, fair comparison on real opinion text.
 
 ### Tasks
 
-- [ ] **B1. Opinion text downloader** — Fetch real opinion text from CourtListener for benchmark cases. Cache to `benchmarks/documents/`. Uses existing `courtlistener.py` client.
-- [ ] **B2. Document-answerability audit** — Read downloaded opinions, verify which predicates appear. Tag benchmark cases with `document_answerable`.
-- [ ] **B3. Document-context baseline runner** — New arm in `benchmarks/runners/`. LLM + real opinion text. Same scoring interface. Only runs on document-answerable questions.
-- [ ] **B4. Add obscure cases** — 10-15 cases from the long tail of the 500-case corpus. Cases no LLM would know from training data.
+- [ ] **B1. Opinion text downloader** — Fetch real opinion text from CourtListener for benchmark cases. Cache to `benchmarks/documents/`.
+- [ ] **B2. Document-answerability audit** — Tag benchmark cases with `document_answerable`.
+- [ ] **B3. Document-context baseline runner** — LLM + real opinion text arm.
+- [ ] **B4. Add obscure cases** — 10-15 long-tail cases no LLM would know.
 - [ ] **B5. Stratified sampler** — `sample_benchmark_cases(all_cases, n, by='predicate')` for Tier 2.
-- [ ] **B6. Three-arm comparison report** — Side-by-side output with separate sections for fair A/B and Crystal-only questions.
+- [ ] **B6. Three-arm comparison report** — Side-by-side output.
 
 ---
 
-## Ingestion — Open items
+## Ingestion — Open Items
 
 ### Structured API data
 
@@ -99,14 +115,10 @@ The naked LLM baseline is a strawman. Lawyers paste real documents into ChatGPT.
 
 ### Unstructured text (Crystal proposes, human verifies)
 
-- [x] **Phase 2a** — Document ingestion MVP. Full pipeline: NER + LLM extraction → confidence scoring → auto-accept/review → SQLite KG persistence. Progressive trust model. Legal-tuned prompt. UI tab. Before/after comparison. Validated on 5 real SCOTUS opinions (543 triplets).
-- [ ] **Phase 2a+** — Run with LLM extraction enabled on real opinions. Tune auto-accept threshold based on LLM extraction quality.
+- [x] **Phase 2a** — Document ingestion MVP. Full pipeline validated on real SCOTUS opinions.
+- [x] **Phase 2a+** — LLM extraction on real opinions. NER-only: 59.1%, NER+LLM: 63.6% on 22 questions.
 - [ ] **Phase 2b** — Oral argument transcripts. New source adapter.
-- [ ] **D2 Phase 3** — Community detection (Leiden) for entity clusters. See also L3.
-
-### Sufficiency threshold
-
-~500 cases / ~2,500 questions across 6+ predicates — sufficient for Ralph Wiggum convergence (~50 per predicate), statistically significant benchmarks, and regression detection.
+- [ ] **D2 Phase 3** — Community detection (Leiden) for entity clusters.
 
 ---
 

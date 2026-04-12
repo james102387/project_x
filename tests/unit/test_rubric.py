@@ -6,10 +6,8 @@ from benchmarks.rubric import (
     RubricResult,
     accuracy_score,
     calibration_score,
-    grounding_score,
     is_abstention,
     score_rubric,
-    specificity_score,
 )
 from benchmarks.scoring import score_batch, score_batch_rubric
 
@@ -54,56 +52,6 @@ class TestAccuracyScore:
             "agriculture and bioengineering are key",
             ["agriculture", "bioengineering"],
         )
-        assert score == 1.0
-
-
-# ── specificity_score ──────────────────────────────────────────────────────
-
-
-class TestSpecificityScore:
-    def test_exact_value_present(self):
-        assert specificity_score("The capital is Zelphos", SAMPLE_KG_RESULTS) == 1.0
-
-    def test_vague_response(self):
-        assert specificity_score("Remulak has a capital city", SAMPLE_KG_RESULTS) == 0.0
-
-    def test_no_kg_results(self):
-        assert specificity_score("anything", []) == 1.0
-
-    def test_partial_specificity(self):
-        response = "The capital is Zelphos and population is 4.3 billion"
-        score = specificity_score(response, MULTI_KG_RESULTS)
-        assert score == pytest.approx(2.0 / 3.0)
-
-    def test_all_specific(self):
-        response = "Zelphos is the capital, Grand Vizier Korth leads, population 4.3 billion"
-        score = specificity_score(response, MULTI_KG_RESULTS)
-        assert score == 1.0
-
-
-# ── grounding_score ────────────────────────────────────────────────────────
-
-
-class TestGroundingScore:
-    def test_fully_grounded(self):
-        response = "Remulak has capital Zelphos"
-        assert grounding_score(response, SAMPLE_KG_RESULTS) == 1.0
-
-    def test_partially_grounded(self):
-        response = "Zelphos is great"
-        score = grounding_score(response, SAMPLE_KG_RESULTS)
-        assert 0.0 < score < 1.0
-
-    def test_no_kg_results(self):
-        assert grounding_score("anything", []) == 1.0
-
-    def test_nothing_grounded(self):
-        response = "I made this up entirely"
-        assert grounding_score(response, SAMPLE_KG_RESULTS) == 0.0
-
-    def test_multi_result_grounding(self):
-        response = "Remulak: capital Zelphos, leader Grand Vizier Korth, population 4.3 billion"
-        score = grounding_score(response, MULTI_KG_RESULTS)
         assert score == 1.0
 
 
@@ -193,8 +141,7 @@ class TestScoreRubric:
         )
         assert isinstance(result, RubricResult)
         assert result.accuracy == 1.0
-        assert result.specificity == 1.0
-        assert result.no_hallucination == 1.0
+        assert result.abstention == 1.0
 
     def test_negative_case_with_abstention(self):
         result = score_rubric(
@@ -204,8 +151,7 @@ class TestScoreRubric:
             is_negative=True,
         )
         assert result.accuracy == 0.0
-        assert result.specificity == 1.0
-        assert result.no_hallucination == 1.0
+        assert result.abstention == 1.0
 
     def test_negative_case_without_abstention(self):
         result = score_rubric(
@@ -215,7 +161,7 @@ class TestScoreRubric:
             is_negative=True,
         )
         assert result.accuracy == 0.0
-        assert result.no_hallucination == 0.0
+        assert result.abstention == 0.0
 
     def test_defaults(self):
         result = score_rubric(
@@ -223,8 +169,7 @@ class TestScoreRubric:
             match_strings=["zelphos"],
         )
         assert result.accuracy == 1.0
-        assert result.specificity == 1.0
-        assert result.no_hallucination == 1.0
+        assert result.abstention == 1.0
 
 
 # ── score_batch backward compat ────────────────────────────────────────────
@@ -290,8 +235,7 @@ class TestScoreBatchRubric:
         assert scored["negative_cases"] == 0
         assert "rubric_averages" in scored
         assert scored["rubric_averages"]["accuracy"] == 1.0
-        assert scored["rubric_averages"]["specificity"] == 1.0
-        assert scored["rubric_averages"]["no_hallucination"] == 1.0
+        assert scored["rubric_averages"]["abstention"] == 1.0
         assert "rubric" in scored["details"][0]
 
     def test_negative_batch_with_abstention(self):
@@ -307,7 +251,7 @@ class TestScoreBatchRubric:
         ]
         scored = score_batch_rubric(results)
         assert scored["negative_cases"] == 1
-        assert scored["rubric_averages"]["no_hallucination"] == 1.0
+        assert scored["rubric_averages"]["abstention"] == 1.0
 
     def test_mixed_batch(self):
         results = [
@@ -334,7 +278,7 @@ class TestScoreBatchRubric:
         assert scored["total"] == 2
         assert scored["positive_cases"] == 1
         assert scored["negative_cases"] == 1
-        assert scored["rubric_averages"]["no_hallucination"] == 1.0
+        assert scored["rubric_averages"]["abstention"] == 1.0
 
     def test_defaults_when_missing_optional_fields(self):
         """score_batch_rubric works even without kg_results and is_negative."""

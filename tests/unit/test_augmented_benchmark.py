@@ -66,7 +66,6 @@ class TestScoreResults:
         scored = score_results(results)
         assert scored[0]["correct"] is True
         assert scored[0]["rubric"]["accuracy"] == 1.0
-        assert scored[0]["rubric"]["specificity"] == 1.0
 
     def test_wrong_response_scores_poorly(self):
         results = [self._make_result(
@@ -77,7 +76,6 @@ class TestScoreResults:
         scored = score_results(results)
         assert scored[0]["correct"] is False
         assert scored[0]["rubric"]["accuracy"] == 0.0
-        assert scored[0]["rubric"]["specificity"] == 0.0
 
     def test_partial_accuracy(self):
         results = [self._make_result(
@@ -101,7 +99,7 @@ class TestScoreResults:
             ],
         }
         scored = score_results(results, kg_results_from_treatment=treatment_kg)
-        assert scored[0]["rubric"]["specificity"] == 1.0
+        assert scored[0]["rubric"]["accuracy"] == 1.0
 
     def test_empty_results(self):
         scored = score_results([])
@@ -114,25 +112,25 @@ class TestScoreResults:
 class TestSummarizeScored:
     def test_perfect_summary(self):
         scored = [
-            {"correct": True, "rubric": {"accuracy": 1.0, "specificity": 1.0, "no_hallucination": 1.0}},
-            {"correct": True, "rubric": {"accuracy": 1.0, "specificity": 0.8, "no_hallucination": 1.0}},
+            {"correct": True, "rubric": {"accuracy": 1.0, "abstention": 1.0}},
+            {"correct": True, "rubric": {"accuracy": 1.0, "abstention": 1.0}},
         ]
         s = summarize_scored(scored)
         assert s["count"] == 2
         assert s["correct"] == 2
         assert s["accuracy"] == 1.0
-        assert s["rubric_averages"]["specificity"] == pytest.approx(0.9)
+        assert s["rubric_averages"]["abstention"] == pytest.approx(1.0)
 
     def test_mixed_summary(self):
         scored = [
-            {"correct": True, "rubric": {"accuracy": 1.0, "specificity": 1.0, "no_hallucination": 1.0}},
-            {"correct": False, "rubric": {"accuracy": 0.0, "specificity": 0.0, "no_hallucination": 0.5}},
+            {"correct": True, "rubric": {"accuracy": 1.0, "abstention": 1.0}},
+            {"correct": False, "rubric": {"accuracy": 0.0, "abstention": 0.5}},
         ]
         s = summarize_scored(scored)
         assert s["correct"] == 1
         assert s["accuracy"] == 0.5
         assert s["rubric_averages"]["accuracy"] == pytest.approx(0.5)
-        assert s["rubric_averages"]["no_hallucination"] == pytest.approx(0.75)
+        assert s["rubric_averages"]["abstention"] == pytest.approx(0.75)
 
     def test_empty_summary(self):
         s = summarize_scored([])
