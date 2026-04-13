@@ -94,7 +94,8 @@ def normalize_predicate(
 ) -> str:
     """Normalize an extracted predicate against the ontology.
 
-    Tries exact match, then alias lookup, then substring containment.
+    Tries exact match, then alias lookup. No substring fallback — loose
+    matching caused predicates like "convicted" to map to "date_filed".
     Returns the canonical predicate if matched, or the raw predicate unchanged.
     """
     if not raw_predicate:
@@ -107,11 +108,6 @@ def normalize_predicate(
 
     if predicate_aliases and low in predicate_aliases:
         return predicate_aliases[low]
-
-    if ontology_predicates:
-        for canon in ontology_predicates:
-            if canon in low or low in canon:
-                return canon
 
     return low
 

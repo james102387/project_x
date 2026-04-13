@@ -152,3 +152,61 @@ ALL_CASES = (
     + KG_ADVERSARIAL_NEGATIVES
     + KG_FUZZY_ENTITY_ALIAS_CASES + KG_FUZZY_STRING_CASES
 )
+
+
+# ── Golden KG facts — known-correct triplets for purity testing ──────
+#
+# Format: (subject, predicate, object)
+# These must always pass validate_triplet(). If a validation rule change
+# causes any of these to fail, the change is reverted.
+GOLDEN_KG_FACTS: list[tuple[str, str, str]] = [
+    # Miranda v. Arizona
+    ("Miranda v. Arizona", "court", "Supreme Court of the United States"),
+    ("Miranda v. Arizona", "date_filed", "1966-06-13"),
+    ("Miranda v. Arizona", "opinion_author", "Warren"),
+    ("Miranda v. Arizona", "cited_by_count", "9832"),
+    ("Miranda v. Arizona", "precedential_status", "Published"),
+    # Brown v. Board of Education
+    ("Brown v. Board of Education", "court", "Supreme Court of the United States"),
+    ("Brown v. Board of Education", "date_filed", "1954-05-17"),
+    ("Brown v. Board of Education", "opinion_author", "Warren"),
+    # Loving v. Virginia
+    ("Loving v. Virginia", "court", "Supreme Court of the United States"),
+    ("Loving v. Virginia", "date_filed", "1967-06-12"),
+    ("Loving v. Virginia", "opinion_author", "Warren"),
+    # Roe v. Wade
+    ("Roe v. Wade", "court", "Supreme Court of the United States"),
+    ("Roe v. Wade", "date_filed", "1973-01-22"),
+    ("Roe v. Wade", "opinion_author", "Blackmun"),
+    # Marbury v. Madison
+    ("Marbury v. Madison", "court", "Supreme Court of the United States"),
+    ("Marbury v. Madison", "date_filed", "1803-02-24"),
+    ("Marbury v. Madison", "opinion_author", "Marshall"),
+    ("Marbury v. Madison", "per_curiam", "false"),
+    # Gideon v. Wainwright
+    ("Gideon v. Wainwright", "court", "Supreme Court of the United States"),
+    ("Gideon v. Wainwright", "opinion_author", "Black"),
+    # Terry v. Ohio
+    ("Terry v. Ohio", "court", "Supreme Court of the United States"),
+    ("Terry v. Ohio", "date_filed", "1968-06-10"),
+    # Dred Scott v. Sandford
+    ("Dred Scott v. Sandford", "court", "Supreme Court of the United States"),
+    ("Dred Scott v. Sandford", "opinion_author", "Taney"),
+    # Edge cases: legitimate legal formats
+    ("In re Gault", "court", "Supreme Court of the United States"),
+    ("Ex parte Milligan", "court", "Supreme Court of the United States"),
+]
+
+
+# Known-bad triplets — these must always FAIL validate_triplet().
+KNOWN_BAD_TRIPLETS: list[tuple[str, str, str]] = [
+    ("it", "have", "effect"),
+    ("we", "blind", "ourselves"),
+    ("they", "consider", "problems"),
+    ("Lovings", "date_filed", "convicted of violating § 20-58 of the Virginia Code"),
+    ("parties", "date_filed", "briefs"),
+    ("defendant", "yield to", "prosecution"),
+    ("court", "require", "evidence"),
+    ("Brown v. Board", "cited_by_count", "many times"),
+    ("this case", "constitute", "landmark"),
+]

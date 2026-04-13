@@ -43,6 +43,7 @@ from crystal.ingest.confidence import (
     classify_extraction_source,
     score_ingestion_confidence,
 )
+from crystal.ingest.validation import validate_triplet
 from crystal.tools.kg.graph import KnowledgeGraph
 
 logger = logging.getLogger(__name__)
@@ -152,6 +153,33 @@ class DocumentIngestionResult:
         return rejected
 
 
+def _post_insert_validate(accepted: list[ScoredTriplet]) -> None:
+    """Safety net: re-validate just-inserted triplets and warn on failures.
+
+    In normal flow this should never fire (we validate before insertion),
+    but catches cases where bulk_insert is called directly or validation
+    is bypassed.
+    """
+    hard_fails = 0
+    for st in accepted:
+        vr = validate_triplet(st.subject, st.predicate, st.object)
+        if not vr.valid:
+            sev = vr.severity.value if vr.severity else "unknown"
+            reason_str = "; ".join(vr.reasons) if vr.reasons else "unknown"
+            logger.warning(
+                "Post-insert validation failure (%s): (%s, %s, %s) — %s",
+                sev, st.subject, st.predicate, st.object[:80], reason_str,
+            )
+            if vr.severity and vr.severity.value == "hard":
+                hard_fails += 1
+    if hard_fails:
+        logger.error(
+            "POST-INSERT ALERT: %d hard validation failures in batch of %d. "
+            "KG may contain invalid facts.",
+            hard_fails, len(accepted),
+        )
+
+
 def ingest_document(
     path_or_text: str | Path,
     kg=None,
@@ -205,10 +233,24 @@ def ingest_document(
     ner_result = ingest_text(text, source=source)
 
     scored: list[ScoredTriplet] = []
+    validation_rejected: list[ScoredTriplet] = []
+
     for triplet in ner_result.triplets:
         norm_pred = normalize_predicate(
             triplet.predicate, ontology_predicates, predicate_aliases,
         )
+        vr = validate_triplet(triplet.subject, norm_pred, triplet.object)
+        if not vr.valid:
+            validation_rejected.append(ScoredTriplet(
+                subject=triplet.subject,
+                predicate=norm_pred,
+                object=triplet.object,
+                source_sentence=triplet.source_sentence,
+                extraction_source="ner",
+                ingestion_confidence=0.0,
+                status="rejected",
+            ))
+            continue
         conf = score_ingestion_confidence(
             triplet.subject, norm_pred, "ner",
             kg=kg, ontology_predicates=ontology_predicates,
@@ -218,7 +260,7 @@ def ingest_document(
             subject=triplet.subject,
             predicate=norm_pred,
             object=triplet.object,
-            source_sentence="",
+            source_sentence=triplet.source_sentence,
             extraction_source="ner",
             ingestion_confidence=conf,
         ))
@@ -234,6 +276,18 @@ def ingest_document(
                 norm_pred = normalize_predicate(
                     rt.predicate, ontology_predicates, predicate_aliases,
                 )
+                vr = validate_triplet(rt.subject, norm_pred, rt.object)
+                if not vr.valid:
+                    validation_rejected.append(ScoredTriplet(
+                        subject=rt.subject,
+                        predicate=norm_pred,
+                        object=rt.object,
+                        source_sentence=rt.source_sentence,
+                        extraction_source=ext_source,
+                        ingestion_confidence=0.0,
+                        status="rejected",
+                    ))
+                    continue
                 conf = score_ingestion_confidence(
                     rt.subject, norm_pred, ext_source,
                     kg=kg, ontology_predicates=ontology_predicates,
@@ -274,12 +328,15 @@ def ingest_document(
             st.status = "rejected"
             rejected.append(st)
 
+    rejected.extend(validation_rejected)
+
     if auto_accepted and kg is not None:
         try:
             kg.bulk_insert(
-                [st.as_tuple() for st in auto_accepted],
+                [st.as_tuple_with_sentence() for st in auto_accepted],
                 source=source,
             )
+            _post_insert_validate(auto_accepted)
         except Exception:
             logger.exception("Failed to insert auto-accepted triplets into KG")
 
@@ -291,13 +348,14 @@ def ingest_document(
         rejected=rejected,
         stats={
             "source": source,
-            "total_extracted": len(scored),
+            "total_extracted": len(scored) + len(validation_rejected),
+            "validation_rejected": len(validation_rejected),
             "auto_accepted": len(auto_accepted),
             "pending_review": len(pending_review),
             "rejected": len(rejected),
-            "deduped": len(scored) - len(auto_accepted) - len(pending_review) - len(rejected),
+            "deduped": len(scored) - len(auto_accepted) - len(pending_review) - (len(rejected) - len(validation_rejected)),
             "ner_triplets": len(ner_result.triplets),
-            "llm_triplets": len(scored) - len(ner_result.triplets),
+            "llm_triplets": max(0, len(scored) + len(validation_rejected) - len(ner_result.triplets)),
             "elapsed_seconds": round(elapsed, 2),
         },
     )

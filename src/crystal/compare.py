@@ -15,6 +15,7 @@ from dataclasses import dataclass, field
 from typing import Callable
 
 from crystal.graph import build_crystal_graph
+from crystal.ingest.validation import validate_object, validate_subject
 from crystal.state import make_initial_state
 
 logger = logging.getLogger(__name__)
@@ -135,13 +136,17 @@ _JUNK_PREFIXES = ("this ", "the ", "said ", "such ", "that ")
 
 
 def _is_plausible_case_name(subject: str) -> bool:
-    """Check if a subject looks like a legal case name, not NER noise."""
+    """Check if a subject looks like a legal case name, not NER noise.
+
+    Delegates to the shared validation module for the core checks,
+    then applies additional question-generation-specific heuristics.
+    """
     s = subject.strip().lower()
     if len(s) < 3 or len(s) > 120:
         return False
-    if s in _JUNK_SUBJECTS:
-        return False
-    if any(s.startswith(p) and " v" not in s for p in _JUNK_PREFIXES):
+
+    vr = validate_subject(subject)
+    if not vr.valid:
         return False
 
     if " v. " in s or " v " in s:
@@ -158,8 +163,6 @@ def _is_plausible_case_name(subject: str) -> bool:
     if len(words) > 6:
         return False
     if not any(w[0].isupper() for w in words if w):
-        return False
-    if all(w[0].islower() for w in words if w):
         return False
     if s.startswith("justice ") or s.startswith("chief justice "):
         return False
@@ -185,6 +188,9 @@ def generate_questions_from_triplets(triplets: list[tuple[str, str, str]], max_q
             continue
 
         if not _is_plausible_case_name(subj):
+            continue
+
+        if not validate_object(pred, obj).valid:
             continue
 
         key = (subj.lower(), pred.lower())

@@ -355,6 +355,130 @@ def collect_accepted_cases(review_dir: Path | None = None) -> list[tuple[str, st
     return accepted
 
 
+def save_single_review_decision(
+    batch_id: str,
+    question_idx: int,
+    golden_answer: str,
+    status: str,
+    review_dir: Path | None = None,
+) -> bool:
+    """Save golden answer and status for a single question.
+
+    Updates the golden_answer text, re-derives match_strings, and sets status.
+    Returns True on success.
+    """
+    review_dir = review_dir or REVIEW_DIR
+    path = _resolve_batch_path(batch_id, review_dir)
+    if path is None:
+        return False
+
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    cases = data.get("cases", [])
+    if not (0 <= question_idx < len(cases)):
+        return False
+
+    cases[question_idx]["golden_answer"] = golden_answer.strip()
+    cases[question_idx]["match_strings"] = _derive_match_strings(golden_answer)
+    cases[question_idx]["status"] = status
+
+    data["pending"] = sum(1 for c in cases if c.get("status") == "pending_review")
+
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+    return True
+
+
+def load_source_document_text(slug: str, docs_dir: Path | None = None) -> str:
+    """Load the opinion text for a document by its slug.
+
+    Looks in ``benchmarks/documents/<slug>.json`` and extracts the text field.
+    Returns the text content, or an error message if not found.
+    """
+    if docs_dir is None:
+        docs_dir = Path(__file__).parent.parent.parent / "benchmarks" / "documents"
+
+    path = docs_dir / f"{slug}.json"
+    if not path.exists():
+        return f"Document not found: {slug}"
+
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if isinstance(data, dict):
+            for key in ("text", "plain_text", "opinion_text", "content"):
+                if key in data and data[key]:
+                    text = str(data[key])
+                    if len(text) > 60_000:
+                        return text[:60_000] + (
+                            f"\n\n[...truncated at 60,000 characters, "
+                            f"full document is {len(text):,} characters]"
+                        )
+                    return text
+            if "opinions" in data and isinstance(data["opinions"], list):
+                parts = [op["plain_text"] for op in data["opinions"]
+                         if isinstance(op, dict) and op.get("plain_text")]
+                if parts:
+                    text = "\n\n".join(parts)
+                    if len(text) > 60_000:
+                        return text[:60_000] + "\n\n[...truncated]"
+                    return text
+        return "Could not extract text from document."
+    except Exception as e:
+        return f"Error loading document: {e}"
+
+
+def find_batch_document_slugs(batch_id: str, review_dir: Path | None = None) -> list[str]:
+    """Find document slugs relevant to a batch.
+
+    Parses the batch source field for known slugs, then scans questions'
+    source_triplet subjects to find additional matching documents.
+    """
+    review_dir = review_dir or REVIEW_DIR
+    docs_dir = Path(__file__).parent.parent.parent / "benchmarks" / "documents"
+    if not docs_dir.exists():
+        return []
+
+    path = _resolve_batch_path(batch_id, review_dir)
+    if path is None:
+        return []
+
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return []
+
+    slugs: set[str] = set()
+
+    import re
+    source = data.get("batch", {}).get("source", "")
+    for part in source.split(","):
+        part = part.strip()
+        if not part or part.startswith("(+"):
+            continue
+        part = re.sub(r"\s*\(\+\d+ more\)\s*$", "", part).strip()
+        if part:
+            candidate = docs_dir / f"{part}.json"
+            if candidate.exists():
+                slugs.add(part)
+
+    for case in data.get("cases", []):
+        st = case.get("source_triplet", [])
+        if st and len(st) >= 1:
+            name = str(st[0])
+            slug = (name.lower()
+                    .replace(".", "")
+                    .replace(",", "")
+                    .replace(" ", "-"))
+            candidate = docs_dir / f"{slug}.json"
+            if candidate.exists():
+                slugs.add(slug)
+
+    return sorted(slugs)
+
+
 def save_proposed_as_batch(
     proposed_rows: list[dict],
     source: str = "document_extraction",
@@ -404,6 +528,7 @@ def save_proposed_as_batch(
             "crystal_route": row.get("route", ""),
             "crystal_confidence": row.get("confidence", ""),
             "source_triplet": row.get("source_triplet", []),
+            "source_sentence": row.get("source_sentence", ""),
         })
 
     data = {

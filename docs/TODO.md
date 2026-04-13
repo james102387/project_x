@@ -55,20 +55,66 @@
 
 </details>
 
+<details>
+<summary>KG Quality & Purification (complete)</summary>
+
+- [x] Triplet validation gates — subject/predicate/object-type with hard/soft severity (`src/crystal/ingest/validation.py`)
+- [x] Source sentence persistence — NER stamps `sent.text` on each triplet, SQLite column + migration
+- [x] Batch provenance + rollback — `ingestion_batches` table, `delete_batch()`, `list_batches()`
+- [x] KG audit tool — deterministic health check, zero LLM cost (`src/crystal/tools/kg/audit.py`)
+- [x] KG proofreader — two-pass deep clean: fast gates + LLM proofreading (`src/crystal/tools/kg/proofreader.py`)
+- [x] Post-insert validation safety net — `_post_insert_validate()` in ingestion pipeline
+- [x] Weighted health score — hard=1.0, soft=0.25 weighting in audit
+- [x] Question generation object filter — `compare.py` skips triplets with bad objects
+- [x] Source sentence verification gate — `validate_source_sentence()` deterministic check
+- [x] Ground truth comparison in audit — hardcoded facts for 8 landmark SCOTUS cases
+- [x] Golden KG facts — 27 known-correct tuples + 9 known-bad triplets (`tests/golden/test_cases.py`)
+- [x] PurificationLoop — iteratively tightens validation rules, golden-fact safety constraint (`benchmarks/ralph_wiggum/purification_loop.py`)
+- [x] KG purity test suite — 14 tests covering golden facts, known-bad, source sentence, ground truth, clean KG invariant (`tests/unit/test_kg_purity.py`)
+- [x] KG cleaned — 764 garbage facts deleted, health score 0.75 → 0.93
+
+</details>
+
+<details>
+<summary>Demo Benchmark A/B Comparison (complete)</summary>
+
+- [x] B1. Opinion text downloader — CourtListener → `benchmarks/documents/` (323 cached)
+- [x] B2. Document-answerability audit — predicate-level classification
+- [x] B3. Document-context baseline runner — LLM + real opinion text arm
+- [x] B4. Obscure long-tail cases — 15 cases no LLM would know
+- [x] B5. Stratified sampler — proportional sampling by predicate
+- [x] B6. Three-arm comparison report — side-by-side output with caching
+
+</details>
+
+<details>
+<summary>Demo Pipeline (complete)</summary>
+
+- [x] Provenance: source sentence in auto-accepted UI table
+- [x] Provenance: source_sentence in review batch JSON exports
+- [x] Provenance: scaffold backfill (2,197 facts, 118 doc-matched, 2,079 metadata synth)
+- [x] Golden-answer feedback: "Run Benchmark on Accepted" button in Review tab
+- [x] Golden-answer feedback: "Improve with Ralph Wiggum" button in Review tab
+- [x] Crystallization CLI — `scripts/crystallize.py` (ingest/benchmark/purify subcommands)
+- [x] Three-arm comparison — `benchmarks/three_arm_comparison.py` (Crystal+KG vs LLM+Docs vs Naked LLM)
+- [x] Three-arm comparison UI — accuracy scores per arm on golden answers in Ingest tab
+
+</details>
+
 ---
 
 ## Path to Demo
 
 The demo proves: Crystal + scaffold KG eliminates hallucinations, provides grounded answers, and costs 10x less than document-in-context. The selling points are citation network verification and zero hallucination, not yet holdings/doctrines extraction.
 
-### Phase 1: Extraction Quality (current — iterate 3-5 times)
+### Phase 1: Crystallization Cycles (current)
 
-Target: 80%+ accuracy on document-derived questions.
+All tooling is in place. The remaining work is human-in-the-loop iteration.
 
 1. [ ] **EQ-1. Human ground truth** — Review `review/batch_doc_*.json`, correct golden answers, accept/reject. Need ~50 accepted cases for Ralph Wiggum.
-2. [ ] **EQ-2. Run Ralph Wiggum loops** — ExtractionLoop improves extraction prompts/aliases. PredicateLoop + EntityLoop + ThresholdLoop improve routing/matching. `python -m benchmarks.ralph_wiggum`
-3. [ ] **EQ-3. Re-run extraction benchmark** — Measure improvement: `LLM_PROVIDER=anthropic LLM_MODEL=claude-haiku-4-5 python -m benchmarks.extraction_quality`
-4. [ ] **EQ-4. Iterate** — Repeat EQ-1 → EQ-3 until accuracy ≥ 80% and hallucination ≤ 10%.
+2. [ ] **EQ-2. Run crystallization cycles** — Use `scripts/crystallize.py ingest` on curated SCOTUS opinions (15-20 documents). Run 5 cycles, building the golden answer set each time.
+3. [ ] **EQ-3. Run Ralph Wiggum loops** — Use "Improve with Ralph Wiggum" button or `scripts/crystallize.py benchmark --rw`. Target ≥80% accuracy.
+4. [ ] **EQ-4. Iterate** — Repeat until accuracy ≥ 80% and hallucination ≤ 10%.
 
 ### Phase 2: Scaffold Density
 
@@ -84,24 +130,9 @@ Target: A compelling three-arm comparison on a realistic practice area.
 
 8. [ ] **DEMO-1. Pick practice area** — Choose a specific area with good scaffold coverage (e.g., 4th Amendment, equal protection, commerce clause).
 9. [ ] **DEMO-2. Curate demo documents** — 5-10 real briefs/opinions. Must include citations to cases in the scaffold.
-10. [ ] **DEMO-3. Run three-arm comparison** — Naked LLM vs LLM+document vs Crystal. On the demo documents.
+10. [ ] **DEMO-3. Run three-arm comparison** — `python -m benchmarks.three_arm_comparison` or use UI button on golden answers.
 11. [ ] **DEMO-4. Package results** — "LLM fabricated 40% of citations, Crystal 0%. 95% accuracy, 10x cheaper."
 12. [ ] **DEMO-5. Marketing materials** — Demo video, one-pager, pitch deck from comparison results.
-
----
-
-## Demo Benchmark (A/B Comparison)
-
-Three arms, fair comparison on real opinion text.
-
-### Tasks
-
-- [ ] **B1. Opinion text downloader** — Fetch real opinion text from CourtListener for benchmark cases. Cache to `benchmarks/documents/`.
-- [ ] **B2. Document-answerability audit** — Tag benchmark cases with `document_answerable`.
-- [ ] **B3. Document-context baseline runner** — LLM + real opinion text arm.
-- [ ] **B4. Add obscure cases** — 10-15 long-tail cases no LLM would know.
-- [ ] **B5. Stratified sampler** — `sample_benchmark_cases(all_cases, n, by='predicate')` for Tier 2.
-- [ ] **B6. Three-arm comparison report** — Side-by-side output.
 
 ---
 

@@ -12,6 +12,7 @@ class Triplet:
     subject: str
     predicate: str
     object: str
+    source_sentence: str = ""
 
     def as_tuple(self) -> tuple[str, str, str]:
         return (self.subject, self.predicate, self.object)

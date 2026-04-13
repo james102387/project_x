@@ -9,12 +9,12 @@ Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.
 
 Update this section each session with current priorities.
 
-- **Extraction baselines established.** NER-only: 59.1% accuracy (13/22). NER+LLM: 63.6% (14/22). 2,575 vs 3,241 KG facts from 15 SCOTUS opinions.
-- **Review pipeline ready.** Document → extract → generate questions → Crystal proposes → human verifies → review batch → Ralph Wiggum. First batch: `review/batch_doc_20260412_103346.json` (7 questions from 5 landmark cases).
-- **Test count:** 769 unit tests passing.
-- **Product direction:** Crystal (engine) + pre-built legal KG (scaffold) + customer document uploads.
-- **Path to demo:** (1) Get extraction to 80%+ via Ralph Wiggum iterations, (2) expand scaffold 543→5K subjects, (3) pick practice area + curate demo batch, (4) three-arm comparison → marketing materials.
-- **Next:** Human review of proposed answers → Ralph Wiggum → re-benchmark → iterate.
+- **Demo pipeline operational.** Full crystallization cycle: ingest → extract → purify → generate questions → human review → benchmark → RW improvement. CLI (`scripts/crystallize.py`) and UI buttons wired.
+- **Test count:** 1,199 tests passing.
+- **KG provenance complete.** All 2,197 scaffold facts backfilled with source_sentence. UI shows sentences in auto-accepted table. Review batch JSON includes source_sentence.
+- **Three-arm comparison ready.** `benchmarks/three_arm_comparison.py` + UI section. Compares Crystal+KG vs LLM+Docs vs Naked LLM on accepted golden answers with accuracy scoring.
+- **Golden-answer feedback loop wired.** Benchmark + RW buttons in Review tab. Questions → human golden answers → benchmark scoring → RW improvement loop.
+- **Next:** Run 5 real crystallization cycles on curated SCOTUS opinions. Build golden answer set. Run three-arm comparison for marketing demo.
 
 ---
 
@@ -70,46 +70,34 @@ Update this section each session with current priorities.
 
 ---
 
-## 2026-04-11 — Ralph Wiggum v3: Multi-Loop Architecture
+## 2026-04-12 — Demo Pipeline Build
 
 ### What changed
-- **Decomposed monolith** — `benchmarks/ralph_wiggum.py` (single 1,048-line file) → `benchmarks/ralph_wiggum/` package with 6 modules:
-  - `base.py`: BaseLoop ABC with shared evaluation, diagnosis, scoring, reporting, git ops, pipeline runner
-  - `predicate_loop.py`: PredicateLoop — owns `predicate_mismatch` → mutates `QUESTION_PREDICATE_MAP` + `LEGAL_PREDICATE_ALIASES`
-  - `entity_loop.py`: EntityLoop — owns `entity_mismatch` → mutates entity alias tables
-  - `threshold_loop.py`: ThresholdLoop — owns `routing_error` → mutates `CONFIDENCE_LOW` (bounded [0.5, 0.85])
-  - `orchestrator.py`: Orchestrator runs all loops in sequence, produces unified report
-  - `__main__.py`: CLI with `--loop` flag to run individual or all loops
-- **Each loop is tightly contained**: owns exactly one `FailureCategory` set, exactly one set of `TARGET_FILES`, its own `_validate_proposal()`, `_apply_proposal()`, `_revert_proposal()`, and `_build_proposal_prompt()`.
-- **Backward-compatible `__init__.py`**: old `RalphWiggumLoop`, `_validate_proposal`, `_apply_proposal`, `_parse_llm_proposal`, `_update_threshold`, `_build_change_report` all still importable from `benchmarks.ralph_wiggum`.
-- **19 new tests** covering orchestrator, per-loop metadata, per-loop validation, `_my_failures` filtering. All existing tests preserved and passing.
-
-### Decisions
-- Each loop filters failures with `_my_failures()` so it only proposes changes for its own domain — no accidental cross-contamination.
-- Orchestrator runs loops in sequence (PredicateLoop → EntityLoop → ThresholdLoop) because earlier loops may fix issues that change the failure distribution for later ones.
-- EntityLoop `_apply_proposal` currently only logs proposed aliases (requires manual KG addition) — this keeps the entity alias mutation safe and auditable.
-- Backward compat shim in `__init__.py` provides a unified `_validate_proposal()` that accepts all loop formats, so existing tests pass unchanged.
+- **Provenance visibility** — Added "Sentence" column to auto-accepted table in UI. Review batch JSON exports now include `source_sentence`. Backfilled 2,197 scaffold facts (118 matched against opinion text, 2,079 got `[COLD Cases metadata]` provenance).
+- **Golden-answer feedback loop** — "Run Benchmark on Accepted" and "Improve with Ralph Wiggum" buttons in Review tab. Runs Crystal pipeline on accepted golden answers, shows accuracy scores and per-question results.
+- **Crystallization CLI** — `scripts/crystallize.py` with three subcommands: `ingest` (documents → extract → questions → review batch), `benchmark` (score accepted golden answers, optional `--rw`), `purify` (run KG audit).
+- **Three-arm comparison** — `benchmarks/three_arm_comparison.py`: runs Crystal+KG, LLM+Docs, Naked LLM on accepted golden answers. Produces markdown report with accuracy table and per-question results. Also wired into UI as "Three-Arm Comparison on Golden Answers" section in Ingest tab.
 
 ---
 
-## 2026-04-11 — Pipeline Safety Guarantees + Ralph Wiggum v2
+## 2026-04-12 — KG Quality Gates, Rollback, and Audit
 
 ### What changed
-- **Unified confidence scoring** — `src/crystal/nodes/planner.py`: replaced binary `_kg_detection_is_confident()` with `score_grounding_confidence()` returning a 0.0–1.0 float. Factors: entity match tier (piecewise bands for fuzzy), predicate specificity (targeted vs subject_scan), entity ambiguity penalty. Three bands: HIGH (≥0.9), MEDIUM (0.7–0.9), LOW (<0.7 → LLM fallback). `grounding_confidence` added to `CrystalState`.
-- **Qualified prompt framing** — `src/crystal/nodes/compiler/kg.py`: HIGH confidence → "verified from the knowledge graph", MEDIUM → "possibly relevant, use your own judgment". Medium forces `kg_augmented` route (never `kg_answerable`) so LLM can cross-check. `_build_kg_augmented_prompt` accepts `grounding_confidence` kwarg.
-- **Graceful error degradation** — `src/crystal/graph.py`: `_safe_node()` wrapper on all pre-LLM nodes. Any exception → `fallback_to_llm=True` with `prompt_type="no_math"` and `compiled_prompt=raw_prompt`, so downstream routing degrades cleanly to LLM.
-- **Contract test suite** — `tests/integration/test_never_worse.py`: 52 tests covering KG answerable, KG augmented, alias resolution, negatives, adversarial negatives, wrong-entity protection, and graceful degradation (broken KG detection, broken compiler).
-- **Ralph Wiggum v2** — `benchmarks/ralph_wiggum.py` rewritten:
-  - Full-pipeline evaluation via `graph.invoke()` (v1 `detect_kg_query`-only mode available with `--legacy`)
-  - Component-level failure diagnosis: `diagnose_failure()` classifies into entity_mismatch, predicate_mismatch, routing_error, framing_error, math_false_positive, no_detection
-  - Expanded mutation targets: predicate maps, predicate aliases, entity aliases (additions only), confidence threshold (bounded [0.5, 0.85])
-  - Autonomous loop produces `ralph_report.md` change report for human review
-  - `_build_change_report()` summarizes iterations, diagnoses, proposed changes, remaining failures
+- **Triplet validation gates** — `src/crystal/ingest/validation.py`: Three fast, deterministic gates run before KG insertion. Subject gate rejects pronouns/common nouns/junk prefixes. Predicate gate rejects non-canonical predicates. Object type gate validates format per predicate (date_filed must be date-like, cited_by_count must be numeric, etc.). Hard vs soft severity classification.
+- **Fixed `normalize_predicate()` substring match** — `src/crystal/ingest/llm_extract.py`: Removed dangerous `canon in low or low in canon` fallback that could silently reclassify predicates. Now exact match + alias lookup only. Same fix applied in `confidence.py` scorer.
+- **Source sentence persistence** — `Triplet` dataclass now has `source_sentence` field. NER extraction stamps `sent.text` on each triplet. `SqliteKnowledgeGraph.bulk_insert()` accepts 4-tuples `(s, p, o, source_sentence)`. New `source_sentence` column in `triplets` table with migration for existing DBs.
+- **Batch provenance + rollback** — `ingestion_batches` table tracks every `bulk_insert()` call with `batch_id`, source, count, status. `delete_batch(batch_id)` rolls back all triplets from a batch. `list_batches()`, `batch_stats()`, `delete_by_ids()` for visibility and cleanup.
+- **KG audit tool** — `src/crystal/tools/kg/audit.py`: Fast, deterministic health check (zero LLM cost). Runs validation gates on all KG facts. CLI: `python -m crystal.tools.kg.audit --db data/legal.sqlite [--fix]`.
+- **KG proofreader** — `src/crystal/tools/kg/proofreader.py`: Two-pass deep clean. Pass 1: fast gates (free). Pass 2: LLM proofreading (semantic verification against source sentences). Tiered trust: hard failures auto-delete, soft+LLM → auto-delete, LLM-only → human review queue. CLI: `python -m crystal.tools.kg.proofread --db data/legal.sqlite [--fix] [--fast]`.
+- **LLM proofreading** — `proofread_triplets()` in validation.py. Groups by source sentence, sends verification prompt per group. Falls back to plausibility check for legacy data without source sentences.
+- **Wired validation into ingestion pipeline** — `ingest_document()` now runs `validate_triplet()` before confidence scoring. Rejected triplets never reach the KG.
+- **KG cleaned** — Proofreader fast-mode deleted 764 garbage facts (pronoun subjects, verb predicates, bad date_filed/cites objects). Backfilled 306 empty `source` fields. Health score: 0.75 → 0.93.
+- **59 new tests** — validation gates, LLM proofreading, batch provenance, rollback, audit, proofreader, ingestion integration. 1,122 tests total.
 
 ### Decisions
-- Entity confidence dominates the scorer via piecewise bands (not linear mapping): <90% fuzzy = 0.4, 90-95% = 0.8, ≥95% = 0.95. This preserves the original 90% threshold behavior while allowing nuanced routing.
-- `_safe_node` sets all fields needed for clean downstream routing — not just `fallback_to_llm` but also `prompt_type`, `compiled_prompt`, `final_response`. This handles crashes in post-planner nodes where the graph can't re-route to `llm_fallback_node`.
-- Confidence threshold mutation bounded at [0.5, 0.85] — low enough to be useful for experimentation but can't accidentally disable the safety gate entirely.
+- Tiered trust policy for KG proofreader: fast gates are deterministic and trusted for auto-delete. LLM proofreading is probabilistic — rejections go to human review queue, never auto-delete on LLM judgment alone. Exception: soft gate failure + LLM rejection = auto-delete (two independent signals agree).
+- `normalize_predicate()` substring match removed entirely rather than tightened. Better to reject an unmapped predicate and let the predicate gate handle it than to silently misclassify.
+- `source_sentence` column added via migration for backward compatibility with existing DBs. Existing facts get empty string, new facts get the actual sentence.
 
 ---
 

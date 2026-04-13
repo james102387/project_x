@@ -1,6 +1,44 @@
 # Crystal Development Log — Archive
 
 Older entries moved from `DEVLOG.md` to keep the active log short.
+
+---
+
+## 2026-04-11 — Ralph Wiggum v3: Multi-Loop Architecture
+
+### What changed
+- **Decomposed monolith** — `benchmarks/ralph_wiggum.py` (single 1,048-line file) → `benchmarks/ralph_wiggum/` package with 6 modules:
+  - `base.py`: BaseLoop ABC with shared evaluation, diagnosis, scoring, reporting, git ops, pipeline runner
+  - `predicate_loop.py`: PredicateLoop — owns `predicate_mismatch` → mutates `QUESTION_PREDICATE_MAP` + `LEGAL_PREDICATE_ALIASES`
+  - `entity_loop.py`: EntityLoop — owns `entity_mismatch` → mutates entity alias tables
+  - `threshold_loop.py`: ThresholdLoop — owns `routing_error` → mutates `CONFIDENCE_LOW` (bounded [0.5, 0.85])
+  - `orchestrator.py`: Orchestrator runs all loops in sequence, produces unified report
+  - `__main__.py`: CLI with `--loop` flag to run individual or all loops
+- **Each loop is tightly contained**: owns exactly one `FailureCategory` set, exactly one set of `TARGET_FILES`, its own `_validate_proposal()`, `_apply_proposal()`, `_revert_proposal()`, and `_build_proposal_prompt()`.
+- **Backward-compatible `__init__.py`**: old `RalphWiggumLoop`, `_validate_proposal`, `_apply_proposal`, `_parse_llm_proposal`, `_update_threshold`, `_build_change_report` all still importable from `benchmarks.ralph_wiggum`.
+- **19 new tests** covering orchestrator, per-loop metadata, per-loop validation, `_my_failures` filtering. All existing tests preserved and passing.
+
+### Decisions
+- Each loop filters failures with `_my_failures()` so it only proposes changes for its own domain — no accidental cross-contamination.
+- Orchestrator runs loops in sequence (PredicateLoop → EntityLoop → ThresholdLoop) because earlier loops may fix issues that change the failure distribution for later ones.
+- EntityLoop `_apply_proposal` currently only logs proposed aliases (requires manual KG addition) — this keeps the entity alias mutation safe and auditable.
+- Backward compat shim in `__init__.py` provides a unified `_validate_proposal()` that accepts all loop formats, so existing tests pass unchanged.
+
+---
+
+## 2026-04-11 — Pipeline Safety Guarantees + Ralph Wiggum v2
+
+### What changed
+- **Unified confidence scoring** — `src/crystal/nodes/planner.py`: replaced binary `_kg_detection_is_confident()` with `score_grounding_confidence()` returning a 0.0–1.0 float. Factors: entity match tier (piecewise bands for fuzzy), predicate specificity (targeted vs subject_scan), entity ambiguity penalty. Three bands: HIGH (≥0.9), MEDIUM (0.7–0.9), LOW (<0.7 → LLM fallback). `grounding_confidence` added to `CrystalState`.
+- **Qualified prompt framing** — `src/crystal/nodes/compiler/kg.py`: HIGH confidence → "verified from the knowledge graph", MEDIUM → "possibly relevant, use your own judgment". Medium forces `kg_augmented` route (never `kg_answerable`) so LLM can cross-check. `_build_kg_augmented_prompt` accepts `grounding_confidence` kwarg.
+- **Graceful error degradation** — `src/crystal/graph.py`: `_safe_node()` wrapper on all pre-LLM nodes. Any exception → `fallback_to_llm=True` with `prompt_type="no_math"` and `compiled_prompt=raw_prompt`, so downstream routing degrades cleanly to LLM.
+- **Contract test suite** — `tests/integration/test_never_worse.py`: 52 tests covering KG answerable, KG augmented, alias resolution, negatives, adversarial negatives, wrong-entity protection, and graceful degradation (broken KG detection, broken compiler).
+- **Ralph Wiggum v2** rewritten with full-pipeline evaluation, component-level failure diagnosis, expanded mutation targets, autonomous loop.
+
+### Decisions
+- Entity confidence dominates the scorer via piecewise bands (not linear mapping): <90% fuzzy = 0.4, 90-95% = 0.8, ≥95% = 0.95.
+- `_safe_node` sets all fields needed for clean downstream routing.
+- Confidence threshold mutation bounded at [0.5, 0.85].
 Only the most recent ~5 entries stay in `DEVLOG.md`.
 
 ---

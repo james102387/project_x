@@ -254,7 +254,11 @@ def extract_triplets(text: str, nlp=None) -> list[Triplet]:
     doc = nlp(text)
     triplets: list[Triplet] = []
     for sent in doc.sents:
-        triplets.extend(_extract_from_sentence(sent))
+        sent_triplets = _extract_from_sentence(sent)
+        sent_text = sent.text.strip()
+        for t in sent_triplets:
+            t.source_sentence = sent_text
+        triplets.extend(sent_triplets)
     return triplets
 
 

@@ -13,7 +13,9 @@ Usage:
 
 from __future__ import annotations
 
+import hashlib
 import sqlite3
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TypeAlias
 
@@ -29,6 +31,8 @@ CREATE TABLE IF NOT EXISTS triplets (
     predicate TEXT NOT NULL,
     object TEXT NOT NULL,
     source TEXT,
+    source_sentence TEXT DEFAULT '',
+    batch_id TEXT,
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(subject, predicate, object)
 );
@@ -53,7 +57,35 @@ CREATE TABLE IF NOT EXISTS sync_state (
     last_id TEXT,
     item_count INTEGER
 );
+
+CREATE TABLE IF NOT EXISTS ingestion_batches (
+    batch_id TEXT PRIMARY KEY,
+    source TEXT,
+    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+    triplet_count INTEGER DEFAULT 0,
+    status TEXT DEFAULT 'active'
+);
 """
+
+_MIGRATIONS = [
+    ("col_source_sentence", "ALTER TABLE triplets ADD COLUMN source_sentence TEXT DEFAULT ''"),
+    ("col_batch_id", "ALTER TABLE triplets ADD COLUMN batch_id TEXT"),
+    ("tbl_ingestion_batches", """
+        CREATE TABLE IF NOT EXISTS ingestion_batches (
+            batch_id TEXT PRIMARY KEY,
+            source TEXT,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            triplet_count INTEGER DEFAULT 0,
+            status TEXT DEFAULT 'active'
+        )
+    """),
+]
+
+
+def _generate_batch_id(source: str) -> str:
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    h = hashlib.sha256(f"{source}{ts}".encode()).hexdigest()[:8]
+    return f"batch_{ts}_{h}"
 
 
 class SqliteKnowledgeGraph:
@@ -71,9 +103,30 @@ class SqliteKnowledgeGraph:
         self._conn.execute("PRAGMA journal_mode=WAL")
         self._conn.execute("PRAGMA synchronous=NORMAL")
         self._init_schema()
+        self._run_migrations()
 
     def _init_schema(self) -> None:
         self._conn.executescript(_SCHEMA)
+        self._conn.commit()
+
+    def _run_migrations(self) -> None:
+        """Add new columns/tables to existing databases."""
+        existing_cols = {
+            row[1] for row in self._conn.execute("PRAGMA table_info(triplets)").fetchall()
+        }
+        for name, sql in _MIGRATIONS:
+            if name == "col_source_sentence" and "source_sentence" in existing_cols:
+                continue
+            if name == "col_batch_id" and "batch_id" in existing_cols:
+                continue
+            try:
+                self._conn.execute(sql)
+            except sqlite3.OperationalError:
+                pass
+        try:
+            self._conn.execute("CREATE INDEX IF NOT EXISTS idx_batch ON triplets(batch_id)")
+        except sqlite3.OperationalError:
+            pass
         self._conn.commit()
 
     def close(self) -> None:
@@ -83,20 +136,36 @@ class SqliteKnowledgeGraph:
 
     def bulk_insert(
         self,
-        triplets: list[Triplet],
+        triplets: list[Triplet | tuple[str, str, str, str]],
         entity_aliases: dict[str, str] | None = None,
         predicate_aliases: dict[str, str] | None = None,
         source: str = "",
+        batch_id: str | None = None,
     ) -> int:
-        """Insert triplets and aliases in a single transaction. Returns count inserted."""
+        """Insert triplets and aliases in a single transaction.
+
+        Triplets can be 3-tuples (subject, predicate, object) or
+        4-tuples (subject, predicate, object, source_sentence).
+
+        Returns count inserted.
+        """
+        if batch_id is None:
+            batch_id = _generate_batch_id(source)
+
         inserted = 0
         with self._conn:
-            for subj, pred, obj in triplets:
+            for t in triplets:
+                if len(t) >= 4:
+                    subj, pred, obj, src_sent = t[0], t[1], t[2], t[3]
+                else:
+                    subj, pred, obj = t[0], t[1], t[2]
+                    src_sent = ""
                 try:
                     self._conn.execute(
-                        "INSERT OR IGNORE INTO triplets (subject, predicate, object, source) "
-                        "VALUES (?, ?, ?, ?)",
-                        (subj.lower(), pred.lower(), obj, source),
+                        "INSERT OR IGNORE INTO triplets "
+                        "(subject, predicate, object, source, source_sentence, batch_id) "
+                        "VALUES (?, ?, ?, ?, ?, ?)",
+                        (subj.lower(), pred.lower(), obj, source, src_sent, batch_id),
                     )
                     inserted += 1
                 except sqlite3.IntegrityError:
@@ -114,7 +183,81 @@ class SqliteKnowledgeGraph:
                     (alias.lower(), canonical.lower()),
                 )
 
+            self._conn.execute(
+                "INSERT OR REPLACE INTO ingestion_batches "
+                "(batch_id, source, triplet_count, status) VALUES (?, ?, ?, 'active')",
+                (batch_id, source, inserted),
+            )
+
         return inserted
+
+    # ── Batch management ─────────────────────────────────────────────────
+
+    def delete_batch(self, batch_id: str) -> int:
+        """Delete all triplets from a batch and mark it rolled back. Returns count deleted."""
+        with self._conn:
+            cursor = self._conn.execute(
+                "DELETE FROM triplets WHERE batch_id = ?", (batch_id,),
+            )
+            deleted = cursor.rowcount
+            self._conn.execute(
+                "UPDATE ingestion_batches SET status = 'rolled_back', triplet_count = 0 "
+                "WHERE batch_id = ?",
+                (batch_id,),
+            )
+        return deleted
+
+    def list_batches(self, status: str | None = None) -> list[dict]:
+        """List ingestion batches, optionally filtered by status."""
+        if status:
+            rows = self._conn.execute(
+                "SELECT batch_id, source, created_at, triplet_count, status "
+                "FROM ingestion_batches WHERE status = ? ORDER BY created_at DESC",
+                (status,),
+            ).fetchall()
+        else:
+            rows = self._conn.execute(
+                "SELECT batch_id, source, created_at, triplet_count, status "
+                "FROM ingestion_batches ORDER BY created_at DESC",
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    def batch_stats(self, batch_id: str) -> dict:
+        """Get statistics for a specific batch."""
+        row = self._conn.execute(
+            "SELECT batch_id, source, created_at, triplet_count, status "
+            "FROM ingestion_batches WHERE batch_id = ?",
+            (batch_id,),
+        ).fetchone()
+        if not row:
+            return {}
+        stats = dict(row)
+        pred_counts = self._conn.execute(
+            "SELECT predicate, COUNT(*) as cnt FROM triplets "
+            "WHERE batch_id = ? GROUP BY predicate ORDER BY cnt DESC",
+            (batch_id,),
+        ).fetchall()
+        stats["predicates"] = {r["predicate"]: r["cnt"] for r in pred_counts}
+        return stats
+
+    def delete_by_ids(self, ids: list[int]) -> int:
+        """Delete specific triplets by their row IDs. Returns count deleted."""
+        if not ids:
+            return 0
+        placeholders = ",".join("?" * len(ids))
+        with self._conn:
+            cursor = self._conn.execute(
+                f"DELETE FROM triplets WHERE id IN ({placeholders})", ids,
+            )
+        return cursor.rowcount
+
+    def get_all_facts(self) -> list[dict]:
+        """Return all triplets with full metadata for auditing."""
+        rows = self._conn.execute(
+            "SELECT id, subject, predicate, object, source, source_sentence, batch_id "
+            "FROM triplets"
+        ).fetchall()
+        return [dict(r) for r in rows]
 
     # ── Entity/predicate resolution ──────────────────────────────────────
 

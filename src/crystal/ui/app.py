@@ -25,14 +25,17 @@ from crystal.ingest import ingest, build_kg, ingest_document, DocumentIngestionR
 from crystal.ingest.ner import ingest_text
 from crystal.compare import before_after_comparison, generate_questions_from_triplets
 from crystal.review import (
+    find_batch_document_slugs,
     format_review_dashboard,
     list_batches,
     load_batch_context,
     load_batch_questions,
     load_known_gaps,
     load_pending_questions,
+    load_source_document_text,
     save_proposed_as_batch,
     save_review_decisions,
+    save_single_review_decision,
 )
 from crystal.tools.kg import remulak_kg
 from crystal.tools.kg.graph import KnowledgeGraph
@@ -229,13 +232,14 @@ def ask_question(question, kg_state):
 
 # ── Document ingestion helpers ────────────────────────────────────────────
 
-_INGEST_AUTO_HEADERS = ["Subject", "Predicate", "Object", "Source", "Confidence"]
+_INGEST_AUTO_HEADERS = ["Subject", "Predicate", "Object", "Source", "Confidence", "Sentence"]
 _INGEST_PENDING_HEADERS = ["#", "Subject", "Predicate", "Object", "Source", "Confidence", "Sentence"]
 
 
 def _scored_to_auto_df(triplets):
     rows = [
-        [st.subject, st.predicate, st.object, st.extraction_source, f"{st.ingestion_confidence:.2f}"]
+        [st.subject, st.predicate, st.object, st.extraction_source,
+         f"{st.ingestion_confidence:.2f}", st.source_sentence[:120]]
         for st in triplets
     ]
     return pd.DataFrame(rows, columns=_INGEST_AUTO_HEADERS) if rows else pd.DataFrame(columns=_INGEST_AUTO_HEADERS)
@@ -448,9 +452,9 @@ def save_proposed_to_review(proposed_table, ingest_result):
     if ingest_result and isinstance(ingest_result, DocumentIngestionResult):
         source = ingest_result.stats.get("source", "document_extraction")
 
-    all_triplets = []
+    all_scored = []
     if ingest_result and isinstance(ingest_result, DocumentIngestionResult):
-        all_triplets = [st.as_tuple() for st in ingest_result.auto_accepted]
+        all_scored = ingest_result.auto_accepted
 
     proposed_rows = []
     for row in rows_data:
@@ -463,9 +467,11 @@ def save_proposed_to_review(proposed_table, ingest_result):
             golden = str(row[5]) if len(row) > 5 else crystal_answer
 
             src_triplet = []
-            for s, p, o in all_triplets:
-                if s.lower() in question.lower():
-                    src_triplet = [s, p, o]
+            src_sentence = ""
+            for st in all_scored:
+                if st.subject.lower() in question.lower():
+                    src_triplet = [st.subject, st.predicate, st.object]
+                    src_sentence = st.source_sentence
                     break
 
             proposed_rows.append({
@@ -476,6 +482,7 @@ def save_proposed_to_review(proposed_table, ingest_result):
                 "expected": expected,
                 "golden_answer": golden,
                 "source_triplet": src_triplet,
+                "source_sentence": src_sentence,
             })
         except (IndexError, ValueError):
             continue
@@ -529,6 +536,55 @@ def run_comparison(questions_text, ingest_result, kg_state):
     ]
     status = f"Compared {len(result.rows)} questions across 3 modes."
     return status, pd.DataFrame(rows, columns=_COMPARE_HEADERS)
+
+
+_GOLDEN_COMPARE_HEADERS = [
+    "Question", "Golden Answer", "Crystal", "C?", "LLM+Docs", "D?", "Naked LLM", "N?",
+]
+
+
+def run_golden_comparison(kg_state):
+    """Run three-arm comparison on all accepted golden answers with accuracy scoring."""
+    from benchmarks.three_arm_comparison import run_three_arm
+
+    try:
+        report = run_three_arm(kg=kg_state)
+    except Exception as e:
+        empty = pd.DataFrame(columns=_GOLDEN_COMPARE_HEADERS)
+        return f"Error: {e}", "", empty
+
+    if not report.results:
+        empty = pd.DataFrame(columns=_GOLDEN_COMPARE_HEADERS)
+        return "No accepted golden answers found. Accept some questions in the Review tab first.", "", empty
+
+    rows = []
+    for r in report.results:
+        rows.append([
+            r.question[:60],
+            r.golden_answer[:50],
+            r.crystal.answer[:60],
+            "YES" if r.crystal.correct else "NO",
+            r.llm_docs.answer[:60],
+            "YES" if r.llm_docs.correct else "NO",
+            r.llm_naked.answer[:60],
+            "YES" if r.llm_naked.correct else "NO",
+        ])
+
+    n = len(report.results)
+    crystal_wins = sum(1 for r in report.results if r.crystal.correct and not r.llm_naked.correct)
+
+    scores_md = (
+        f"### Accuracy Scores\n\n"
+        f"| Arm | Accuracy |\n"
+        f"|-----|----------|\n"
+        f"| **Crystal + KG** | **{report.crystal_accuracy:.0%}** |\n"
+        f"| LLM + Docs | {report.llm_docs_accuracy:.0%} |\n"
+        f"| Naked LLM | {report.llm_naked_accuracy:.0%} |\n\n"
+        f"Crystal wins over naked LLM on **{crystal_wins}/{n}** questions."
+    )
+
+    status = f"Compared {n} golden answers across 3 arms."
+    return status, scores_md, pd.DataFrame(rows, columns=_GOLDEN_COMPARE_HEADERS)
 
 
 # ── KG Explorer helpers ───────────────────────────────────────────────────
@@ -600,7 +656,11 @@ def _get_batch_choices() -> list[str]:
         return ["(no batches)"]
     choices = []
     for b in batches:
-        label = f"{b['id']} — {b['total_cases']} questions ({b['pending']} pending, {b['accepted']} accepted)"
+        pending_tag = f" ** {b['pending']} PENDING **" if b["pending"] > 0 else ""
+        label = (
+            f"{b['id']} — {b['total_cases']} questions "
+            f"({b['pending']} pending, {b['accepted']} accepted){pending_tag}"
+        )
         choices.append(label)
     return choices
 
@@ -612,54 +672,25 @@ def _extract_batch_id(choice: str) -> str | None:
     return choice.split(" — ")[0].strip()
 
 
-_TABLE_HEADERS = ["#", "Question", "Golden Answer", "Tier", "Source", "Status"]
+_OVERVIEW_HEADERS = ["#", "Question", "Status", "Route"]
 
 
-def _load_batch_table(choice: str) -> pd.DataFrame:
-    """Load questions for a batch as a DataFrame for Gradio."""
-    batch_id = _extract_batch_id(choice)
+def _load_overview_table(batch_id: str | None) -> pd.DataFrame:
+    """Load questions overview as a compact DataFrame."""
     if not batch_id:
-        return pd.DataFrame(columns=_TABLE_HEADERS)
+        return pd.DataFrame(columns=_OVERVIEW_HEADERS)
     questions = load_batch_questions(batch_id)
     rows = []
     for i, q in enumerate(questions):
-        src = q.get("source_triplet", [])
-        source_str = f"{src[0]} | {src[1]}" if src and len(src) >= 2 else ""
+        status = q.get("status", "pending_review")
+        icon = {"accepted": "accepted", "rejected": "rejected"}.get(status, "PENDING")
         rows.append([
-            str(i),
-            q.get("question", ""),
-            q.get("golden_answer", ""),
-            str(q.get("tier", "")),
-            source_str,
-            q.get("status", "pending_review"),
+            str(i + 1),
+            q.get("question", "")[:80],
+            icon,
+            q.get("crystal_route", ""),
         ])
-    return pd.DataFrame(rows, columns=_TABLE_HEADERS)
-
-
-def _load_batch_context_table(choice: str) -> str:
-    """Load source triplets for a batch as markdown."""
-    batch_id = _extract_batch_id(choice)
-    if not batch_id:
-        return "Select a batch to see its source data."
-
-    triplets = load_batch_context(batch_id)
-    if not triplets:
-        return "No source triplets recorded for this batch."
-
-    seen_subjects: dict[str, list[tuple[str, str]]] = {}
-    for t in triplets:
-        if len(t) == 3:
-            subj, pred, obj = t
-            seen_subjects.setdefault(subj, []).append((pred, obj))
-
-    lines = [f"### Source Data ({len(triplets)} facts, {len(seen_subjects)} entities)\n"]
-    for subj in sorted(seen_subjects.keys()):
-        lines.append(f"**{subj.title()}**")
-        for pred, obj in seen_subjects[subj]:
-            lines.append(f"  - {pred}: {obj}")
-        lines.append("")
-
-    return "\n".join(lines)
+    return pd.DataFrame(rows, columns=_OVERVIEW_HEADERS)
 
 
 def _load_batch_metadata(choice: str) -> str:
@@ -673,38 +704,229 @@ def _load_batch_metadata(choice: str) -> str:
             return (
                 f"**Batch:** {b['id']}  \n"
                 f"**Source:** {b['source']}  \n"
-                f"**Records ingested:** {b['records_ingested']}  \n"
                 f"**Timestamp:** {b['timestamp']}  \n"
-                f"**Questions:** {b['total_cases']} total, "
-                f"{b['pending']} pending, {b['accepted']} accepted, {b['rejected']} rejected"
+                f"**Questions:** {b['total_cases']} total — "
+                f"**{b['pending']} pending**, {b['accepted']} accepted, {b['rejected']} rejected"
             )
     return ""
 
 
-def _save_decisions(choice: str, table_data) -> tuple[str, pd.DataFrame]:
-    """Save accept/reject decisions from the interactive table."""
-    batch_id = _extract_batch_id(choice)
+def _get_question_choices(batch_id: str | None) -> list[str]:
+    """Get dropdown choices for question selector."""
     if not batch_id:
-        return "No batch selected.", pd.DataFrame(columns=_TABLE_HEADERS)
+        return ["(no questions)"]
+    questions = load_batch_questions(batch_id)
+    if not questions:
+        return ["(no questions)"]
+    choices = []
+    for i, q in enumerate(questions):
+        status = q.get("status", "pending_review")
+        tag = {"accepted": "[OK]", "rejected": "[REJ]"}.get(status, "[PENDING]")
+        choices.append(f"{i + 1}. {tag} {q.get('question', '')[:60]}")
+    return choices
 
-    decisions: dict[int, str] = {}
-    if table_data is not None:
-        if isinstance(table_data, pd.DataFrame):
-            table_data = table_data.values.tolist()
-        for row in table_data:
-            try:
-                idx = int(row[0])
-                status = row[5]
-                if status in ("accepted", "rejected"):
-                    decisions[idx] = status
-            except (ValueError, IndexError):
-                continue
 
-    if not decisions:
-        return "No decisions to save — change the Status column to 'accepted' or 'rejected'.", _load_batch_table(choice)
+def _load_question_detail(batch_id: str | None, question_idx: int) -> tuple:
+    """Load all display fields for a single question.
 
-    save_review_decisions(batch_id, decisions)
-    return f"Saved {len(decisions)} decisions for batch {batch_id}.", _load_batch_table(choice)
+    Returns: (question_md, crystal_proposed, route_info, source_triplet_md,
+              golden_answer, status_label)
+    """
+    empty = ("*Select a question to review.*", "", "", "", "", "")
+    if not batch_id:
+        return empty
+
+    questions = load_batch_questions(batch_id)
+    if not questions or not (0 <= question_idx < len(questions)):
+        return empty
+
+    q = questions[question_idx]
+    status = q.get("status", "pending_review")
+    status_badge = {
+        "accepted": "ACCEPTED",
+        "rejected": "REJECTED",
+    }.get(status, "PENDING REVIEW")
+
+    question_md = (
+        f"## Question {question_idx + 1} of {len(questions)}  \n"
+        f"### {q.get('question', '')}\n\n"
+        f"**Status:** {status_badge}"
+    )
+
+    crystal_proposed = q.get("crystal_proposed", q.get("golden_answer", ""))
+
+    route = q.get("crystal_route", "unknown")
+    confidence = q.get("crystal_confidence", "unknown")
+    tier = q.get("tier", "")
+    route_info = f"**Route:** {route}  \n**Confidence:** {confidence}  \n**Tier:** {tier}"
+
+    st = q.get("source_triplet", [])
+    if st and len(st) == 3:
+        source_md = (
+            f"**Subject:** {st[0]}  \n"
+            f"**Predicate:** {st[1]}  \n"
+            f"**Object:** {st[2]}"
+        )
+    else:
+        source_md = "*No source triplet recorded.*"
+
+    golden = q.get("golden_answer", "")
+
+    return (question_md, crystal_proposed, route_info, source_md, golden, status_badge)
+
+
+def _on_batch_selected(choice: str):
+    """When a batch is selected, load its metadata, questions, docs, and first question."""
+    batch_id = _extract_batch_id(choice)
+
+    meta = _load_batch_metadata(choice)
+    q_choices = _get_question_choices(batch_id)
+    first_q = q_choices[0] if q_choices and q_choices[0] != "(no questions)" else None
+
+    # Find first pending question
+    first_pending_idx = 0
+    if batch_id:
+        questions = load_batch_questions(batch_id)
+        for i, q in enumerate(questions):
+            if q.get("status") == "pending_review":
+                first_pending_idx = i
+                break
+
+    first_q = q_choices[first_pending_idx] if first_pending_idx < len(q_choices) else q_choices[0]
+
+    q_detail = _load_question_detail(batch_id, first_pending_idx)
+
+    doc_slugs = find_batch_document_slugs(batch_id) if batch_id else []
+    doc_choices = [s.replace("-", " ").title() + f" ({s})" for s in doc_slugs]
+    if not doc_choices:
+        doc_choices = ["(no source documents found)"]
+
+    overview = _load_overview_table(batch_id)
+
+    return (
+        meta,
+        gr.update(choices=q_choices, value=first_q),
+        first_pending_idx,
+        *q_detail,
+        gr.update(choices=doc_choices, value=doc_choices[0] if doc_choices else None),
+        "",
+        overview,
+    )
+
+
+def _on_question_selected(choice: str, batch_choice: str):
+    """When a question is selected from the dropdown, load its details."""
+    batch_id = _extract_batch_id(batch_choice)
+    if not choice or choice == "(no questions)":
+        return (0, *_load_question_detail(None, 0))
+
+    try:
+        idx = int(choice.split(".")[0]) - 1
+    except (ValueError, IndexError):
+        idx = 0
+
+    detail = _load_question_detail(batch_id, idx)
+    return (idx, *detail)
+
+
+def _navigate_question(current_idx: int, direction: int, batch_choice: str):
+    """Navigate to previous/next question."""
+    batch_id = _extract_batch_id(batch_choice)
+    if not batch_id:
+        return (0, "(no questions)", *_load_question_detail(None, 0))
+
+    questions = load_batch_questions(batch_id)
+    if not questions:
+        return (0, "(no questions)", *_load_question_detail(None, 0))
+
+    new_idx = max(0, min(len(questions) - 1, current_idx + direction))
+    q_choices = _get_question_choices(batch_id)
+    detail = _load_question_detail(batch_id, new_idx)
+
+    return (new_idx, q_choices[new_idx] if new_idx < len(q_choices) else q_choices[0], *detail)
+
+
+def _accept_question(batch_choice: str, current_idx: int, golden_answer: str):
+    """Accept the current question with the given golden answer."""
+    batch_id = _extract_batch_id(batch_choice)
+    if not batch_id:
+        return ("No batch selected.",) + _after_decision_outputs(None, 0, batch_choice)
+
+    ok = save_single_review_decision(batch_id, current_idx, golden_answer, "accepted")
+    if not ok:
+        return (f"Failed to save decision for question {current_idx + 1}.",) + \
+            _after_decision_outputs(batch_id, current_idx, batch_choice)
+
+    questions = load_batch_questions(batch_id)
+    next_idx = current_idx
+    for i in range(current_idx + 1, len(questions)):
+        if questions[i].get("status") == "pending_review":
+            next_idx = i
+            break
+    else:
+        for i in range(0, current_idx):
+            if questions[i].get("status") == "pending_review":
+                next_idx = i
+                break
+
+    pending = sum(1 for q in questions if q.get("status") == "pending_review")
+    msg = f"Question {current_idx + 1} accepted. {pending} pending remaining."
+
+    return (msg,) + _after_decision_outputs(batch_id, next_idx, batch_choice)
+
+
+def _reject_question(batch_choice: str, current_idx: int, golden_answer: str):
+    """Reject the current question."""
+    batch_id = _extract_batch_id(batch_choice)
+    if not batch_id:
+        return ("No batch selected.",) + _after_decision_outputs(None, 0, batch_choice)
+
+    ok = save_single_review_decision(batch_id, current_idx, golden_answer, "rejected")
+    if not ok:
+        return (f"Failed to save decision for question {current_idx + 1}.",) + \
+            _after_decision_outputs(batch_id, current_idx, batch_choice)
+
+    questions = load_batch_questions(batch_id)
+    next_idx = current_idx
+    for i in range(current_idx + 1, len(questions)):
+        if questions[i].get("status") == "pending_review":
+            next_idx = i
+            break
+    else:
+        for i in range(0, current_idx):
+            if questions[i].get("status") == "pending_review":
+                next_idx = i
+                break
+
+    pending = sum(1 for q in questions if q.get("status") == "pending_review")
+    msg = f"Question {current_idx + 1} rejected. {pending} pending remaining."
+
+    return (msg,) + _after_decision_outputs(batch_id, next_idx, batch_choice)
+
+
+def _after_decision_outputs(batch_id, next_idx, batch_choice):
+    """Compute updated UI state after an accept/reject decision."""
+    q_choices = _get_question_choices(batch_id)
+    detail = _load_question_detail(batch_id, next_idx)
+    overview = _load_overview_table(batch_id)
+    meta = _load_batch_metadata(batch_choice)
+    selector_value = q_choices[next_idx] if next_idx < len(q_choices) else (
+        q_choices[0] if q_choices else "(no questions)")
+    return (
+        next_idx,
+        gr.update(choices=q_choices, value=selector_value),
+        *detail,
+        overview,
+        meta,
+    )
+
+
+def _load_doc_text(doc_choice: str):
+    """Load document text when the user selects a document."""
+    if not doc_choice or doc_choice == "(no source documents found)":
+        return "Select a source document to view the original opinion text."
+    slug = doc_choice.split("(")[-1].rstrip(")").strip() if "(" in doc_choice else doc_choice
+    return load_source_document_text(slug)
 
 
 _GAPS_HEADERS = ["Question", "Expected", "Reason"]
@@ -721,17 +943,80 @@ def _get_known_gaps_df() -> pd.DataFrame:
 
 
 def _refresh_review():
-    """Refresh all review tab data including the questions table."""
-    choices = _get_batch_choices()
-    first = choices[0] if choices and choices[0] != "(no batches)" else None
-    return (
-        format_review_dashboard(),
-        gr.update(choices=choices, value=first),
-        _load_batch_metadata(first) if first else "",
-        _load_batch_table(first) if first else pd.DataFrame(columns=_TABLE_HEADERS),
-        _load_batch_context_table(first) if first else "Select a batch to see its source data.",
-        _get_known_gaps_df(),
+    """Refresh the review dashboard."""
+    return format_review_dashboard()
+
+
+# ── Benchmark & RW loop helpers ──────────────────────────────────────────
+
+_BENCH_HEADERS = ["Question", "Golden Answer", "Crystal Answer", "Route", "Correct"]
+
+
+def run_benchmark_on_accepted(kg_state):
+    """Run all accepted golden answers through Crystal and score them."""
+    from crystal.review import collect_accepted_cases
+    from benchmarks.scoring.fitness import binary_correct
+
+    cases = collect_accepted_cases()
+    if not cases:
+        empty = pd.DataFrame(columns=_BENCH_HEADERS)
+        return "No accepted golden answers found. Accept some questions in the Review tab first.", empty, ""
+
+    rows = []
+    correct_count = 0
+
+    for question, golden_answer, match_strings, is_negative in cases:
+        try:
+            state = make_initial_state(question, kg=kg_state)
+            result = _graph.invoke(state)
+            crystal_answer = result.get("final_response", "")
+            route = result.get("prompt_type", "unknown")
+        except Exception as e:
+            crystal_answer = f"Error: {e}"
+            route = "error"
+
+        is_correct = binary_correct(crystal_answer, match_strings, is_negative)
+        if is_correct:
+            correct_count += 1
+        rows.append([question, golden_answer[:120], crystal_answer[:120], route,
+                      "YES" if is_correct else "NO"])
+
+    score = correct_count / len(cases) if cases else 0.0
+    status = f"**Benchmark: {correct_count}/{len(cases)} correct ({score:.0%})**"
+    score_md = (
+        f"### Accuracy: {score:.1%}\n\n"
+        f"- Total questions: {len(cases)}\n"
+        f"- Correct: {correct_count}\n"
+        f"- Incorrect: {len(cases) - correct_count}"
     )
+    df = pd.DataFrame(rows, columns=_BENCH_HEADERS)
+    return status, df, score_md
+
+
+def run_rw_on_accepted(kg_state):
+    """Run Ralph Wiggum Orchestrator on accepted golden answers."""
+    from crystal.review import collect_accepted_cases
+    from benchmarks.ralph_wiggum.orchestrator import Orchestrator
+
+    cases = collect_accepted_cases()
+    if not cases:
+        return "No accepted golden answers found.", ""
+
+    if len(cases) < 3:
+        return f"Only {len(cases)} accepted cases — need at least 3 for meaningful RW loop.", ""
+
+    try:
+        orch = Orchestrator(
+            kg=kg_state,
+            cases=cases,
+            use_git=False,
+            use_full_pipeline=True,
+        )
+        result = orch.run(threshold=0.90, max_iterations_per_loop=5)
+        status = f"**RW complete — final score: {result.overall_score:.1%}**"
+        return status, result.unified_report
+    except Exception as e:
+        return f"RW loop error: {e}", ""
 
 
 # ── Gradio layout ────────────────────────────────────────────────────────
@@ -911,6 +1196,26 @@ def build_ui() -> gr.Blocks:
                 outputs=[compare_status, compare_table],
             )
 
+            gr.Markdown("---")
+            gr.Markdown("### Three-Arm Comparison on Golden Answers")
+            gr.Markdown(
+                "Run **all accepted golden answers** through Crystal+KG, LLM+Docs, and Naked LLM. "
+                "Shows accuracy for each arm and highlights where Crystal wins."
+            )
+            golden_compare_btn = gr.Button("Run Three-Arm Comparison", variant="primary")
+            golden_compare_status = gr.Markdown("")
+            golden_compare_scores = gr.Markdown("")
+            golden_compare_table = gr.Dataframe(
+                value=pd.DataFrame(columns=_GOLDEN_COMPARE_HEADERS),
+                interactive=False,
+            )
+
+            golden_compare_btn.click(
+                fn=run_golden_comparison,
+                inputs=[kg_state],
+                outputs=[golden_compare_status, golden_compare_scores, golden_compare_table],
+            )
+
         with gr.Tab("Knowledge Graph"):
             gr.Markdown("Manage the active knowledge graph. Switch between datasets, or upload custom data.")
 
@@ -1008,18 +1313,17 @@ def build_ui() -> gr.Blocks:
 
         with gr.Tab("Review"):
             gr.Markdown(
-                "Review generated questions by batch. Accept or reject questions "
-                "to build golden answer sets for the Ralph Wiggum self-improvement loop."
+                "## Review Queue\n"
+                "Review pending questions one at a time. Read the source material, "
+                "verify or correct Crystal's proposed answer, then accept or reject."
             )
 
             review_dashboard = gr.Markdown(format_review_dashboard())
-
-            with gr.Row():
-                refresh_btn = gr.Button("Refresh", variant="secondary", scale=1)
+            refresh_btn = gr.Button("Refresh Dashboard", variant="secondary", size="sm")
 
             gr.Markdown("---")
 
-            gr.Markdown("### Ingestion Batches")
+            # ── Batch selection ──
             initial_choices = _get_batch_choices()
             initial_choice = initial_choices[0] if initial_choices and initial_choices[0] != "(no batches)" else None
             batch_selector = gr.Dropdown(
@@ -1032,51 +1336,221 @@ def build_ui() -> gr.Blocks:
                 _load_batch_metadata(initial_choice) if initial_choice else ""
             )
 
-            initial_table = _load_batch_table(initial_choice) if initial_choice else pd.DataFrame(columns=_TABLE_HEADERS)
-            initial_context = _load_batch_context_table(initial_choice) if initial_choice else "Select a batch to see its source data."
-
-            with gr.Row():
-                with gr.Column(scale=2):
-                    gr.Markdown("### Questions")
-                    gr.Markdown(
-                        "*Edit the **Status** column: change `pending_review` to "
-                        "`accepted` or `rejected`, then click Save.*"
-                    )
-                    questions_table = gr.Dataframe(
-                        value=initial_table,
-                        interactive=True,
-                    )
-                    with gr.Row():
-                        save_btn = gr.Button("Save Decisions", variant="primary")
-                        save_status = gr.Textbox(label="Save Status", interactive=False, scale=3)
-
-                with gr.Column(scale=1):
-                    gr.Markdown("### Batch Context (Source Data)")
-                    batch_context = gr.Markdown(initial_context)
+            # ── State ──
+            review_q_idx = gr.State(0)
 
             gr.Markdown("---")
-            gr.Markdown("### Detector Known Gaps")
-            gaps_table = gr.Dataframe(
-                value=_get_known_gaps_df(),
+
+            # ── Per-question review ──
+            with gr.Row():
+                # Left panel: question detail
+                with gr.Column(scale=3):
+                    gr.Markdown("### Question Review")
+                    with gr.Row():
+                        prev_q_btn = gr.Button("< Prev", size="sm", scale=1)
+                        question_selector = gr.Dropdown(
+                            choices=_get_question_choices(_extract_batch_id(initial_choice)),
+                            label="Question",
+                            interactive=True,
+                            scale=6,
+                        )
+                        next_q_btn = gr.Button("Next >", size="sm", scale=1)
+
+                    question_text_md = gr.Markdown("*Select a batch to begin reviewing.*")
+
+                    with gr.Row():
+                        with gr.Column():
+                            gr.Markdown("**Crystal's Proposed Answer**")
+                            crystal_proposed_box = gr.Textbox(
+                                interactive=False, lines=5,
+                                show_label=False, container=False,
+                            )
+                        with gr.Column():
+                            gr.Markdown("**Routing Info**")
+                            route_info_md = gr.Markdown("")
+                            gr.Markdown("**Source Triplet**")
+                            source_triplet_md = gr.Markdown("")
+
+                    gr.Markdown("---")
+                    gr.Markdown(
+                        "**Golden Answer** — *Edit below if Crystal's answer is wrong. "
+                        "This becomes the verified ground truth.*"
+                    )
+                    golden_answer_box = gr.Textbox(
+                        interactive=True, lines=5,
+                        show_label=False, container=False,
+                        placeholder="The correct answer goes here...",
+                    )
+
+                    with gr.Row():
+                        accept_btn = gr.Button("Accept", variant="primary", scale=2)
+                        reject_btn = gr.Button("Reject", variant="stop", scale=2)
+                    review_action_status = gr.Markdown("")
+                    current_status_label = gr.Markdown("")
+
+                # Right panel: source document viewer
+                with gr.Column(scale=2):
+                    gr.Markdown("### Source Material")
+                    gr.Markdown(
+                        "*Select a document to read the original opinion text. "
+                        "Use this to verify Crystal's answer.*"
+                    )
+                    _init_doc_slugs = find_batch_document_slugs(
+                        _extract_batch_id(initial_choice)
+                    ) if initial_choice else []
+                    _init_doc_choices = [
+                        s.replace("-", " ").title() + f" ({s})" for s in _init_doc_slugs
+                    ] or ["(no source documents found)"]
+                    doc_selector = gr.Dropdown(
+                        choices=_init_doc_choices,
+                        label="Source Document",
+                        interactive=True,
+                    )
+                    doc_text_box = gr.Textbox(
+                        label="Document Text",
+                        interactive=False,
+                        lines=30,
+                        max_lines=60,
+                    )
+
+            # ── Questions overview table ──
+            gr.Markdown("---")
+            gr.Markdown("### All Questions in Batch")
+            overview_table = gr.Dataframe(
+                value=_load_overview_table(_extract_batch_id(initial_choice)),
                 interactive=False,
             )
 
+            # ── Known gaps ──
+            with gr.Accordion("Detector Known Gaps", open=False):
+                gaps_table = gr.Dataframe(
+                    value=_get_known_gaps_df(),
+                    interactive=False,
+                )
+
+            # ── Benchmark & RW loop ──
+            gr.Markdown("---")
+            gr.Markdown("### Benchmark & Improvement")
+            gr.Markdown(
+                "Run all **accepted** golden answers through Crystal to measure accuracy, "
+                "then optionally run Ralph Wiggum loops to improve."
+            )
+            with gr.Row():
+                bench_btn = gr.Button("Run Benchmark on Accepted", variant="primary", scale=2)
+                rw_btn = gr.Button("Improve with Ralph Wiggum", variant="secondary", scale=2)
+            bench_status = gr.Markdown("")
+            bench_score_md = gr.Markdown("")
+            bench_table = gr.Dataframe(
+                value=pd.DataFrame(columns=_BENCH_HEADERS),
+                interactive=False,
+            )
+            rw_status = gr.Markdown("")
+            rw_report = gr.Markdown("")
+
+            # ── Load initial question if batch exists ──
+            _init_batch_id = _extract_batch_id(initial_choice)
+            if _init_batch_id:
+                _init_detail = _load_question_detail(_init_batch_id, 0)
+            else:
+                _init_detail = ("*Select a batch to begin reviewing.*", "", "", "", "", "")
+            question_text_md.value = _init_detail[0]
+            crystal_proposed_box.value = _init_detail[1]
+            route_info_md.value = _init_detail[2]
+            source_triplet_md.value = _init_detail[3]
+            golden_answer_box.value = _init_detail[4]
+            current_status_label.value = _init_detail[5]
+
+            # ── Wiring ──
+
             batch_selector.change(
-                fn=lambda c: (_load_batch_metadata(c), _load_batch_table(c), _load_batch_context_table(c)),
+                fn=_on_batch_selected,
                 inputs=[batch_selector],
-                outputs=[batch_meta, questions_table, batch_context],
+                outputs=[
+                    batch_meta,
+                    question_selector, review_q_idx,
+                    question_text_md, crystal_proposed_box, route_info_md,
+                    source_triplet_md, golden_answer_box, current_status_label,
+                    doc_selector, doc_text_box,
+                    overview_table,
+                ],
             )
 
-            save_btn.click(
-                fn=_save_decisions,
-                inputs=[batch_selector, questions_table],
-                outputs=[save_status, questions_table],
+            question_selector.change(
+                fn=_on_question_selected,
+                inputs=[question_selector, batch_selector],
+                outputs=[
+                    review_q_idx,
+                    question_text_md, crystal_proposed_box, route_info_md,
+                    source_triplet_md, golden_answer_box, current_status_label,
+                ],
+            )
+
+            prev_q_btn.click(
+                fn=lambda idx, bc: _navigate_question(idx, -1, bc),
+                inputs=[review_q_idx, batch_selector],
+                outputs=[
+                    review_q_idx, question_selector,
+                    question_text_md, crystal_proposed_box, route_info_md,
+                    source_triplet_md, golden_answer_box, current_status_label,
+                ],
+            )
+
+            next_q_btn.click(
+                fn=lambda idx, bc: _navigate_question(idx, +1, bc),
+                inputs=[review_q_idx, batch_selector],
+                outputs=[
+                    review_q_idx, question_selector,
+                    question_text_md, crystal_proposed_box, route_info_md,
+                    source_triplet_md, golden_answer_box, current_status_label,
+                ],
+            )
+
+            accept_btn.click(
+                fn=_accept_question,
+                inputs=[batch_selector, review_q_idx, golden_answer_box],
+                outputs=[
+                    review_action_status,
+                    review_q_idx, question_selector,
+                    question_text_md, crystal_proposed_box, route_info_md,
+                    source_triplet_md, golden_answer_box, current_status_label,
+                    overview_table, batch_meta,
+                ],
+            )
+
+            reject_btn.click(
+                fn=_reject_question,
+                inputs=[batch_selector, review_q_idx, golden_answer_box],
+                outputs=[
+                    review_action_status,
+                    review_q_idx, question_selector,
+                    question_text_md, crystal_proposed_box, route_info_md,
+                    source_triplet_md, golden_answer_box, current_status_label,
+                    overview_table, batch_meta,
+                ],
+            )
+
+            doc_selector.change(
+                fn=_load_doc_text,
+                inputs=[doc_selector],
+                outputs=[doc_text_box],
+            )
+
+            bench_btn.click(
+                fn=run_benchmark_on_accepted,
+                inputs=[kg_state],
+                outputs=[bench_status, bench_table, bench_score_md],
+            )
+
+            rw_btn.click(
+                fn=run_rw_on_accepted,
+                inputs=[kg_state],
+                outputs=[rw_status, rw_report],
             )
 
             refresh_btn.click(
                 fn=_refresh_review,
                 inputs=[],
-                outputs=[review_dashboard, batch_selector, batch_meta, questions_table, batch_context, gaps_table],
+                outputs=[review_dashboard],
             )
 
     return demo

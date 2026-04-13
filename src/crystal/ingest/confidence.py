@@ -49,6 +49,9 @@ class ScoredTriplet:
     def as_tuple(self) -> tuple[str, str, str]:
         return (self.subject, self.predicate, self.object)
 
+    def as_tuple_with_sentence(self) -> tuple[str, str, str, str]:
+        return (self.subject, self.predicate, self.object, self.source_sentence)
+
     def to_dict(self) -> dict:
         return {
             "subject": self.subject,
@@ -124,11 +127,6 @@ def score_ingestion_confidence(
             aligned = True
         if not aligned and predicate_aliases and pred_lower in predicate_aliases:
             aligned = True
-        if not aligned and ontology_predicates:
-            for canon in ontology_predicates:
-                if canon in pred_lower or pred_lower in canon:
-                    aligned = True
-                    break
         if aligned:
             bonus += _PREDICATE_ALIGNED_BONUS
 
