@@ -25,3 +25,11 @@
 - Two `SqliteKnowledgeGraph` import sites remain (intentional — tab modules need the isinstance check locally). Could consolidate via a typing protocol if we end up with more polymorphic branching.
 - `save_pending_decisions` in `tabs/ingest.py` is still a "accept all remaining" stopgap; the row-level accept/reject UI from the original file was never wired up.
 - `dev.py` path is unchanged (`gradio src/crystal/ui/dev.py --watch-dirs src/crystal`) — it imports `build_ui` from `crystal.ui.app` same as before.
+
+## Review tab — source-doc association, filter, auto-sync
+
+### Completed
+- **Source Doc column now derived, not stored.** Added `_derive_source_doc_slug(q)` + memoized `_resolve_doc_slug(entity)` in `tabs/review.py`. Overview table column now prefers `q["source_document"]` when it resolves via fuzzy matching; falls back to `find_document_for_entity(source_triplet[0])`. Previous behavior read the raw `source_document` field which is literally `"n/a"` in every current batch.
+- **Filter box above the overview table.** Case-insensitive substring match across all columns (question, status, route, origin, source doc). `_load_overview_table(batch_id, filter_text="")` does the filtering; threaded through `_on_batch_selected`, `_revalidate_pending`, `_accept_question`, `_reject_question` so filter state is preserved across every handler that rewrites the table.
+- **Source-doc dropdown auto-syncs on question change, with custom-value fallback.** Choices are now union of batch-level slugs + per-question derived slugs (`_batch_doc_choices`). `doc_selector` has `allow_custom_value=True` so a derived slug not in the precomputed list still sets correctly. Auto-selection in `_on_batch_selected` picks the derived doc for the first pending question instead of the alphabetical-first batch doc. User override still works (dropdown stays interactive).
+- Smoke-tested against `review/pending_questions.json` (100 questions): filter=`brown` returns 3 rows, filter=`accepted` returns all 100. `pytest tests/ -v` → 1272 passed, 8 skipped (unchanged).

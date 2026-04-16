@@ -31,6 +31,7 @@ hallucination + citation precision for opinion-text questions.
 - `three_arm_comparison --corpus` default switched to `opinion_golden`; `all` now prints per-corpus sections instead of a merged dilute report.
 - Merged the two question-gen template dicts (`compare._PRED_TEMPLATES` + `question_gen._PREDICATE_QUESTION_FORMS`) into a single source of truth with shared helpers.
 - Split `src/crystal/ui/app.py` (1,970 lines) into `ui/state.py`, `ui/formatting.py`, and per-tab modules under `ui/tabs/`. `app.py` is now a 93-line composition root; all tests still pass.
+- Review tab UX: Source Doc column in the overview table is now derived from the source-triplet subject (was reading the useless `"n/a"` stored field); added a case-insensitive filter box above the table; source-document dropdown auto-syncs on question change with `allow_custom_value=True` so derived slugs outside the batch-level choice set still apply.
 
 ---
 

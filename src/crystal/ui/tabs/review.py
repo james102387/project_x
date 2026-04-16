@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import lru_cache
 
 import gradio as gr
 import pandas as pd
@@ -55,8 +56,61 @@ def _extract_batch_id(choice: str) -> str | None:
     return choice.split(" — ")[0].strip()
 
 
-def _load_overview_table(batch_id: str | None) -> pd.DataFrame:
-    """Compact questions overview."""
+# ── Source-document resolution ───────────────────────────────────────────
+
+@lru_cache(maxsize=2048)
+def _resolve_doc_slug(entity: str) -> str:
+    """Resolve an entity or case name to a doc slug via fuzzy matching.
+
+    Cached per-process because ``find_document_for_entity`` rebuilds the
+    docs directory index on every call.
+    """
+    if not entity:
+        return ""
+    match = find_document_for_entity(entity)
+    return match.stem if match else ""
+
+
+def _derive_source_doc_slug(q: dict) -> str:
+    """Best-effort mapping from a question to its source document slug.
+
+    Prefers the question's stored ``source_document`` field if it resolves,
+    otherwise falls back to the subject of the source triplet. Returns
+    an empty string if nothing resolves.
+    """
+    raw = (q.get("source_document") or "").strip()
+    if raw and raw.lower() not in {"n/a", "none", "unknown"}:
+        slug = _resolve_doc_slug(raw)
+        if slug:
+            return slug
+    st = q.get("source_triplet") or []
+    if st:
+        return _resolve_doc_slug(str(st[0]))
+    return ""
+
+
+def _format_doc_choice(slug: str) -> str:
+    """Render a slug as a dropdown label (``Case Name (slug)``)."""
+    return slug.replace("-", " ").title() + f" ({slug})"
+
+
+def _batch_doc_choices(batch_id: str | None) -> list[str]:
+    """All doc-selector choices for a batch: batch-level slugs plus per-question derivations."""
+    if not batch_id:
+        return ["(no source documents found)"]
+    slugs: set[str] = set(find_batch_document_slugs(batch_id) or [])
+    for q in load_batch_questions(batch_id):
+        s = _derive_source_doc_slug(q)
+        if s:
+            slugs.add(s)
+    if not slugs:
+        return ["(no source documents found)"]
+    return [_format_doc_choice(s) for s in sorted(slugs)]
+
+
+def _load_overview_table(batch_id: str | None, filter_text: str = "") -> pd.DataFrame:
+    """Compact questions overview. ``filter_text`` is a case-insensitive
+    substring match across all visible columns."""
     if not batch_id:
         return pd.DataFrame(columns=_OVERVIEW_HEADERS)
     questions = load_batch_questions(batch_id)
@@ -66,14 +120,20 @@ def _load_overview_table(batch_id: str | None) -> pd.DataFrame:
         icon = {"accepted": "accepted", "rejected": "rejected"}.get(status, "PENDING")
         origin = q.get("origin", "unknown")
         origin_label = _ORIGIN_DISPLAY.get(origin, origin)
+        doc_slug = _derive_source_doc_slug(q)
         rows.append([
             str(i + 1),
             q.get("question", "")[:80],
             icon,
             q.get("crystal_route", ""),
             origin_label,
-            q.get("source_document", ""),
+            doc_slug or "—",
         ])
+
+    needle = (filter_text or "").strip().lower()
+    if needle:
+        rows = [r for r in rows if any(needle in str(cell).lower() for cell in r)]
+
     return pd.DataFrame(rows, columns=_OVERVIEW_HEADERS)
 
 
@@ -225,7 +285,7 @@ def _load_doc_text(doc_choice: str):
 
 # ── Batch selection / navigation handlers ────────────────────────────────
 
-def _on_batch_selected(choice: str, kg_state=None):
+def _on_batch_selected(choice: str, filter_text: str = "", kg_state=None):
     """When a batch is selected, load its metadata, questions, docs, and first question."""
     batch_id = _extract_batch_id(choice)
 
@@ -245,15 +305,19 @@ def _on_batch_selected(choice: str, kg_state=None):
 
     q_detail = _load_question_detail(batch_id, first_pending_idx)
 
-    doc_slugs = find_batch_document_slugs(batch_id) if batch_id else []
-    doc_choices = [s.replace("-", " ").title() + f" ({s})" for s in doc_slugs]
-    if not doc_choices:
-        doc_choices = ["(no source documents found)"]
-
-    first_doc_choice = doc_choices[0] if doc_choices else None
+    doc_choices = _batch_doc_choices(batch_id)
+    derived_doc_slug = ""
+    if batch_id:
+        questions = load_batch_questions(batch_id)
+        if 0 <= first_pending_idx < len(questions):
+            derived_doc_slug = _derive_source_doc_slug(questions[first_pending_idx])
+    if derived_doc_slug:
+        first_doc_choice = _format_doc_choice(derived_doc_slug)
+    else:
+        first_doc_choice = doc_choices[0] if doc_choices else None
     first_doc_text = _load_doc_text(first_doc_choice) if first_doc_choice else ""
 
-    overview = _load_overview_table(batch_id)
+    overview = _load_overview_table(batch_id, filter_text)
 
     subgraph = _kg_subgraph_for_question(batch_id, first_pending_idx, kg_state) if kg_state else ""
 
@@ -311,10 +375,10 @@ def _navigate_question(current_idx: int, direction: int, batch_choice: str, kg_s
 
 # ── Accept / reject ──────────────────────────────────────────────────────
 
-def _after_decision_outputs(batch_id, next_idx, batch_choice, kg_state):
+def _after_decision_outputs(batch_id, next_idx, batch_choice, filter_text, kg_state):
     q_choices = _get_question_choices(batch_id)
     detail = _load_question_detail(batch_id, next_idx)
-    overview = _load_overview_table(batch_id)
+    overview = _load_overview_table(batch_id, filter_text)
     meta = _load_batch_metadata(batch_choice)
     subgraph = _kg_subgraph_for_question(batch_id, next_idx, kg_state)
     doc_display, doc_text = _doc_for_question(batch_id, next_idx)
@@ -333,15 +397,19 @@ def _after_decision_outputs(batch_id, next_idx, batch_choice, kg_state):
     )
 
 
-def _accept_question(batch_choice: str, current_idx: int, golden_answer: str, kg_state):
+def _accept_question(
+    batch_choice: str, current_idx: int, golden_answer: str,
+    filter_text: str, kg_state,
+):
     batch_id = _extract_batch_id(batch_choice)
     if not batch_id:
-        return ("No batch selected.",) + _after_decision_outputs(None, 0, batch_choice, kg_state)
+        return ("No batch selected.",) + _after_decision_outputs(
+            None, 0, batch_choice, filter_text, kg_state)
 
     ok = save_single_review_decision(batch_id, current_idx, golden_answer, "accepted")
     if not ok:
         return (f"Failed to save decision for question {current_idx + 1}.",) + \
-            _after_decision_outputs(batch_id, current_idx, batch_choice, kg_state)
+            _after_decision_outputs(batch_id, current_idx, batch_choice, filter_text, kg_state)
 
     questions = load_batch_questions(batch_id)
     next_idx = current_idx
@@ -358,18 +426,22 @@ def _accept_question(batch_choice: str, current_idx: int, golden_answer: str, kg
     pending = sum(1 for q in questions if q.get("status") == "pending_review")
     msg = f"Question {current_idx + 1} accepted. {pending} pending remaining."
 
-    return (msg,) + _after_decision_outputs(batch_id, next_idx, batch_choice, kg_state)
+    return (msg,) + _after_decision_outputs(batch_id, next_idx, batch_choice, filter_text, kg_state)
 
 
-def _reject_question(batch_choice: str, current_idx: int, golden_answer: str, kg_state):
+def _reject_question(
+    batch_choice: str, current_idx: int, golden_answer: str,
+    filter_text: str, kg_state,
+):
     batch_id = _extract_batch_id(batch_choice)
     if not batch_id:
-        return ("No batch selected.",) + _after_decision_outputs(None, 0, batch_choice, kg_state)
+        return ("No batch selected.",) + _after_decision_outputs(
+            None, 0, batch_choice, filter_text, kg_state)
 
     ok = save_single_review_decision(batch_id, current_idx, golden_answer, "rejected")
     if not ok:
         return (f"Failed to save decision for question {current_idx + 1}.",) + \
-            _after_decision_outputs(batch_id, current_idx, batch_choice, kg_state)
+            _after_decision_outputs(batch_id, current_idx, batch_choice, filter_text, kg_state)
 
     questions = load_batch_questions(batch_id)
     next_idx = current_idx
@@ -386,7 +458,7 @@ def _reject_question(batch_choice: str, current_idx: int, golden_answer: str, kg
     pending = sum(1 for q in questions if q.get("status") == "pending_review")
     msg = f"Question {current_idx + 1} rejected. {pending} pending remaining."
 
-    return (msg,) + _after_decision_outputs(batch_id, next_idx, batch_choice, kg_state)
+    return (msg,) + _after_decision_outputs(batch_id, next_idx, batch_choice, filter_text, kg_state)
 
 
 # ── Known gaps ───────────────────────────────────────────────────────────
@@ -406,7 +478,7 @@ def _refresh_review():
 
 # ── Benchmark & Ralph Wiggum ─────────────────────────────────────────────
 
-def _revalidate_pending(kg_state, batch_choice):
+def _revalidate_pending(kg_state, batch_choice, filter_text: str = ""):
     """Revalidate all pending questions against the current KG."""
     result = revalidate_pending_questions(kg_state)
     n = result["total_rejected"]
@@ -424,7 +496,7 @@ def _revalidate_pending(kg_state, batch_choice):
 
     dashboard = format_review_dashboard()
     batch_id = _extract_batch_id(batch_choice)
-    overview = _load_overview_table(batch_id)
+    overview = _load_overview_table(batch_id, filter_text)
     batch_meta_text = _load_batch_metadata(batch_choice) if batch_choice else ""
 
     return msg, dashboard, overview, batch_meta_text
@@ -506,6 +578,7 @@ class ReviewTab:
     revalidate_status: gr.Markdown
     batch_selector: gr.Dropdown
     batch_meta: gr.Markdown
+    overview_filter: gr.Textbox
     overview_table: gr.Dataframe
     review_q_idx: gr.State
     prev_q_btn: gr.Button
@@ -565,6 +638,11 @@ def build_review_tab(kg_state: gr.State) -> ReviewTab:
         )
 
         gr.Markdown("### All Questions in Batch")
+        overview_filter = gr.Textbox(
+            label="Filter questions",
+            placeholder="Case-insensitive substring across all columns (question, status, route, origin, source doc)",
+            interactive=True,
+        )
         overview_table = gr.Dataframe(
             value=_load_overview_table(_extract_batch_id(initial_choice)),
             interactive=False,
@@ -642,16 +720,14 @@ def build_review_tab(kg_state: gr.State) -> ReviewTab:
                     gr.Markdown(
                         "*Select a document to read the original opinion text.*"
                     )
-                    _init_doc_slugs = find_batch_document_slugs(
+                    _init_doc_choices = _batch_doc_choices(
                         _extract_batch_id(initial_choice)
-                    ) if initial_choice else []
-                    _init_doc_choices = [
-                        s.replace("-", " ").title() + f" ({s})" for s in _init_doc_slugs
-                    ] or ["(no source documents found)"]
+                    )
                     doc_selector = gr.Dropdown(
                         choices=_init_doc_choices,
                         label="Source Document",
                         interactive=True,
+                        allow_custom_value=True,
                     )
                     doc_text_box = gr.Textbox(
                         label="Document Text",
@@ -718,7 +794,7 @@ def build_review_tab(kg_state: gr.State) -> ReviewTab:
 
     batch_selector.change(
         fn=_on_batch_selected,
-        inputs=[batch_selector, kg_state],
+        inputs=[batch_selector, overview_filter, kg_state],
         outputs=[
             batch_meta,
             question_selector, review_q_idx,
@@ -728,6 +804,12 @@ def build_review_tab(kg_state: gr.State) -> ReviewTab:
             overview_table,
             kg_subgraph_md,
         ],
+    )
+
+    overview_filter.change(
+        fn=lambda f, bc: _load_overview_table(_extract_batch_id(bc), f),
+        inputs=[overview_filter, batch_selector],
+        outputs=[overview_table],
     )
 
     question_selector.change(
@@ -768,7 +850,7 @@ def build_review_tab(kg_state: gr.State) -> ReviewTab:
 
     accept_btn.click(
         fn=_accept_question,
-        inputs=[batch_selector, review_q_idx, golden_answer_box, kg_state],
+        inputs=[batch_selector, review_q_idx, golden_answer_box, overview_filter, kg_state],
         outputs=[
             review_action_status,
             review_q_idx, question_selector,
@@ -782,7 +864,7 @@ def build_review_tab(kg_state: gr.State) -> ReviewTab:
 
     reject_btn.click(
         fn=_reject_question,
-        inputs=[batch_selector, review_q_idx, golden_answer_box, kg_state],
+        inputs=[batch_selector, review_q_idx, golden_answer_box, overview_filter, kg_state],
         outputs=[
             review_action_status,
             review_q_idx, question_selector,
@@ -802,7 +884,7 @@ def build_review_tab(kg_state: gr.State) -> ReviewTab:
 
     revalidate_btn.click(
         fn=_revalidate_pending,
-        inputs=[kg_state, batch_selector],
+        inputs=[kg_state, batch_selector, overview_filter],
         outputs=[revalidate_status, review_dashboard, overview_table, batch_meta],
     )
 
@@ -824,6 +906,7 @@ def build_review_tab(kg_state: gr.State) -> ReviewTab:
         revalidate_status=revalidate_status,
         batch_selector=batch_selector,
         batch_meta=batch_meta,
+        overview_filter=overview_filter,
         overview_table=overview_table,
         review_q_idx=review_q_idx,
         prev_q_btn=prev_q_btn,
