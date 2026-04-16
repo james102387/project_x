@@ -4,13 +4,14 @@ import pytest
 
 from crystal.tools.kg.graph import KnowledgeGraph
 from crystal.tools.kg import remulak_kg
+from crystal.ingest.loader import load_csv_text
 from crystal.ui.app import (
     _kg_info,
     _format_kg_stats,
     _format_kg_facts,
     _default_kg_info,
-    reset_to_remulak,
-    ingest_raw_text,
+    import_structured_data,
+    KG_MODES,
 )
 
 
@@ -80,30 +81,54 @@ class TestFormatKgFacts:
         assert "...and 200 more" in text
 
 
-class TestResetToRemulak:
-    def test_returns_remulak_kg(self):
-        kg, status, stats, facts = reset_to_remulak()
-        assert kg is remulak_kg
-        assert "Reset" in status
-        assert "Remulak" in stats
+class TestLoadCsvText:
+    def test_parses_simple_csv(self):
+        result = load_csv_text("Alpha, relates_to, Beta\nBeta, has, Gamma")
+        assert len(result.triplets) == 2
+        assert result.triplets[0].subject == "Alpha"
+
+    def test_skips_header(self):
+        result = load_csv_text("subject,predicate,object\nA, p, B")
+        assert len(result.triplets) == 1
+
+    def test_empty_text(self):
+        result = load_csv_text("")
+        assert len(result.triplets) == 0
+
+    def test_skips_short_rows(self):
+        result = load_csv_text("Alpha, relates_to\nBeta, has, Gamma")
+        assert len(result.triplets) == 1
 
 
-class TestIngestRawText:
-    def test_empty_text(self, tiny_kg):
-        kg, status, stats, facts = ingest_raw_text("", tiny_kg)
-        assert kg is tiny_kg
-        assert "No text" in status
+class TestImportStructuredData:
+    def test_no_input_returns_error(self, tiny_kg):
+        result = import_structured_data(None, "", "Create new KG", "", "", tiny_kg)
+        assert "No file or text" in result[1]
+        assert result[0] is tiny_kg
 
-    def test_whitespace_only(self, tiny_kg):
-        kg, status, stats, facts = ingest_raw_text("   ", tiny_kg)
-        assert kg is tiny_kg
-        assert "No text" in status
+    def test_create_new_from_text(self, tiny_kg):
+        name = "_test_import_create"
+        try:
+            result = import_structured_data(
+                None, "X, p, Y\nX, q, Z",
+                "Create new KG", name, "", tiny_kg,
+            )
+            assert "Created" in result[1]
+            assert name in KG_MODES
+            assert len(result[0]) == 2
+        finally:
+            KG_MODES.pop(name, None)
 
-    def test_valid_text_extracts_triplets(self, tiny_kg):
-        text = "The capital of Zorgon is Mareth. Mareth has a population of 500."
-        kg, status, stats, facts = ingest_raw_text(text, tiny_kg)
-        if "extracted" in status.lower() or "triplet" in status.lower():
-            assert kg is not tiny_kg
-            assert len(kg) > 0
-        else:
-            assert kg is tiny_kg
+    def test_append_to_existing(self, tiny_kg):
+        name = "_test_import_append"
+        KG_MODES[name] = tiny_kg
+        try:
+            original_len = len(tiny_kg)
+            result = import_structured_data(
+                None, "NewSubj, pred, NewObj",
+                "Append to existing KG", "", name, tiny_kg,
+            )
+            assert "Appended" in result[1]
+            assert len(result[0]) == original_len + 1
+        finally:
+            KG_MODES.pop(name, None)

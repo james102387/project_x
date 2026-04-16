@@ -11,6 +11,7 @@ import pytest
 from crystal.nodes.planner import (
     CONFIDENCE_HIGH,
     CONFIDENCE_LOW,
+    debug_confidence_trace,
     score_grounding_confidence,
     plan_builder_node,
 )
@@ -116,6 +117,36 @@ class TestScoreGroundingConfidence:
         d = _make_kg_detection(match_tier="exact", lookup_type="multi_hop")
         score = score_grounding_confidence(d)
         assert CONFIDENCE_LOW <= score <= 1.0
+
+
+# ── debug_confidence_trace ───────────────────────────────────────────
+
+
+class TestDebugConfidenceTrace:
+    def test_trace_exact_match_is_high(self):
+        d = _make_kg_detection()
+        trace = debug_confidence_trace(d)
+        assert trace["tier"] == "high"
+        assert trace["final_confidence"] == score_grounding_confidence(d)
+        assert trace["entity_tier"] == "exact"
+        assert trace["predicate_modifier"] == 1.0
+        assert trace["ambiguity_penalty"] == 0.0
+
+    def test_trace_low_tier_for_weak_fuzzy(self):
+        d = _make_kg_detection(
+            match_tier="fuzzy", match_score=75.0, lookup_type="subject_scan",
+        )
+        trace = debug_confidence_trace(d)
+        assert trace["tier"] == "low"
+        assert trace["final_confidence"] < CONFIDENCE_LOW
+
+    def test_trace_surfaces_ambiguity_penalty(self):
+        d = _make_kg_detection(
+            entity_spans=[{"entity": "a"}, {"entity": "b"}, {"entity": "c"}],
+        )
+        trace = debug_confidence_trace(d)
+        assert trace["ambiguity_penalty"] == 0.1
+        assert trace["n_entity_spans"] == 3
 
 
 # ── plan_builder_node ────────────────────────────────────────────────

@@ -143,6 +143,44 @@ class TestBulkInsert:
         db.bulk_insert([("a", "rel", "b")])
         assert len(db) == 1
 
+    def test_insert_count_reflects_actual_rowcount_on_dedup(self):
+        """Counter must only count rows actually inserted, not attempts.
+
+        Regression: INSERT OR IGNORE silently skips duplicates but used
+        to still increment the counter, producing inflated triplet_count
+        in ingestion_batches and phantom batches with no rows.
+        """
+        db = SqliteKnowledgeGraph(":memory:")
+        db.bulk_insert([("a", "rel", "b")])
+        count = db.bulk_insert([
+            ("a", "rel", "b"),
+            ("c", "rel", "d"),
+        ])
+        assert count == 1
+
+    def test_no_batch_row_when_nothing_inserted(self):
+        """Re-inserting only duplicates should not create an empty batch row."""
+        db = SqliteKnowledgeGraph(":memory:")
+        db.bulk_insert([("a", "rel", "b")])
+        batches_before = len(db.list_batches())
+        count = db.bulk_insert([("a", "rel", "b")])
+        assert count == 0
+        assert len(db.list_batches()) == batches_before
+
+    def test_batch_id_stamped_on_inserted_rows(self):
+        """Every inserted row must carry the batch_id for rollback to work."""
+        db = SqliteKnowledgeGraph(":memory:")
+        db.bulk_insert([("a", "rel", "b"), ("c", "rel", "d")], source="test")
+        batches = db.list_batches()
+        assert len(batches) == 1
+        bid = batches[0]["batch_id"]
+        rows = db._conn.execute(
+            "SELECT batch_id FROM triplets"
+        ).fetchall()
+        assert all(r[0] == bid for r in rows)
+        assert db.delete_batch(bid) == 2
+        assert len(db) == 0
+
     def test_source_field(self):
         db = SqliteKnowledgeGraph(":memory:")
         db.bulk_insert([("a", "rel", "b")], source="test-source")

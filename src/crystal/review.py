@@ -147,50 +147,29 @@ def format_review_dashboard(review_dir: Path | None = None) -> str:
     summary = discover_review_files(review_dir)
     gaps = load_known_gaps()
 
-    lines = ["# Review Dashboard\n"]
+    lines = []
 
-    total_pending = summary.pending_questions + summary.pending_triplets + summary.known_gaps
-    lines.append(f"**{total_pending} items need your attention**\n")
-
-    lines.append("## Generated Questions")
-    lines.append(f"- Pending: **{summary.pending_questions}**")
-    lines.append(f"- Accepted: {summary.accepted_questions}")
-    lines.append(f"- Rejected: {summary.rejected_questions}")
-    if summary.question_files:
-        for f in summary.question_files:
-            lines.append(f"- File: `{Path(f).name}`")
-    lines.append("")
-
-    lines.append("## LLM-Extracted Triplets")
-    if summary.pending_triplets > 0:
-        lines.append(f"- Pending: **{summary.pending_triplets}**")
-        for f in summary.triplet_files:
-            lines.append(f"- File: `{Path(f).name}`")
+    total_pending = summary.pending_questions + summary.pending_triplets
+    if total_pending > 0:
+        lines.append(f"**{total_pending} items need your review** — "
+                      f"{summary.pending_questions} questions, {summary.pending_triplets} triplets\n")
     else:
-        lines.append("- No pending triplet proposals.")
-    lines.append("")
+        lines.append("**All caught up** — no pending review items.\n")
 
-    lines.append("## Detector Known Gaps")
-    lines.append(f"- **{summary.known_gaps}** known detection failures requiring engineering fixes:")
-    for gap in gaps:
-        lines.append(f"  - *\"{gap['question']}\"* — {gap['reason']}")
+    lines.append(f"Questions: **{summary.pending_questions}** pending · "
+                 f"{summary.accepted_questions} accepted · {summary.rejected_questions} rejected")
+
+    if summary.pending_triplets > 0:
+        lines.append(f"  \nTriplets: **{summary.pending_triplets}** pending LLM-extracted triplets")
     lines.append("")
 
     batches = list_batches(review_dir)
     if batches:
-        lines.append("## Ingestion Batches")
         total_accepted = sum(b["accepted"] for b in batches)
-        lines.append(f"- **{len(batches)}** batches, **{total_accepted}** accepted golden answers")
-        for b in batches:
-            lines.append(
-                f"  - `{b['id']}`: {b['total_cases']} questions "
-                f"({b['pending']} pending, {b['accepted']} accepted, {b['rejected']} rejected)"
-            )
-        lines.append("")
+        lines.append(f"**{len(batches)}** batches · **{total_accepted}** accepted golden answers")
         if total_accepted >= 50:
             lines.append(
-                f"**Ready for Ralph Wiggum loop** — {total_accepted} accepted cases. "
-                "Run: `python -m benchmarks.ralph_wiggum --threshold 0.90`"
+                f"  \n*Ready for Ralph Wiggum loop — {total_accepted} accepted cases.*"
             )
             lines.append("")
 
@@ -324,11 +303,20 @@ def save_review_decisions(
         json.dump(data, f, indent=2, ensure_ascii=False)
 
 
-def collect_accepted_cases(review_dir: Path | None = None) -> list[tuple[str, str, list[str], bool]]:
+def collect_accepted_cases(
+    review_dir: Path | None = None,
+    *,
+    origin_filter: str | None = None,
+    document_filter: str | None = None,
+) -> list[tuple[str, str, list[str], bool]]:
     """Collect all accepted cases across all batches as benchmark tuples.
 
     Returns list of (question, golden_answer, match_strings, is_negative).
     Used by the Ralph Wiggum loop to gather its test corpus.
+
+    Args:
+        origin_filter: If set, only return cases with this origin value.
+        document_filter: If set, only return cases from this source_document.
     """
     review_dir = review_dir or REVIEW_DIR
     accepted = []
@@ -344,13 +332,18 @@ def collect_accepted_cases(review_dir: Path | None = None) -> list[tuple[str, st
             continue
 
         for case in data.get("cases", []):
-            if case.get("status") == "accepted":
-                accepted.append((
-                    case["question"],
-                    case.get("golden_answer", ""),
-                    case.get("match_strings", []),
-                    case.get("is_negative", False),
-                ))
+            if case.get("status") != "accepted":
+                continue
+            if origin_filter and case.get("origin", "unknown") != origin_filter:
+                continue
+            if document_filter and case.get("source_document", "") != document_filter:
+                continue
+            accepted.append((
+                case["question"],
+                case.get("golden_answer", ""),
+                case.get("match_strings", []),
+                case.get("is_negative", False),
+            ))
 
     return accepted
 
@@ -391,10 +384,59 @@ def save_single_review_decision(
     return True
 
 
-def load_source_document_text(slug: str, docs_dir: Path | None = None) -> str:
-    """Load the opinion text for a document by its slug.
+def _normalize_for_match(s: str) -> str:
+    """Collapse a case name or slug to a canonical matching key."""
+    import re
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9]", " ", s.lower())).strip()
 
-    Looks in ``benchmarks/documents/<slug>.json`` and extracts the text field.
+
+def _build_doc_index(docs_dir: Path) -> dict[str, Path]:
+    """Build a map of normalized-key -> document path for fuzzy matching."""
+    index: dict[str, Path] = {}
+    if not docs_dir.exists():
+        return index
+    for p in docs_dir.glob("*.json"):
+        key = _normalize_for_match(p.stem)
+        index[key] = p
+    return index
+
+
+def find_document_for_entity(
+    entity_name: str, docs_dir: Path | None = None,
+) -> Path | None:
+    """Find the document file matching a KG entity name.
+
+    Tries exact slug match first, then normalized match, then prefix match
+    (for truncated filenames).
+    """
+    if docs_dir is None:
+        docs_dir = Path(__file__).parent.parent.parent / "benchmarks" / "documents"
+
+    slug = (entity_name.lower()
+            .replace(".", "").replace(",", "").replace("'", "")
+            .replace("&", "").replace(" ", "-"))
+    exact = docs_dir / f"{slug}.json"
+    if exact.exists():
+        return exact
+
+    index = _build_doc_index(docs_dir)
+    entity_key = _normalize_for_match(entity_name)
+    if entity_key in index:
+        return index[entity_key]
+
+    for doc_key, path in index.items():
+        if doc_key.startswith(entity_key[:40]) and len(entity_key) > 40:
+            return path
+        if entity_key.startswith(doc_key[:40]) and len(doc_key) > 40:
+            return path
+
+    return None
+
+
+def load_source_document_text(slug: str, docs_dir: Path | None = None) -> str:
+    """Load the opinion text for a document by its slug or entity name.
+
+    Looks in ``benchmarks/documents/`` using normalized matching.
     Returns the text content, or an error message if not found.
     """
     if docs_dir is None:
@@ -402,6 +444,8 @@ def load_source_document_text(slug: str, docs_dir: Path | None = None) -> str:
 
     path = docs_dir / f"{slug}.json"
     if not path.exists():
+        path = find_document_for_entity(slug, docs_dir)
+    if path is None or not path.exists():
         return f"Document not found: {slug}"
 
     try:
@@ -468,13 +512,9 @@ def find_batch_document_slugs(batch_id: str, review_dir: Path | None = None) -> 
         st = case.get("source_triplet", [])
         if st and len(st) >= 1:
             name = str(st[0])
-            slug = (name.lower()
-                    .replace(".", "")
-                    .replace(",", "")
-                    .replace(" ", "-"))
-            candidate = docs_dir / f"{slug}.json"
-            if candidate.exists():
-                slugs.add(slug)
+            match = find_document_for_entity(name, docs_dir)
+            if match is not None:
+                slugs.add(match.stem)
 
     return sorted(slugs)
 
@@ -529,6 +569,8 @@ def save_proposed_as_batch(
             "crystal_confidence": row.get("confidence", ""),
             "source_triplet": row.get("source_triplet", []),
             "source_sentence": row.get("source_sentence", ""),
+            "origin": row.get("origin", "unknown"),
+            "source_document": row.get("source_document", ""),
         })
 
     data = {
@@ -553,6 +595,88 @@ def save_proposed_as_batch(
         json.dump(data, f, indent=2, ensure_ascii=False)
 
     return path
+
+
+def revalidate_pending_questions(
+    kg,
+    review_dir: Path | None = None,
+) -> dict:
+    """Re-evaluate pending questions against current KG state.
+
+    For each pending_review case with a source_triplet, checks:
+      1. Whether the source triplet still exists in the KG.
+      2. Whether the source triplet passes current validation rules.
+
+    Cases that fail either check are auto-rejected. The batch files are
+    updated in place and the pending count is recalculated.
+
+    Returns a summary: {rejected: [...], total_checked, total_rejected}.
+    """
+    from crystal.ingest.validation import validate_triplet
+
+    review_dir = review_dir or REVIEW_DIR
+    if not review_dir.exists():
+        return {"rejected": [], "total_checked": 0, "total_rejected": 0}
+
+    rejected_details: list[dict] = []
+    total_checked = 0
+
+    for path in sorted(review_dir.glob("*.json")):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            continue
+
+        cases = data.get("cases")
+        if not cases or not isinstance(cases, list):
+            continue
+
+        changed = False
+        for case in cases:
+            if case.get("status") != "pending_review":
+                continue
+
+            st = case.get("source_triplet")
+            if not st or not isinstance(st, list) or len(st) < 3:
+                continue
+
+            total_checked += 1
+            subj, pred, obj = st[0], st[1], st[2]
+            reason = None
+
+            vr = validate_triplet(subj, pred, obj)
+            if not vr.valid:
+                reason = f"fails validation: {'; '.join(vr.reasons)}"
+
+            if reason is None and kg is not None:
+                hits = kg.lookup(subject=subj, predicate=pred)
+                if not any(h["object"].lower() == obj.lower() for h in hits):
+                    reason = "source triplet no longer in KG"
+
+            if reason:
+                case["status"] = "rejected"
+                case["_rejection_reason"] = reason
+                changed = True
+                rejected_details.append({
+                    "file": path.name,
+                    "question": case.get("question", ""),
+                    "source_triplet": st,
+                    "reason": reason,
+                })
+
+        if changed:
+            data["pending"] = sum(
+                1 for c in cases if c.get("status") == "pending_review"
+            )
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+
+    return {
+        "rejected": rejected_details,
+        "total_checked": total_checked,
+        "total_rejected": len(rejected_details),
+    }
 
 
 def _derive_match_strings(golden_answer: str) -> list[str]:

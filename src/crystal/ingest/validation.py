@@ -95,9 +95,9 @@ def validate_subject(subject: str) -> ValidationResult:
 # ── Predicate gate ────────────────────────────────────────────────────
 
 _ALLOWED_PREDICATES = frozenset({
-    "cites", "cited_by_count", "court", "date_filed", "judges",
-    "disposition", "nature_of_suit", "opinion_author", "per_curiam",
-    "attorneys", "precedential_status",
+    "cites", "cited_by_count", "court", "date_filed", "document_slug",
+    "judges", "disposition", "nature_of_suit", "opinion_author",
+    "per_curiam", "attorneys", "precedential_status",
     "doctrine", "holding", "reasoning", "is a",
 })
 

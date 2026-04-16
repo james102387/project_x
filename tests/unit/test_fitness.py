@@ -2,7 +2,7 @@
 
 import pytest
 
-from benchmarks.fitness import binary_correct, fitness_score, evaluate_cases
+from benchmarks.scoring.fitness import binary_correct, fitness_score, evaluate_cases
 
 
 class TestBinaryCorrect:

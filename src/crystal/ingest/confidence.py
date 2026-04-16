@@ -42,6 +42,8 @@ class ScoredTriplet:
     extraction_source: str
     ingestion_confidence: float
     status: str = "pending_review"
+    source_document: str = ""
+    origin: str = "opinion_doc"
 
     def to_triplet(self) -> Triplet:
         return Triplet(subject=self.subject, predicate=self.predicate, object=self.object)
@@ -61,6 +63,8 @@ class ScoredTriplet:
             "extraction_source": self.extraction_source,
             "ingestion_confidence": round(self.ingestion_confidence, 3),
             "status": self.status,
+            "source_document": self.source_document,
+            "origin": self.origin,
         }
 
     @classmethod
@@ -73,11 +77,14 @@ class ScoredTriplet:
             extraction_source=d.get("extraction_source", "llm_medium"),
             ingestion_confidence=d.get("ingestion_confidence", 0.5),
             status=d.get("status", "pending_review"),
+            source_document=d.get("source_document", ""),
+            origin=d.get("origin", "opinion_doc"),
         )
 
     @classmethod
     def from_reviewable(
         cls, rt: ReviewableTriplet, extraction_source: str, confidence: float,
+        source_document: str = "",
     ) -> ScoredTriplet:
         return cls(
             subject=rt.subject,
@@ -87,6 +94,7 @@ class ScoredTriplet:
             extraction_source=extraction_source,
             ingestion_confidence=confidence,
             status=rt.status,
+            source_document=source_document,
         )
 
 

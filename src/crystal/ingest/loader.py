@@ -145,6 +145,24 @@ def load_review(path: str | Path) -> IngestResult:
     )
 
 
+def load_csv_text(text: str) -> IngestResult:
+    """Parse pasted CSV text (subject, predicate, object per line)."""
+    import io
+    triplets: list[Triplet] = []
+    reader = csv.reader(io.StringIO(text))
+    rows = list(reader)
+    if not rows:
+        return IngestResult(source="pasted_text")
+    start = 1 if _looks_like_header(rows[0]) else 0
+    for row in rows[start:]:
+        if len(row) < 3:
+            continue
+        subj, pred, obj = row[0].strip(), row[1].strip(), row[2].strip()
+        if subj and pred and obj:
+            triplets.append(Triplet(subject=subj, predicate=pred, object=obj))
+    return IngestResult(triplets=triplets, source="pasted_text")
+
+
 def load_file(path: str | Path) -> IngestResult:
     """Auto-detect file format and load triplets."""
     path = Path(path)

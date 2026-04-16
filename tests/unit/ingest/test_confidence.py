@@ -144,3 +144,42 @@ class TestScoredTriplet:
         assert t.subject == "a"
         assert t.predicate == "b"
         assert t.object == "c"
+
+    def test_origin_defaults_to_opinion_doc(self):
+        st = ScoredTriplet(
+            subject="a", predicate="b", object="c",
+            source_sentence="", extraction_source="ner",
+            ingestion_confidence=0.85,
+        )
+        assert st.origin == "opinion_doc"
+
+    def test_origin_explicit_api_metadata(self):
+        st = ScoredTriplet(
+            subject="a", predicate="b", object="c",
+            source_sentence="", extraction_source="ner",
+            ingestion_confidence=0.85,
+            origin="api_metadata",
+        )
+        assert st.origin == "api_metadata"
+
+    def test_source_document_field(self):
+        st = ScoredTriplet(
+            subject="a", predicate="b", object="c",
+            source_sentence="", extraction_source="ner",
+            ingestion_confidence=0.85,
+            source_document="miranda.json",
+        )
+        assert st.source_document == "miranda.json"
+        d = st.to_dict()
+        assert d["source_document"] == "miranda.json"
+        assert d["origin"] == "opinion_doc"
+
+    def test_from_dict_with_source_document(self):
+        d = {
+            "subject": "a", "predicate": "b", "object": "c",
+            "source_sentence": "", "extraction_source": "ner",
+            "ingestion_confidence": 0.85,
+            "source_document": "doc.json",
+        }
+        st = ScoredTriplet.from_dict(d)
+        assert st.source_document == "doc.json"

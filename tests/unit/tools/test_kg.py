@@ -2,6 +2,7 @@
 
 import pytest
 from crystal.tools.kg import KnowledgeGraph
+from crystal.tools.kg.store import SqliteKnowledgeGraph
 
 
 # ── Fixtures ───────────────────────────────────────────────────────────────
@@ -346,3 +347,270 @@ class TestConstruction:
         kg = KnowledgeGraph(SAMPLE_TRIPLETS)
         assert kg._resolve_predicate("capital") == "capital"
         assert kg._resolve_predicate("capital city") == "capital city"
+
+
+# ── Extend (mutation) ────────────────────────────────────────────────────
+
+
+class TestExtend:
+    def test_adds_new_triplets(self, kg):
+        original_len = len(kg)
+        added = kg.extend([("Zelphos", "type", "city"), ("Zelphos", "founded", "year 0")])
+        assert added == 2
+        assert len(kg) == original_len + 2
+        results = kg.lookup(subject="Zelphos", predicate="type")
+        assert results[0]["object"] == "city"
+
+    def test_skips_duplicates(self, kg):
+        original_len = len(kg)
+        added = kg.extend([("Remulak", "capital", "Zelphos")])
+        assert added == 0
+        assert len(kg) == original_len
+
+    def test_mixed_new_and_duplicate(self, kg):
+        original_len = len(kg)
+        added = kg.extend([
+            ("Remulak", "capital", "Zelphos"),
+            ("Remulak", "exports", "dilithium"),
+        ])
+        assert added == 1
+        assert len(kg) == original_len + 1
+
+    def test_updates_entity_index(self, kg):
+        kg.extend([("NewPlanet", "type", "gas giant")])
+        assert "newplanet" in kg.entities
+        assert "gas giant" in kg.entities
+        assert "newplanet" in kg.subjects
+
+    def test_extend_empty(self, kg):
+        original_len = len(kg)
+        added = kg.extend([])
+        assert added == 0
+        assert len(kg) == original_len
+
+
+# ── SqliteKnowledgeGraph Provenance ───────────────────────────────────────
+
+
+class TestSqliteProvenance:
+    """Tests for origin and source_document provenance tracking."""
+
+    @pytest.fixture
+    def skg(self):
+        return SqliteKnowledgeGraph(":memory:")
+
+    def test_schema_has_origin_and_source_document(self, skg):
+        cols = {
+            row[1]
+            for row in skg._conn.execute("PRAGMA table_info(triplets)").fetchall()
+        }
+        assert "origin" in cols
+        assert "source_document" in cols
+
+    def test_bulk_insert_default_origin(self, skg):
+        skg.bulk_insert(
+            [("a", "b", "c")],
+            source="test",
+        )
+        facts = skg.get_all_facts()
+        assert len(facts) == 1
+        assert facts[0]["origin"] == "unknown"
+        assert facts[0]["source_document"] == ""
+
+    def test_bulk_insert_with_origin(self, skg):
+        skg.bulk_insert(
+            [("miranda v. arizona", "court", "SCOTUS")],
+            source="cold-cases-scotus",
+            origin="api_metadata",
+            source_document="cold-cases-scotus",
+        )
+        facts = skg.get_all_facts()
+        assert facts[0]["origin"] == "api_metadata"
+        assert facts[0]["source_document"] == "cold-cases-scotus"
+
+    def test_bulk_insert_5tuple_per_row_origin(self, skg):
+        skg.bulk_insert(
+            [
+                ("a", "p1", "o1", "sentence one", "opinion_doc"),
+                ("b", "p2", "o2", "sentence two", "api_metadata"),
+            ],
+            source="test",
+            origin="unknown",
+            source_document="opinion.json",
+        )
+        facts = skg.get_all_facts()
+        origins = {f["subject"]: f["origin"] for f in facts}
+        assert origins["a"] == "opinion_doc"
+        assert origins["b"] == "api_metadata"
+
+    def test_lookup_returns_origin_and_source_document(self, skg):
+        skg.bulk_insert(
+            [("x", "y", "z")],
+            source="test",
+            origin="opinion_doc",
+            source_document="loving-v-virginia.txt",
+        )
+        results = skg.lookup(subject="x", predicate="y")
+        assert len(results) == 1
+        assert results[0]["origin"] == "opinion_doc"
+        assert results[0]["source_document"] == "loving-v-virginia.txt"
+
+    def test_get_all_facts_includes_provenance(self, skg):
+        skg.bulk_insert(
+            [("a", "b", "c")],
+            source="test",
+            origin="opinion_doc",
+            source_document="doc.txt",
+        )
+        facts = skg.get_all_facts()
+        assert "origin" in facts[0]
+        assert "source_document" in facts[0]
+        assert facts[0]["origin"] == "opinion_doc"
+        assert facts[0]["source_document"] == "doc.txt"
+
+    def test_triplets_with_provenance(self, skg):
+        skg.bulk_insert(
+            [("a", "b", "c"), ("d", "e", "f")],
+            source="src",
+            origin="api_metadata",
+            source_document="payload.json",
+        )
+        data = skg.triplets_with_provenance
+        assert len(data) == 2
+        assert len(data[0]) == 6
+        s, p, o, source, origin, src_doc = data[0]
+        assert origin == "api_metadata"
+        assert src_doc == "payload.json"
+
+    def test_provenance_counts(self, skg):
+        skg.bulk_insert(
+            [("a1", "p", "o1"), ("a2", "p", "o2")],
+            source="s1",
+            origin="api_metadata",
+        )
+        skg.bulk_insert(
+            [("b1", "p", "o3")],
+            source="s2",
+            origin="opinion_doc",
+        )
+        counts = skg.provenance_counts()
+        assert counts["api_metadata"] == 2
+        assert counts["opinion_doc"] == 1
+
+    def test_source_documents_list(self, skg):
+        skg.bulk_insert(
+            [("a", "p", "o1")],
+            source="s",
+            source_document="doc_a.json",
+        )
+        skg.bulk_insert(
+            [("b", "p", "o2")],
+            source="s",
+            source_document="doc_b.json",
+        )
+        skg.bulk_insert(
+            [("c", "p", "o3")],
+            source="s",
+            source_document="",
+        )
+        docs = skg.source_documents()
+        assert "doc_a.json" in docs
+        assert "doc_b.json" in docs
+        assert "" not in docs
+
+    def test_lookup_by_origin(self, skg):
+        skg.bulk_insert(
+            [("a", "p", "o1")],
+            source="s",
+            origin="api_metadata",
+        )
+        skg.bulk_insert(
+            [("b", "p", "o2")],
+            source="s",
+            origin="opinion_doc",
+        )
+        api_facts = skg.lookup_by_origin("api_metadata")
+        assert len(api_facts) == 1
+        assert api_facts[0]["subject"] == "a"
+
+        opinion_facts = skg.lookup_by_origin("opinion_doc")
+        assert len(opinion_facts) == 1
+        assert opinion_facts[0]["subject"] == "b"
+
+    def test_lookup_by_document(self, skg):
+        skg.bulk_insert(
+            [("a", "p", "o1")],
+            source="s",
+            source_document="opinion_123.json",
+        )
+        skg.bulk_insert(
+            [("b", "p", "o2")],
+            source="s",
+            source_document="opinion_456.json",
+        )
+        facts = skg.lookup_by_document("opinion_123.json")
+        assert len(facts) == 1
+        assert facts[0]["subject"] == "a"
+
+    def test_backfill_provenance(self, skg):
+        skg.bulk_insert(
+            [("a", "p", "o1")],
+            source="cold-cases-scotus",
+        )
+        skg.bulk_insert(
+            [("b", "p", "o2")],
+            source="pasted_text",
+        )
+        counts = skg.backfill_provenance()
+        assert counts["api_metadata"] >= 1
+        assert counts["opinion_doc"] >= 1
+
+        facts = skg.get_all_facts()
+        origins = {f["subject"]: f["origin"] for f in facts}
+        assert origins["a"] == "api_metadata"
+        assert origins["b"] == "opinion_doc"
+
+    def test_migration_on_old_schema(self):
+        """Verify migrations add origin/source_document to a DB created without them."""
+        import sqlite3
+        conn = sqlite3.connect(":memory:")
+        conn.executescript("""
+            CREATE TABLE IF NOT EXISTS triplets (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                subject TEXT NOT NULL,
+                predicate TEXT NOT NULL,
+                object TEXT NOT NULL,
+                source TEXT,
+                source_sentence TEXT DEFAULT '',
+                batch_id TEXT,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(subject, predicate, object)
+            );
+            CREATE TABLE IF NOT EXISTS entity_aliases (
+                alias TEXT PRIMARY KEY, canonical TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS predicate_aliases (
+                alias TEXT PRIMARY KEY, canonical TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS sync_state (
+                source TEXT PRIMARY KEY, last_sync TEXT,
+                last_id TEXT, item_count INTEGER
+            );
+            CREATE TABLE IF NOT EXISTS ingestion_batches (
+                batch_id TEXT PRIMARY KEY, source TEXT,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                triplet_count INTEGER DEFAULT 0,
+                status TEXT DEFAULT 'active'
+            );
+        """)
+        conn.execute(
+            "INSERT INTO triplets (subject, predicate, object, source) "
+            "VALUES ('x', 'y', 'z', 'old_source')"
+        )
+        conn.commit()
+        conn.close()
+
+        kg = SqliteKnowledgeGraph(":memory:")
+        kg.bulk_insert([("test", "pred", "obj")], source="new", origin="api_metadata")
+        facts = kg.get_all_facts()
+        assert any(f["origin"] == "api_metadata" for f in facts)

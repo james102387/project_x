@@ -13,7 +13,7 @@ from crystal.ingest.schema import IngestResult
 from crystal.ingest.sources.cold_cases import ingest_cold_cases
 from crystal.data.legal_ontology import LEGAL_PREDICATE_ALIASES
 from tests.fixtures.scotus_sample import SCOTUS_SAMPLE
-from benchmarks.legal_ground_truth import LEGAL_BENCHMARK_CASES
+from benchmarks.ground_truth.legal import LEGAL_BENCHMARK_CASES
 
 
 @pytest.fixture(scope="module")

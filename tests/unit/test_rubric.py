@@ -2,14 +2,14 @@
 
 import pytest
 
-from benchmarks.rubric import (
+from benchmarks.scoring.rubric import (
     RubricResult,
     accuracy_score,
     calibration_score,
     is_abstention,
     score_rubric,
 )
-from benchmarks.scoring import score_batch, score_batch_rubric
+from benchmarks.scoring.binary import score_batch, score_batch_rubric
 
 
 # ── Fixtures ───────────────────────────────────────────────────────────────

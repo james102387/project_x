@@ -10,9 +10,9 @@ Scores both with the rubric (accuracy, abstention) to verify the
 augmentation helps rather than misleads.
 
 Usage:
-    python -m benchmarks.run_augmented_benchmark
-    python -m benchmarks.run_augmented_benchmark --baseline-only
-    python -m benchmarks.run_augmented_benchmark --treatment-only
+    python -m benchmarks.runners.augmented
+    python -m benchmarks.runners.augmented --baseline-only
+    python -m benchmarks.runners.augmented --treatment-only
 
 Requires GOOGLE_API_KEY in environment.
 """

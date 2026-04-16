@@ -2,9 +2,9 @@
 Benchmark runner — baseline (naked LLM) vs treatment (Crystal + KG).
 
 Usage:
-    python -m benchmarks.run_benchmark              # both baseline + treatment
-    python -m benchmarks.run_benchmark --baseline    # baseline only
-    python -m benchmarks.run_benchmark --treatment   # treatment only
+    python -m benchmarks.runners.baseline              # both baseline + treatment
+    python -m benchmarks.runners.baseline --baseline    # baseline only
+    python -m benchmarks.runners.baseline --treatment   # treatment only
 
 Requires GOOGLE_API_KEY in environment.
 Results are written to benchmarks/results/ as JSON.

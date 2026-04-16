@@ -16,7 +16,11 @@
         "bethel school district v. fraser",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Bethel School District V. Fraser filed?",
@@ -31,7 +35,11 @@
         "bethel school district v. fraser",
         "date_filed",
         "1986-07-07"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1986-07-07"
     },
     {
       "question": "Which court decided Brandenburg V. Ohio?",
@@ -46,7 +54,11 @@
         "brandenburg v. ohio",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Brandenburg V. Ohio decided?",
@@ -61,7 +73,11 @@
         "brandenburg v. ohio",
         "date_filed",
         "1969-06-09"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1969-06-09"
     },
     {
       "question": "What court heard Brown V. Board Of Education?",
@@ -76,7 +92,11 @@
         "brown v. board of education",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "What date was Brown V. Board Of Education filed?",
@@ -91,7 +111,11 @@
         "brown v. board of education",
         "date_filed",
         "1954-05-17"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1954-05-17"
     },
     {
       "question": "Which court decided Bush V. Gore?",
@@ -106,7 +130,11 @@
         "bush v. gore",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "What date was Bush V. Gore filed?",
@@ -121,7 +149,11 @@
         "bush v. gore",
         "date_filed",
         "2000-12-12"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2000-12-12"
     },
     {
       "question": "Which court decided Carpenter V. United States?",
@@ -136,7 +168,11 @@
         "carpenter v. united states",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "What date was Carpenter V. United States filed?",
@@ -151,7 +187,11 @@
         "carpenter v. united states",
         "date_filed",
         "2018-06-22"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2018-06-22"
     },
     {
       "question": "What court heard Chevron U.S.A., Inc. V. Natural Resources Defense Council, Inc.?",
@@ -166,7 +206,11 @@
         "chevron u.s.a., inc. v. natural resources defense council, inc.",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Chevron U.S.A., Inc. V. Natural Resources Defense Council, Inc. filed?",
@@ -181,7 +225,11 @@
         "chevron u.s.a., inc. v. natural resources defense council, inc.",
         "date_filed",
         "1984-06-25"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1984-06-25"
     },
     {
       "question": "Which court decided Citizens United V. Federal Election Commission?",
@@ -196,7 +244,11 @@
         "citizens united v. federal election commission",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Citizens United V. Federal Election Commission filed?",
@@ -211,7 +263,11 @@
         "citizens united v. federal election commission",
         "date_filed",
         "2010-01-21"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2010-01-21"
     },
     {
       "question": "What court heard Crawford V. Washington?",
@@ -226,7 +282,11 @@
         "crawford v. washington",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Crawford V. Washington decided?",
@@ -241,7 +301,11 @@
         "crawford v. washington",
         "date_filed",
         "2004-03-08"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2004-03-08"
     },
     {
       "question": "What court heard District Of Columbia V. Heller?",
@@ -256,7 +320,11 @@
         "district of columbia v. heller",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "What date was District Of Columbia V. Heller filed?",
@@ -271,7 +339,11 @@
         "district of columbia v. heller",
         "date_filed",
         "2008-06-26"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2008-06-26"
     },
     {
       "question": "What court heard Dobbs V. Jackson Women'S Health Organization?",
@@ -286,7 +358,11 @@
         "dobbs v. jackson women's health organization",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Dobbs V. Jackson Women'S Health Organization decided?",
@@ -301,7 +377,11 @@
         "dobbs v. jackson women's health organization",
         "date_filed",
         "2022-06-24"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2022-06-24"
     },
     {
       "question": "What court decided Dred Scott V. Sandford?",
@@ -316,7 +396,11 @@
         "dred scott v. sandford",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "What date was Dred Scott V. Sandford filed?",
@@ -331,7 +415,11 @@
         "dred scott v. sandford",
         "date_filed",
         "1857-03-06"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1857-03-06"
     },
     {
       "question": "What court decided Engel V. Vitale?",
@@ -346,7 +434,11 @@
         "engel v. vitale",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Engel V. Vitale filed?",
@@ -361,7 +453,11 @@
         "engel v. vitale",
         "date_filed",
         "1962-06-25"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1962-06-25"
     },
     {
       "question": "What court heard Furman V. Georgia?",
@@ -376,7 +472,11 @@
         "furman v. georgia",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "What date was Furman V. Georgia filed?",
@@ -391,7 +491,11 @@
         "furman v. georgia",
         "date_filed",
         "1972-06-29"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1972-06-29"
     },
     {
       "question": "What court heard Gibbons V. Ogden?",
@@ -406,7 +510,11 @@
         "gibbons v. ogden",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Gibbons V. Ogden filed?",
@@ -421,7 +529,11 @@
         "gibbons v. ogden",
         "date_filed",
         "1824-03-02"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1824-03-02"
     },
     {
       "question": "Which court decided Gideon V. Wainwright?",
@@ -436,7 +548,11 @@
         "gideon v. wainwright",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Gideon V. Wainwright decided?",
@@ -451,7 +567,11 @@
         "gideon v. wainwright",
         "date_filed",
         "1963-03-18"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1963-03-18"
     },
     {
       "question": "What court heard Gonzales V. Raich?",
@@ -466,7 +586,11 @@
         "gonzales v. raich",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "What date was Gonzales V. Raich filed?",
@@ -481,7 +605,11 @@
         "gonzales v. raich",
         "date_filed",
         "2005-06-06"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2005-06-06"
     },
     {
       "question": "What court heard Griswold V. Connecticut?",
@@ -496,7 +624,11 @@
         "griswold v. connecticut",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Griswold V. Connecticut decided?",
@@ -511,7 +643,11 @@
         "griswold v. connecticut",
         "date_filed",
         "1965-06-07"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1965-06-07"
     },
     {
       "question": "Which court decided Grutter V. Bollinger?",
@@ -526,7 +662,11 @@
         "grutter v. bollinger",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Grutter V. Bollinger decided?",
@@ -541,7 +681,11 @@
         "grutter v. bollinger",
         "date_filed",
         "2003-06-23"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2003-06-23"
     },
     {
       "question": "What court decided Hazelwood School District V. Kuhlmeier?",
@@ -556,7 +700,11 @@
         "hazelwood school district v. kuhlmeier",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Hazelwood School District V. Kuhlmeier decided?",
@@ -571,7 +719,11 @@
         "hazelwood school district v. kuhlmeier",
         "date_filed",
         "1988-01-13"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1988-01-13"
     },
     {
       "question": "Which court decided Heart Of Atlanta Motel V. United States?",
@@ -586,7 +738,11 @@
         "heart of atlanta motel v. united states",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Heart Of Atlanta Motel V. United States decided?",
@@ -601,7 +757,11 @@
         "heart of atlanta motel v. united states",
         "date_filed",
         "1964-12-14"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1964-12-14"
     },
     {
       "question": "What court decided Katz V. United States?",
@@ -616,7 +776,11 @@
         "katz v. united states",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Katz V. United States decided?",
@@ -631,7 +795,11 @@
         "katz v. united states",
         "date_filed",
         "1967-12-18"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1967-12-18"
     },
     {
       "question": "What court decided Korematsu V. United States?",
@@ -646,7 +814,11 @@
         "korematsu v. united states",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "What date was Korematsu V. United States filed?",
@@ -661,7 +833,11 @@
         "korematsu v. united states",
         "date_filed",
         "1944-12-18"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1944-12-18"
     },
     {
       "question": "Which court decided Lawrence V. Texas?",
@@ -676,7 +852,11 @@
         "lawrence v. texas",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Lawrence V. Texas decided?",
@@ -691,7 +871,11 @@
         "lawrence v. texas",
         "date_filed",
         "2003-06-26"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2003-06-26"
     },
     {
       "question": "Which court decided Lemon V. Kurtzman?",
@@ -706,7 +890,11 @@
         "lemon v. kurtzman",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Lemon V. Kurtzman decided?",
@@ -721,7 +909,11 @@
         "lemon v. kurtzman",
         "date_filed",
         "1971-06-28"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1971-06-28"
     },
     {
       "question": "What court heard Loper Bright Enterprises V. Raimondo?",
@@ -736,7 +928,11 @@
         "loper bright enterprises v. raimondo",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Loper Bright Enterprises V. Raimondo decided?",
@@ -751,7 +947,11 @@
         "loper bright enterprises v. raimondo",
         "date_filed",
         "2024-06-28"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2024-06-28"
     },
     {
       "question": "Which court decided Loving V. Virginia?",
@@ -766,7 +966,11 @@
         "loving v. virginia",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Loving V. Virginia decided?",
@@ -781,7 +985,11 @@
         "loving v. virginia",
         "date_filed",
         "1967-06-12"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1967-06-12"
     },
     {
       "question": "What court heard Mapp V. Ohio?",
@@ -796,7 +1004,11 @@
         "mapp v. ohio",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "What date was Mapp V. Ohio filed?",
@@ -811,7 +1023,11 @@
         "mapp v. ohio",
         "date_filed",
         "1961-06-19"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1961-06-19"
     },
     {
       "question": "What court decided Marbury V. Madison?",
@@ -826,7 +1042,11 @@
         "marbury v. madison",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "What date was Marbury V. Madison filed?",
@@ -841,7 +1061,11 @@
         "marbury v. madison",
         "date_filed",
         "1803-02-24"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1803-02-24"
     },
     {
       "question": "Which court decided Mcculloch V. Maryland?",
@@ -856,7 +1080,11 @@
         "mcculloch v. maryland",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Mcculloch V. Maryland filed?",
@@ -871,7 +1099,11 @@
         "mcculloch v. maryland",
         "date_filed",
         "1819-03-06"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1819-03-06"
     },
     {
       "question": "Which court decided Mcdonald V. City Of Chicago?",
@@ -886,7 +1118,11 @@
         "mcdonald v. city of chicago",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "What date was Mcdonald V. City Of Chicago filed?",
@@ -901,7 +1137,11 @@
         "mcdonald v. city of chicago",
         "date_filed",
         "2010-06-28"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2010-06-28"
     },
     {
       "question": "What court heard Miranda V. Arizona?",
@@ -916,7 +1156,11 @@
         "miranda v. arizona",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Miranda V. Arizona decided?",
@@ -931,7 +1175,11 @@
         "miranda v. arizona",
         "date_filed",
         "1966-06-13"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1966-06-13"
     },
     {
       "question": "What court decided New York Times Co. V. Sullivan?",
@@ -946,7 +1194,11 @@
         "new york times co. v. sullivan",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was New York Times Co. V. Sullivan filed?",
@@ -961,7 +1213,11 @@
         "new york times co. v. sullivan",
         "date_filed",
         "1964-03-09"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1964-03-09"
     },
     {
       "question": "Which court decided Obergefell V. Hodges?",
@@ -976,7 +1232,11 @@
         "obergefell v. hodges",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Obergefell V. Hodges decided?",
@@ -991,7 +1251,11 @@
         "obergefell v. hodges",
         "date_filed",
         "2015-06-26"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2015-06-26"
     },
     {
       "question": "What court decided Planned Parenthood V. Casey?",
@@ -1006,7 +1270,11 @@
         "planned parenthood v. casey",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Planned Parenthood V. Casey decided?",
@@ -1021,7 +1289,11 @@
         "planned parenthood v. casey",
         "date_filed",
         "1992-06-29"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1992-06-29"
     },
     {
       "question": "What court heard Plessy V. Ferguson?",
@@ -1036,7 +1308,11 @@
         "plessy v. ferguson",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Plessy V. Ferguson filed?",
@@ -1051,7 +1327,11 @@
         "plessy v. ferguson",
         "date_filed",
         "1896-05-18"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1896-05-18"
     },
     {
       "question": "Which court decided Regents Of The University Of California V. Bakke?",
@@ -1066,7 +1346,11 @@
         "regents of the university of california v. bakke",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Regents Of The University Of California V. Bakke filed?",
@@ -1081,7 +1365,11 @@
         "regents of the university of california v. bakke",
         "date_filed",
         "1978-06-28"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1978-06-28"
     },
     {
       "question": "Which court decided Riley V. California?",
@@ -1096,7 +1384,11 @@
         "riley v. california",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Riley V. California decided?",
@@ -1111,7 +1403,11 @@
         "riley v. california",
         "date_filed",
         "2014-06-25"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2014-06-25"
     },
     {
       "question": "What court heard Roe V. Wade?",
@@ -1126,7 +1422,11 @@
         "roe v. wade",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "What date was Roe V. Wade filed?",
@@ -1141,7 +1441,11 @@
         "roe v. wade",
         "date_filed",
         "1973-01-22"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1973-01-22"
     },
     {
       "question": "Which court decided Roper V. Simmons?",
@@ -1156,7 +1460,11 @@
         "roper v. simmons",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Roper V. Simmons filed?",
@@ -1171,7 +1479,11 @@
         "roper v. simmons",
         "date_filed",
         "2005-03-01"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2005-03-01"
     },
     {
       "question": "What court heard Schenck V. United States?",
@@ -1186,7 +1498,11 @@
         "schenck v. united states",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Schenck V. United States decided?",
@@ -1201,7 +1517,11 @@
         "schenck v. united states",
         "date_filed",
         "1919-03-03"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1919-03-03"
     },
     {
       "question": "Which court decided Shelby County V. Holder?",
@@ -1216,7 +1536,11 @@
         "shelby county v. holder",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Shelby County V. Holder filed?",
@@ -1231,7 +1555,11 @@
         "shelby county v. holder",
         "date_filed",
         "2013-06-25"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "2013-06-25"
     },
     {
       "question": "What court heard Terry V. Ohio?",
@@ -1246,7 +1574,11 @@
         "terry v. ohio",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "What date was Terry V. Ohio filed?",
@@ -1261,7 +1593,11 @@
         "terry v. ohio",
         "date_filed",
         "1968-06-10"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1968-06-10"
     },
     {
       "question": "Which court decided Texas V. Johnson?",
@@ -1276,7 +1612,11 @@
         "texas v. johnson",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "What date was Texas V. Johnson filed?",
@@ -1291,7 +1631,11 @@
         "texas v. johnson",
         "date_filed",
         "1989-06-21"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1989-06-21"
     },
     {
       "question": "Which court decided Tinker V. Des Moines?",
@@ -1306,7 +1650,11 @@
         "tinker v. des moines",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "Which court decided Tinker V. Des Moines Independent Community School District?",
@@ -1321,7 +1669,11 @@
         "tinker v. des moines independent community school district",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Tinker V. Des Moines Independent Community School District decided?",
@@ -1336,7 +1688,11 @@
         "tinker v. des moines independent community school district",
         "date_filed",
         "1969-02-24"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1969-02-24"
     },
     {
       "question": "What court heard United States V. Nixon?",
@@ -1351,7 +1707,11 @@
         "united states v. nixon",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was United States V. Nixon filed?",
@@ -1366,7 +1726,11 @@
         "united states v. nixon",
         "date_filed",
         "1974-07-24"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1974-07-24"
     },
     {
       "question": "What court heard West Virginia State Board Of Education V. Barnette?",
@@ -1381,7 +1745,11 @@
         "west virginia state board of education v. barnette",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was West Virginia State Board Of Education V. Barnette filed?",
@@ -1396,7 +1764,11 @@
         "west virginia state board of education v. barnette",
         "date_filed",
         "1943-06-14"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1943-06-14"
     },
     {
       "question": "Which court decided Youngstown Sheet & Tube Co. V. Sawyer?",
@@ -1411,7 +1783,11 @@
         "youngstown sheet & tube co. v. sawyer",
         "court",
         "Supreme Court of the United States"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "Supreme Court of the United States"
     },
     {
       "question": "When was Youngstown Sheet & Tube Co. V. Sawyer decided?",
@@ -1426,7 +1802,11 @@
         "youngstown sheet & tube co. v. sawyer",
         "date_filed",
         "1952-06-02"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "1952-06-02"
     },
     {
       "question": "What is the gdp of Bethel School District V. Fraser?",
@@ -1434,7 +1814,11 @@
       "match_strings": [],
       "is_negative": true,
       "tier": 1,
-      "status": "accepted"
+      "status": "accepted",
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "[ABSTAIN]"
     },
     {
       "question": "What is the population density of Brandenburg V. Ohio?",
@@ -1442,7 +1826,11 @@
       "match_strings": [],
       "is_negative": true,
       "tier": 1,
-      "status": "accepted"
+      "status": "accepted",
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "[ABSTAIN]"
     },
     {
       "question": "What is the area in square miles of Brown V. Board Of Education?",
@@ -1450,7 +1838,11 @@
       "match_strings": [],
       "is_negative": true,
       "tier": 1,
-      "status": "accepted"
+      "status": "accepted",
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "[ABSTAIN]"
     },
     {
       "question": "What is the chief justice of Bush V. Gore?",
@@ -1458,7 +1850,11 @@
       "match_strings": [],
       "is_negative": true,
       "tier": 1,
-      "status": "accepted"
+      "status": "accepted",
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "[ABSTAIN]"
     },
     {
       "question": "What is the majority opinion author of Carpenter V. United States?",
@@ -1466,7 +1862,11 @@
       "match_strings": [],
       "is_negative": true,
       "tier": 1,
-      "status": "accepted"
+      "status": "accepted",
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "[ABSTAIN]"
     }
   ]
 }

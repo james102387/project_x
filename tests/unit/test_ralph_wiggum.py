@@ -316,7 +316,9 @@ class TestOrchestrator:
     def test_overall_score_from_last_loop(self, simple_kg, passing_cases):
         orch = Orchestrator(kg=simple_kg, cases=passing_cases)
         result = orch.run(threshold=0.90, max_iterations_per_loop=2)
-        assert result.overall_score == 1.0
+        last_loop_name = list(result.loop_results.keys())[-1]
+        expected = result.loop_results[last_loop_name].final_score
+        assert result.overall_score == expected
 
 
 # ── _my_failures filter ─────────────────────────────────────────────

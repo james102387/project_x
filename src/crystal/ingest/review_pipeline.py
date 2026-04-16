@@ -23,7 +23,7 @@ import logging
 import time
 from pathlib import Path
 
-from crystal.compare import generate_questions_from_triplets
+from crystal.compare import generate_questions_from_triplets, generate_questions_llm
 from crystal.graph import build_crystal_graph
 from crystal.ingest import ingest_document, DocumentIngestionResult
 from crystal.ingest.confidence import ScoredTriplet
@@ -78,6 +78,9 @@ def run_review_pipeline(
             domain="legal",
         )
         result.accept_all_pending()
+        for st in result.auto_accepted:
+            if not st.source_document:
+                st.source_document = doc_path.stem
         all_auto.extend(result.auto_accepted)
         all_pending.extend(result.pending_review)
         doc_sources.append(doc_path.stem)
@@ -91,37 +94,90 @@ def run_review_pipeline(
         return {"error": "no_facts", "documents": len(document_paths)}
 
     triplets = [st.as_tuple() for st in all_auto]
-    questions = generate_questions_from_triplets(triplets, max_questions=max_questions)
-    print(f"\n  Generated {len(questions)} questions from {len(triplets)} facts")
+
+    triplet_to_st: dict[tuple[str, str, str], ScoredTriplet] = {}
+    for st in all_auto:
+        triplet_to_st[(st.subject.lower(), st.predicate.lower(), st.object.lower())] = st
+
+    def _origin_for_triplet(src_triplet: list) -> tuple[str, str]:
+        """Return (origin, source_document) for a source triplet."""
+        if src_triplet and len(src_triplet) >= 3:
+            key = (str(src_triplet[0]).lower(), str(src_triplet[1]).lower(),
+                   str(src_triplet[2]).lower())
+            st = triplet_to_st.get(key)
+            if st:
+                return st.origin, st.source_document
+        return "unknown", ""
 
     proposed_rows = []
-    for i, q_text in enumerate(questions):
-        print(f"  [{i+1}/{len(questions)}] {q_text[:70]}")
-        try:
-            state = make_initial_state(q_text, kg=kg)
-            final = graph.invoke(state)
-            answer = final.get("final_response", "")
-            prompt_type = final.get("prompt_type", "unknown")
-        except Exception as e:
-            answer = f"[Error: {e}]"
-            prompt_type = "error"
+    if call_llm_fn is not None:
+        print(f"\n  Using LLM question generation on {len(triplets)} facts...")
+        llm_questions = generate_questions_llm(
+            triplets, call_llm_fn, max_questions=max_questions,
+        )
+        print(f"  LLM generated {len(llm_questions)} questions")
+        for i, qd in enumerate(llm_questions):
+            q_text = qd["question"]
+            print(f"  [{i+1}/{len(llm_questions)}] {q_text[:70]}")
+            try:
+                state = make_initial_state(q_text, kg=kg)
+                final = graph.invoke(state)
+                answer = final.get("final_response", "")
+                prompt_type = final.get("prompt_type", "unknown")
+            except Exception as e:
+                answer = f"[Error: {e}]"
+                prompt_type = "error"
 
-        src_triplet = []
-        for s, p, o in triplets:
-            if s.lower() in q_text.lower():
-                src_triplet = [s, p, o]
-                break
+            src_triplet = qd.get("source_triplet", [])
+            q_origin, q_source_doc = _origin_for_triplet(src_triplet)
 
-        proposed_rows.append({
-            "question": q_text,
-            "crystal_answer": answer[:500],
-            "route": prompt_type,
-            "confidence": prompt_type,
-            "golden_answer": answer[:500],
-            "source_triplet": src_triplet,
-        })
+            proposed_rows.append({
+                "question": q_text,
+                "crystal_answer": answer[:500],
+                "route": prompt_type,
+                "confidence": prompt_type,
+                "golden_answer": qd.get("golden_answer", answer[:500]),
+                "source_triplet": src_triplet,
+                "origin": q_origin,
+                "source_document": q_source_doc,
+            })
+            time.sleep(1)
 
-        time.sleep(1)
+    if not proposed_rows:
+        questions = generate_questions_from_triplets(triplets, max_questions=max_questions)
+        print(f"\n  Template fallback: {len(questions)} questions from {len(triplets)} facts")
+        for i, q_text in enumerate(questions):
+            print(f"  [{i+1}/{len(questions)}] {q_text[:70]}")
+            try:
+                state = make_initial_state(q_text, kg=kg)
+                final = graph.invoke(state)
+                answer = final.get("final_response", "")
+                prompt_type = final.get("prompt_type", "unknown")
+            except Exception as e:
+                answer = f"[Error: {e}]"
+                prompt_type = "error"
+
+            src_triplet = []
+            for s, p, o in triplets:
+                if s.lower() in q_text.lower():
+                    src_triplet = [s, p, o]
+                    break
+
+            q_origin, q_source_doc = _origin_for_triplet(src_triplet)
+
+            proposed_rows.append({
+                "question": q_text,
+                "crystal_answer": answer[:500],
+                "route": prompt_type,
+                "confidence": prompt_type,
+                "golden_answer": answer[:500],
+                "source_triplet": src_triplet,
+                "origin": q_origin,
+                "source_document": q_source_doc,
+            })
+            time.sleep(1)
+
+    print(f"\n  Total questions generated: {len(proposed_rows)}")
 
     source_label = ", ".join(doc_sources[:3])
     if len(doc_sources) > 3:
@@ -136,7 +192,7 @@ def run_review_pipeline(
     return {
         "documents": len(document_paths),
         "facts_extracted": len(triplets),
-        "questions_generated": len(questions),
+        "questions_generated": len(proposed_rows),
         "batch_file": str(batch_path) if batch_path else None,
     }
 

@@ -60,6 +60,68 @@ def score_grounding_confidence(detection: dict) -> float:
     return max(0.0, min(1.0, confidence))
 
 
+def debug_confidence_trace(detection: dict) -> dict:
+    """Return a structured breakdown of how a detection was scored.
+
+    Every factor that contributes to the final confidence is surfaced so
+    the Ralph Wiggum loops, review UI, and debug logs can see which
+    component is pushing a score over/under the HIGH/LOW bands.
+
+    Returns a dict with per-component values plus the final score and the
+    tier label (``high`` / ``medium`` / ``low``).
+    """
+    entity_tier = detection.get("match_tier", "exact")
+    entity_raw_score = detection.get("match_score", 1.0)
+
+    if entity_tier in ("exact", "alias"):
+        entity_confidence = 1.0
+    elif entity_raw_score >= 95:
+        entity_confidence = 0.95
+    elif entity_raw_score >= 90:
+        entity_confidence = 0.8
+    else:
+        entity_confidence = 0.4
+
+    lookup_type = detection.get("lookup_type", "subject_scan")
+    if lookup_type == "targeted":
+        predicate_modifier = 1.0
+    elif lookup_type == "multi_hop":
+        predicate_modifier = 0.9
+    else:
+        predicate_modifier = 0.85
+
+    n_entity_spans = len(detection.get("entity_spans", []))
+    if n_entity_spans > 2:
+        ambiguity_penalty = 0.1
+    elif n_entity_spans > 1:
+        ambiguity_penalty = 0.05
+    else:
+        ambiguity_penalty = 0.0
+
+    final = max(
+        0.0,
+        min(1.0, entity_confidence * predicate_modifier - ambiguity_penalty),
+    )
+    if final >= CONFIDENCE_HIGH:
+        tier = "high"
+    elif final >= CONFIDENCE_LOW:
+        tier = "medium"
+    else:
+        tier = "low"
+
+    return {
+        "entity_tier": entity_tier,
+        "entity_raw_score": entity_raw_score,
+        "entity_confidence": entity_confidence,
+        "lookup_type": lookup_type,
+        "predicate_modifier": predicate_modifier,
+        "n_entity_spans": n_entity_spans,
+        "ambiguity_penalty": ambiguity_penalty,
+        "final_confidence": final,
+        "tier": tier,
+    }
+
+
 def plan_builder_node(state: dict) -> dict:
     """Build a compiler plan from tool detections.
 

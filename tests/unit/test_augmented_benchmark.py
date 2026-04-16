@@ -2,8 +2,8 @@
 
 import pytest
 
-from benchmarks.ground_truth import AUGMENTED_BENCHMARK_CASES
-from benchmarks.run_augmented_benchmark import score_results, summarize_scored
+from benchmarks.ground_truth.remulak import AUGMENTED_BENCHMARK_CASES
+from benchmarks.runners.augmented import score_results, summarize_scored
 
 
 # ── Ground truth sanity ───────────────────────────────────────────────────

@@ -13,6 +13,7 @@ Usage:
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import sqlite3
 from datetime import datetime, timezone
@@ -24,6 +25,16 @@ from crystal.tools.kg.fuzzy import fuzzy_match
 Triplet: TypeAlias = tuple[str, str, str]
 
 
+ORIGIN_API_METADATA = "api_metadata"
+ORIGIN_OPINION_DOC = "opinion_doc"
+ORIGIN_UNKNOWN = "unknown"
+
+VALID_ORIGINS = {
+    ORIGIN_API_METADATA,
+    ORIGIN_OPINION_DOC,
+    ORIGIN_UNKNOWN,
+}
+
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS triplets (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,6 +44,8 @@ CREATE TABLE IF NOT EXISTS triplets (
     source TEXT,
     source_sentence TEXT DEFAULT '',
     batch_id TEXT,
+    origin TEXT DEFAULT 'unknown',
+    source_document TEXT DEFAULT '',
     created_at TEXT DEFAULT CURRENT_TIMESTAMP,
     UNIQUE(subject, predicate, object)
 );
@@ -79,6 +92,8 @@ _MIGRATIONS = [
             status TEXT DEFAULT 'active'
         )
     """),
+    ("col_origin", "ALTER TABLE triplets ADD COLUMN origin TEXT DEFAULT 'unknown'"),
+    ("col_source_document", "ALTER TABLE triplets ADD COLUMN source_document TEXT DEFAULT ''"),
 ]
 
 
@@ -98,12 +113,35 @@ class SqliteKnowledgeGraph:
     ) -> None:
         self.db_path = str(db_path)
         self.fuzzy_threshold = fuzzy_threshold
-        self._conn = sqlite3.connect(self.db_path)
-        self._conn.row_factory = sqlite3.Row
-        self._conn.execute("PRAGMA journal_mode=WAL")
-        self._conn.execute("PRAGMA synchronous=NORMAL")
+        self._conn = self._open_connection(self.db_path)
         self._init_schema()
         self._run_migrations()
+
+    @staticmethod
+    def _open_connection(db_path: str) -> sqlite3.Connection:
+        conn = sqlite3.connect(db_path, check_same_thread=False)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA synchronous=NORMAL")
+        return conn
+
+    def __deepcopy__(self, memo):
+        """Return a new instance pointing at the same DB file.
+
+        sqlite3.Connection objects can't be pickled/deepcopied.
+        Gradio's gr.State calls deepcopy on the initial value, so we
+        re-open the connection instead.
+        """
+        return SqliteKnowledgeGraph(self.db_path, self.fuzzy_threshold)
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state["_conn"]
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._conn = self._open_connection(self.db_path)
 
     def _init_schema(self) -> None:
         self._conn.executescript(_SCHEMA)
@@ -114,19 +152,29 @@ class SqliteKnowledgeGraph:
         existing_cols = {
             row[1] for row in self._conn.execute("PRAGMA table_info(triplets)").fetchall()
         }
+        _COL_SKIP = {
+            "col_source_sentence": "source_sentence",
+            "col_batch_id": "batch_id",
+            "col_origin": "origin",
+            "col_source_document": "source_document",
+        }
         for name, sql in _MIGRATIONS:
-            if name == "col_source_sentence" and "source_sentence" in existing_cols:
-                continue
-            if name == "col_batch_id" and "batch_id" in existing_cols:
+            col = _COL_SKIP.get(name)
+            if col and col in existing_cols:
                 continue
             try:
                 self._conn.execute(sql)
             except sqlite3.OperationalError:
                 pass
-        try:
-            self._conn.execute("CREATE INDEX IF NOT EXISTS idx_batch ON triplets(batch_id)")
-        except sqlite3.OperationalError:
-            pass
+        for idx_sql in [
+            "CREATE INDEX IF NOT EXISTS idx_batch ON triplets(batch_id)",
+            "CREATE INDEX IF NOT EXISTS idx_origin ON triplets(origin)",
+            "CREATE INDEX IF NOT EXISTS idx_source_document ON triplets(source_document)",
+        ]:
+            try:
+                self._conn.execute(idx_sql)
+            except sqlite3.OperationalError:
+                pass
         self._conn.commit()
 
     def close(self) -> None:
@@ -141,11 +189,18 @@ class SqliteKnowledgeGraph:
         predicate_aliases: dict[str, str] | None = None,
         source: str = "",
         batch_id: str | None = None,
+        origin: str = ORIGIN_UNKNOWN,
+        source_document: str = "",
     ) -> int:
         """Insert triplets and aliases in a single transaction.
 
-        Triplets can be 3-tuples (subject, predicate, object) or
-        4-tuples (subject, predicate, object, source_sentence).
+        Triplets can be 3-tuples (subject, predicate, object),
+        4-tuples (subject, predicate, object, source_sentence), or
+        5-tuples (subject, predicate, object, source_sentence, per_row_origin).
+
+        Args:
+            origin: Default origin for all rows (overridden by per-row 5th element).
+            source_document: The specific document or payload that produced these facts.
 
         Returns count inserted.
         """
@@ -155,21 +210,26 @@ class SqliteKnowledgeGraph:
         inserted = 0
         with self._conn:
             for t in triplets:
-                if len(t) >= 4:
+                if len(t) >= 5:
+                    subj, pred, obj, src_sent, row_origin = (
+                        t[0], t[1], t[2], t[3], t[4],
+                    )
+                elif len(t) >= 4:
                     subj, pred, obj, src_sent = t[0], t[1], t[2], t[3]
+                    row_origin = origin
                 else:
                     subj, pred, obj = t[0], t[1], t[2]
                     src_sent = ""
-                try:
-                    self._conn.execute(
-                        "INSERT OR IGNORE INTO triplets "
-                        "(subject, predicate, object, source, source_sentence, batch_id) "
-                        "VALUES (?, ?, ?, ?, ?, ?)",
-                        (subj.lower(), pred.lower(), obj, source, src_sent, batch_id),
-                    )
-                    inserted += 1
-                except sqlite3.IntegrityError:
-                    pass
+                    row_origin = origin
+                cursor = self._conn.execute(
+                    "INSERT OR IGNORE INTO triplets "
+                    "(subject, predicate, object, source, source_sentence, "
+                    "batch_id, origin, source_document) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (subj.lower(), pred.lower(), obj, source, src_sent,
+                     batch_id, row_origin, source_document),
+                )
+                inserted += cursor.rowcount if cursor.rowcount > 0 else 0
 
             for alias, canonical in (entity_aliases or {}).items():
                 self._conn.execute(
@@ -183,11 +243,12 @@ class SqliteKnowledgeGraph:
                     (alias.lower(), canonical.lower()),
                 )
 
-            self._conn.execute(
-                "INSERT OR REPLACE INTO ingestion_batches "
-                "(batch_id, source, triplet_count, status) VALUES (?, ?, ?, 'active')",
-                (batch_id, source, inserted),
-            )
+            if inserted > 0:
+                self._conn.execute(
+                    "INSERT OR REPLACE INTO ingestion_batches "
+                    "(batch_id, source, triplet_count, status) VALUES (?, ?, ?, 'active')",
+                    (batch_id, source, inserted),
+                )
 
         return inserted
 
@@ -254,7 +315,8 @@ class SqliteKnowledgeGraph:
     def get_all_facts(self) -> list[dict]:
         """Return all triplets with full metadata for auditing."""
         rows = self._conn.execute(
-            "SELECT id, subject, predicate, object, source, source_sentence, batch_id "
+            "SELECT id, subject, predicate, object, source, source_sentence, "
+            "batch_id, origin, source_document "
             "FROM triplets"
         ).fetchall()
         return [dict(r) for r in rows]
@@ -372,32 +434,41 @@ class SqliteKnowledgeGraph:
         predicate: str | None = None,
         obj: str | None = None,
     ) -> list[dict]:
-        """Query the KG. Same interface as the in-memory KnowledgeGraph."""
+        """Query the KG. Same interface as the in-memory KnowledgeGraph.
+
+        Returns dicts with subject, predicate, object, source, origin,
+        and source_document.
+        """
+        _COLS = "subject, predicate, object, source, origin, source_document"
+
         if predicate:
             predicate = self._resolve_predicate(predicate)
 
         if subject and predicate:
             rows = self._conn.execute(
-                "SELECT subject, predicate, object FROM triplets "
+                f"SELECT {_COLS} FROM triplets "
                 "WHERE subject = ? AND predicate = ?",
                 (subject.lower(), predicate.lower()),
             ).fetchall()
         elif predicate and obj:
             rows = self._conn.execute(
-                "SELECT subject, predicate, object FROM triplets "
+                f"SELECT {_COLS} FROM triplets "
                 "WHERE predicate = ? AND lower(object) = ?",
                 (predicate.lower(), obj.lower()),
             ).fetchall()
         elif subject:
             rows = self._conn.execute(
-                "SELECT subject, predicate, object FROM triplets WHERE subject = ?",
+                f"SELECT {_COLS} FROM triplets WHERE subject = ?",
                 (subject.lower(),),
             ).fetchall()
         else:
             return []
 
         return [
-            {"subject": r["subject"], "predicate": r["predicate"], "object": r["object"]}
+            {"subject": r["subject"], "predicate": r["predicate"],
+             "object": r["object"], "source": r["source"] or "",
+             "origin": r["origin"] or ORIGIN_UNKNOWN,
+             "source_document": r["source_document"] or ""}
             for r in rows
         ]
 
@@ -447,3 +518,100 @@ class SqliteKnowledgeGraph:
             "SELECT subject, predicate, object FROM triplets"
         ).fetchall()
         return [(r[0], r[1], r[2]) for r in rows]
+
+    @property
+    def triplets_with_source(self) -> list[tuple[str, str, str, str]]:
+        """All triplets as (subject, predicate, object, source) tuples."""
+        rows = self._conn.execute(
+            "SELECT subject, predicate, object, source FROM triplets"
+        ).fetchall()
+        return [(r[0], r[1], r[2], r[3] or "") for r in rows]
+
+    @property
+    def triplets_with_provenance(
+        self,
+    ) -> list[tuple[str, str, str, str, str, str]]:
+        """All triplets as (subject, predicate, object, source, origin, source_document)."""
+        rows = self._conn.execute(
+            "SELECT subject, predicate, object, source, origin, source_document "
+            "FROM triplets"
+        ).fetchall()
+        return [
+            (r[0], r[1], r[2], r[3] or "", r[4] or ORIGIN_UNKNOWN, r[5] or "")
+            for r in rows
+        ]
+
+    def provenance_counts(self) -> dict[str, int]:
+        """Count triplets by origin type."""
+        rows = self._conn.execute(
+            "SELECT COALESCE(origin, 'unknown') AS o, COUNT(*) AS cnt "
+            "FROM triplets GROUP BY o ORDER BY cnt DESC"
+        ).fetchall()
+        return {r[0]: r[1] for r in rows}
+
+    def source_documents(self) -> list[str]:
+        """Distinct source_document values, excluding empty."""
+        rows = self._conn.execute(
+            "SELECT DISTINCT source_document FROM triplets "
+            "WHERE source_document != '' ORDER BY source_document"
+        ).fetchall()
+        return [r[0] for r in rows]
+
+    def lookup_by_origin(self, origin: str) -> list[dict]:
+        """Return all triplets with a given origin."""
+        rows = self._conn.execute(
+            "SELECT id, subject, predicate, object, source, source_sentence, "
+            "batch_id, origin, source_document "
+            "FROM triplets WHERE origin = ?",
+            (origin,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+    def lookup_by_document(self, source_document: str) -> list[dict]:
+        """Return all triplets from a specific source document."""
+        rows = self._conn.execute(
+            "SELECT id, subject, predicate, object, source, source_sentence, "
+            "batch_id, origin, source_document "
+            "FROM triplets WHERE source_document = ?",
+            (source_document,),
+        ).fetchall()
+        return [dict(r) for r in rows]
+
+    # ── Backfill provenance ───────────────────────────────────────────────
+
+    def backfill_provenance(self) -> dict[str, int]:
+        """Classify existing rows that have origin='unknown' based on heuristics.
+
+        Returns counts of rows updated per origin category.
+        """
+        counts: dict[str, int] = {}
+
+        with self._conn:
+            cur = self._conn.execute(
+                "UPDATE triplets SET origin = 'api_metadata' "
+                "WHERE origin IN ('unknown', '') AND ("
+                "  source LIKE '%cold-cases%' OR source LIKE '%courtlistener%' "
+                "  OR source LIKE '%scaffold%' OR source LIKE '%cron%'"
+                ")"
+            )
+            counts["api_metadata"] = cur.rowcount
+
+            cur = self._conn.execute(
+                "UPDATE triplets SET origin = 'opinion_doc' "
+                "WHERE origin IN ('unknown', '') AND ("
+                "  source = 'pasted_text' OR source LIKE '%.txt'"
+                "  OR source LIKE '%.csv' OR source LIKE '%.json'"
+                ") AND source NOT LIKE '%cold-cases%' "
+                "AND source NOT LIKE '%courtlistener%' "
+                "AND source NOT LIKE '%scaffold%' "
+                "AND source NOT LIKE '%cron%'"
+            )
+            counts["opinion_doc"] = cur.rowcount
+
+            cur = self._conn.execute(
+                "UPDATE triplets SET source_document = source "
+                "WHERE source_document IN ('', NULL) AND source != ''"
+            )
+            counts["source_document_backfilled"] = cur.rowcount
+
+        return counts

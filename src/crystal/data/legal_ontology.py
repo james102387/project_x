@@ -22,6 +22,7 @@ LEGAL_PREDICATES: list[str] = [
     "cited_by_count",
     "court",
     "date_filed",
+    "document_slug",
     "judges",
     "disposition",
     "nature_of_suit",

@@ -198,6 +198,27 @@ GOLDEN_KG_FACTS: list[tuple[str, str, str]] = [
 ]
 
 
+# Doctrinal golden triplets — holdings/doctrines/reasoning must pass validation
+# and generate questions via templates.
+GOLDEN_DOCTRINAL_FACTS: list[tuple[str, str, str]] = [
+    ("Miranda v. Arizona", "holding",
+     "The prosecution may not use statements stemming from custodial interrogation "
+     "unless procedural safeguards are demonstrated."),
+    ("Gideon v. Wainwright", "holding",
+     "The Sixth Amendment right to counsel is a fundamental right applicable to the "
+     "states through the Fourteenth Amendment."),
+    ("Brown v. Board of Education", "doctrine",
+     "Separate educational facilities are inherently unequal and violate the Equal "
+     "Protection Clause of the Fourteenth Amendment."),
+    ("Marbury v. Madison", "doctrine",
+     "Judicial review: the Supreme Court has the power to declare acts of Congress "
+     "unconstitutional."),
+    ("Roe v. Wade", "reasoning",
+     "The right to privacy under the Due Process Clause extends to a woman's decision "
+     "to have an abortion, but must be balanced against the state's interests."),
+]
+
+
 # Known-bad triplets — these must always FAIL validate_triplet().
 KNOWN_BAD_TRIPLETS: list[tuple[str, str, str]] = [
     ("it", "have", "effect"),

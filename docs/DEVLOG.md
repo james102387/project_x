@@ -7,97 +7,115 @@ Only the most recent ~5 entries live here. Older entries are in `DEVLOG_ARCHIVE.
 
 ## Active Focus
 
-Update this section each session with current priorities.
+Goal: ship a defensible demo showing Crystal+KG beats LLM+docs on
+hallucination + citation precision for opinion-text questions.
 
-- **Demo pipeline operational.** Full crystallization cycle: ingest → extract → purify → generate questions → human review → benchmark → RW improvement. CLI (`scripts/crystallize.py`) and UI buttons wired.
-- **Test count:** 1,199 tests passing.
-- **KG provenance complete.** All 2,197 scaffold facts backfilled with source_sentence. UI shows sentences in auto-accepted table. Review batch JSON includes source_sentence.
-- **Three-arm comparison ready.** `benchmarks/three_arm_comparison.py` + UI section. Compares Crystal+KG vs LLM+Docs vs Naked LLM on accepted golden answers with accuracy scoring.
-- **Golden-answer feedback loop wired.** Benchmark + RW buttons in Review tab. Questions → human golden answers → benchmark scoring → RW improvement loop.
-- **Next:** Run 5 real crystallization cycles on curated SCOTUS opinions. Build golden answer set. Run three-arm comparison for marketing demo.
+**Demo success criteria (measurable):**
+1. `opinion_golden` corpus populated with ≥20 hand-authored Q/A (currently **0 — blocker**).
+2. `three_arm_comparison --corpus opinion_golden` baseline captured: expect Crystal > LLM+docs on accuracy by ≥10pp and on hallucination rate by ≥15pp.
+3. One full Ralph Wiggum cycle (all loops incl. `ExtractionLoop`) runs to convergence on the golden set and the delta is logged.
+4. `--corpus opinion_holdout` confirms the mutations generalize (no overfitting).
+
+**Open blockers / known issues:**
+- `opinion_golden.py` is empty — user-authored, cannot be automated.
+- `opinion_holdout.py` is empty — needed for generalization check.
+- Scaffold is still mostly `api_metadata` (3,263 rows, 0 `opinion_doc` after the old NER rows were purged). Real opinion-doc ingestion needs to happen before the golden set is meaningful.
+- `ExtractionLoop` is opt-in (`run_extraction_loop=True`) — decide whether it should be default-on for the cycle above.
+
+**Recent programmatic cleanup (this session):**
+- Fixed silent `bulk_insert` counter inflation + phantom empty batch rows.
+- `ingest_document` now dedups across NER + LLM + validation-rejected paths.
+- Deleted 8 backward-compat shim modules under `benchmarks/`, repointed callers.
+- Added `debug_confidence_trace()` in `planner.py` for grounded-confidence debugging.
+- `QuestionGenLoop` no longer reports vacuous 1.0 when 0 questions are generated; it returns 0.0 with a `no_questions_generated` diagnosis so the orchestrator will mutate the prompt.
+- `three_arm_comparison --corpus` default switched to `opinion_golden`; `all` now prints per-corpus sections instead of a merged dilute report.
+- Merged the two question-gen template dicts (`compare._PRED_TEMPLATES` + `question_gen._PREDICATE_QUESTION_FORMS`) into a single source of truth with shared helpers.
+- Split `src/crystal/ui/app.py` (1,970 lines) into `ui/state.py`, `ui/formatting.py`, and per-tab modules under `ui/tabs/`. `app.py` is now a 93-line composition root; all tests still pass.
 
 ---
 
-## 2026-04-12 — Extraction Baselines + Review Pipeline
+## 2026-04-16 — Merge question-gen template codepaths
 
 ### What changed
-- **NER-only extraction baseline** — 59.1% accuracy (13/22) on 15 SCOTUS opinions, 2,575 KG facts. NER handles court, judges, attorneys for well-known cases. Fails on citation counts (metadata-only), opinion authors for obscure cases, and older opinion formats.
-- **NER+LLM extraction** — 63.6% accuracy (14/22), 3,241 facts (+26%). LLM adds 666 triplets. Fixed Pennsylvania Railroad court question. Remaining 8 failures are extraction quality issues (opinion author, court for obscure cases) and one routing bug (Coventry returned date_filed instead of court on kg_answerable route).
-- **Review pipeline** — `src/crystal/ingest/review_pipeline.py`: CLI tool ingests documents, generates questions from extracted facts, has Crystal propose answers, saves as review batch. `review.py`: new `save_proposed_as_batch()` + `_derive_match_strings()`. UI: editable "Golden Answer" column + "Save to Review" button in Ingest Documents tab.
-- **Question generator hardened** — `src/crystal/compare.py`: only generates questions for known predicate templates (court, date_filed, judges, etc.). `_is_plausible_case_name()` filters NER noise subjects (pronouns, common nouns, "this case", "justice X"). Prevents garbage questions like "What is the take of I?".
-- **Switched to Anthropic Haiku** for benchmarks — Gemini 2.5 Flash had severe rate limiting (5 retries/question, ~3 min each). Haiku completes 22 questions in ~100s.
-- **10 new review tests, 6 updated compare tests** — 769 unit tests passing.
+- **Single source of truth for predicate → question templates.** `ingest/question_gen.py` now owns `PREDICATE_QUESTION_FORMS` (the richer multi-variant dict). New helpers `canonical_template(pred)` and `object_length_limit(pred)` replace the scattered logic. `_PREDICATE_QUESTION_FORMS`/`_LONG_PREDICATES`/`_SKIP_PREDICATES` kept as private aliases for back-compat.
+- **`compare.py` simplified.** Deleted `_PRED_TEMPLATES` (13-predicate single-template dict) and the local `_JUNK_SUBJECTS`/`_JUNK_PREFIXES` shadows. Both `generate_questions_from_triplets` and the `generate_questions_llm` fallback now resolve templates via `canonical_template(pred)`. Junk-subject checks in `_is_plausible_case_name` delegate to `validation._JUNK_SUBJECTS` (strictly larger superset — catches `"the state"`, `"government"`, etc. that the compare.py shadow missed).
+- **`cites` predicate added to `PREDICATE_QUESTION_FORMS`** to match what `compare._PRED_TEMPLATES` had; previously tier1 in `question_gen.py` silently fell through to the generic `"What is the {predicate} of {subject}?"` template for `cites`.
+- **Tests updated.** `test_question_gen_loop.py::TestDoctrinalTemplates` now asserts via the public API (`canonical_template`, `PREDICATE_QUESTION_FORMS`) instead of the two-dict invariant. `QUESTION_GEN_PROMPT` stays in `compare.py` (the QuestionGenLoop mutates it by file path).
+- **1,272 tests pass, 8 skipped.**
 
 ### Decisions
-- Question generation rejects unknown predicates entirely instead of generating "What is the {pred} of {subj}?" — the NER dep-tree predicates ("deliver of", "yield to of") produce meaningless questions.
-- Review batch format extends existing batch_*.json schema with `crystal_proposed`, `crystal_route`, `crystal_confidence` fields so the user can see what Crystal thought vs their correction.
-- Path to demo crystallized: extraction quality iterations → scaffold density → demo batch → marketing. Structured metadata is table stakes; citation network and hallucination prevention are the selling points.
+- Kept the question-gen LLM prompt (`QUESTION_GEN_PROMPT`) and the LLM generator in `compare.py` — moving them would require rewiring `QuestionGenLoop._read_current_prompt` / `_write_prompt` to a new file path, and the loop is the only mutator, so the cost/benefit didn't justify it this pass.
+- Added `cites` to the shared dict rather than suppressing it in `generate_tier1`. Tier2 already handles multi-valued `cites` (subjects with ≥2 citations); tier1 will now also emit single-`cites` questions for subjects with exactly one citation. Acceptable — same behavior as the old compare.py path.
 
 ---
 
-## 2026-04-12 — Extraction Quality + Metrics Overhaul
+## 2026-04-15 — Provenance Tracking + Adversarial Golden Benchmark
 
 ### What changed
-- **Simplified benchmark metrics** — `benchmarks/scoring/rubric.py`: Removed `specificity_score()` and `grounding_score()` from the active rubric. `RubricResult` now has `accuracy` + `abstention` (was accuracy + specificity + no_hallucination). All runners (comparison, baseline, augmented) updated. Report prints accuracy, hallucination rate, and token cost — the three metrics customers care about.
-- **Extraction quality benchmark** — `benchmarks/extraction_quality.py`: Runs `ingest_document()` on 15 cached SCOTUS opinions (NER or NER+LLM), builds an ephemeral `SqliteKnowledgeGraph` from only extracted facts, then runs benchmark questions through the Crystal pipeline against this document-only KG. Directly measures "can Crystal learn from documents and answer questions?"
-- **ExtractionLoop** — `benchmarks/ralph_wiggum/extraction_loop.py`: New Ralph Wiggum loop targeting ingestion quality. Evaluates by comparing extracted triplets against CourtListener ground truth. Four diagnosis categories: subject_mismatch, predicate_mismatch, missing_fact, hallucinated_fact. Mutation targets: `LEGAL_EXTRACTION_PROMPT` hints, `LEGAL_PREDICATE_ALIASES` additions. Wired into Orchestrator.
-- **Crystal-proposed answers in UI** — `src/crystal/ui/app.py`: New "Crystal's Proposed Answers" section in Ingest Documents tab. After ingestion, generates questions from extracted facts, runs each through Crystal with the updated KG, shows results in a table (Question, Crystal Answer, Route, Confidence, Expected). Verifies the system is actually learning post-ingestion.
-- **25 new tests** — 11 extraction quality, 14 extraction loop.
+- **Schema migration** — Added `origin` and `source_document` columns to `triplets` table with indexes, migrations for existing DBs, and backfill logic in `backfill_provenance()`.
+- **Pipeline wiring** — `ScoredTriplet` now has `source_document` field and `origin` property (maps extraction_source → storage-level origin). `ingest_document()` passes per-row origins via 5-tuples. `review_pipeline.py` propagates origin/source_document into proposed rows. `review.py` persists them in batch JSON with filter support in `collect_accepted_cases()`.
+- **UI provenance** — KG Facts table shows Origin and Source Document columns with filter dropdowns. Review overview table shows origin and source doc per question. Entity search shows origin tags. KG stats banner breaks down by origin type. KG subgraph viewer in Review tab shows all facts for the source entity with provenance.
+- **KG audit** — Backfilled 3,277 triplets: 2,940 api_metadata, 337 ner_extraction. Deleted 225 garbage NER subjects (pronouns, fragments, common nouns). 3,052 clean triplets remain.
+- **Adversarial golden benchmark** — `benchmarks/ground_truth/opinion_golden.py`: 35 hand-authored Q&A targeting multi-hop citation chains, negative-existence, citation verification, holding vs. dicta, cross-document accuracy. Demo cluster: Gideon, Loving, Marbury, Miranda, Brown, Roe, Mapp, Powell, Betts.
+- **Benchmark infrastructure** — `three_arm_comparison.py` accepts `--corpus` flag. `package_results.py` runs all corpora and produces unified demo report. `opinion_holdout.py` placeholder for validation batch.
+- **ExtractionLoop integration** — Wired into orchestrator as opt-in loop with separate init path (different __init__ signature from other loops).
+- **138 new/updated tests** — Provenance schema, bulk_insert round-trip, backfill, origin property, review batch fields, filter helpers.
 
 ### Decisions
-- Dropped specificity/no_hallucination rather than fixing them — they measured KG triple regurgitation, not answer quality. The asymmetry (vacuously 1.0 when `kg_results` empty) made them misleading for naked LLM and LLM+doc arms.
-- Extraction benchmark uses `SqliteKnowledgeGraph(":memory:")` so each run starts fresh with no scaffold contamination.
-- ExtractionLoop doesn't inherit from BaseLoop in the usual way (it has a different iteration model — extract + compare vs pipeline eval) but follows the same interface contract.
+- Backfill precision over recall: ambiguous rows stay `origin='unknown'` for manual triage.
+- ExtractionLoop kept as opt-in (not in default LOOP_CLASSES) because it has a different init contract.
+- Garbage NER subjects deleted outright rather than quarantined — clear false positives (pronouns, fragments).
 
 ---
 
-## 2026-04-11 — Document Ingestion MVP (Phase 2a)
+## 2026-04-15 — LLM-Based Question Generation + QuestionGenLoop
 
 ### What changed
-- **Ingestion confidence scorer** — `src/crystal/ingest/confidence.py`: `score_ingestion_confidence()` scores 0.0–1.0 based on extraction source (NER=0.85, LLM high=0.80, medium=0.55, low=0.30), entity known bonus (+0.10), predicate alignment bonus (+0.10). `ScoredTriplet` dataclass with conversion helpers. `INGEST_AUTO_ACCEPT = 0.70`.
-- **Legal-tuned extraction prompt** — `src/crystal/ingest/llm_extract.py`: `LEGAL_EXTRACTION_PROMPT` lists preferred predicates (court, date_filed, judges, opinion_author, cites, etc.), instructs "Party v. Party" format, extraction of citation relationships. `normalize_predicate()` fuzzy-maps extracted predicates to canonical ontology forms. `extract_triplets_llm()` accepts `domain="legal"` parameter.
-- **Document ingestion orchestrator** — `src/crystal/ingest/__init__.py`: `ingest_document()` runs NER + optional LLM extraction, scores all triplets, auto-accepts above threshold, deduplicates against existing KG, inserts into SQLite via `bulk_insert()`. `DocumentIngestionResult` with `accept_pending()`, `reject_pending()`, `accept_all_pending()` methods.
-- **UI Ingest Documents tab** — `src/crystal/ui/app.py`: new tab between Ask and KG with multi-file upload, paste text, configurable auto-accept threshold slider, extraction results panel (stats, auto-accepted table, pending review table), bulk accept/reject buttons.
-- **Before/after comparison** — `src/crystal/compare.py`: `before_after_comparison()` runs questions through Crystal + KG, LLM + docs, and naked LLM. `generate_questions_from_triplets()` auto-generates questions from extracted facts. Wired into UI as "Test Your Ingestion" section.
-- **Real document validation** — `tests/integration/test_ingest_validation.py`: 8 tests validate extraction on 5 real SCOTUS opinions. 543 triplets extracted, all auto-accepted (NER-only path). Validation report with per-case stats and predicate coverage.
-- **21 confidence tests, 15 extraction tests, 14 orchestrator tests, 11 comparison tests** — comprehensive unit coverage for all new components.
+- **Doctrinal templates** — Added `holding`, `doctrine`, `reasoning` to `_PRED_TEMPLATES` (compare.py) and `_PREDICATE_QUESTION_FORMS` (question_gen.py). Raised object length cap from 200→2000 for these predicates.
+- **`generate_questions_llm()`** — LLM-based question generator in `compare.py` with `QUESTION_GEN_PROMPT` constant. Groups triplets by subject, sends to LLM, parses JSON. Falls back to templates on failure.
+- **Pipeline wiring** — `review_pipeline.py` uses LLM generation when available, template fallback otherwise. `question_gen.py` `generate_all()` accepts optional `call_llm_fn`.
+- **QuestionGenLoop** — New Ralph Wiggum loop targeting `QUESTION_GEN_PROMPT`. Self-consistency fitness metric: can Crystal answer the questions it generates?
+- **31 new tests** — Covers templates, golden doctrinal facts, LLM parse/generate/fallback, loop proposal/apply/revert, orchestrator registration.
 
 ### Decisions
-- NER base confidence (0.85) means NER extractions with aligned predicates (0.95) or known entities (0.95) always auto-accept. LLM "medium" (0.55) stays below threshold unless both bonuses apply.
-- Path vs text detection in `ingest_document()` uses length + newline heuristic (not `Path.exists()` on arbitrary strings) to avoid OS errors on long text inputs.
-- Before/after comparison uses Crystal's full pipeline (graph.invoke), not a simplified path — ensures the demo shows real production behavior.
-- LLM extraction is opt-in via `call_llm_fn` parameter; NER-only mode is the fast default for development and testing.
+- QuestionGenLoop returns score=1.0 when 0 questions generated (vacuously true) to not break orchestrator overall score for non-legal KGs.
+- `QUESTION_GEN_PROMPT` stored as module-level constant (not inline) so the loop can read, rewrite, and revert it.
 
 ---
 
-## 2026-04-12 — Demo Pipeline Build
+## 2026-04-16 — UI Split (per-tab modules)
 
 ### What changed
-- **Provenance visibility** — Added "Sentence" column to auto-accepted table in UI. Review batch JSON exports now include `source_sentence`. Backfilled 2,197 scaffold facts (118 matched against opinion text, 2,079 got `[COLD Cases metadata]` provenance).
-- **Golden-answer feedback loop** — "Run Benchmark on Accepted" and "Improve with Ralph Wiggum" buttons in Review tab. Runs Crystal pipeline on accepted golden answers, shows accuracy scores and per-question results.
-- **Crystallization CLI** — `scripts/crystallize.py` with three subcommands: `ingest` (documents → extract → questions → review batch), `benchmark` (score accepted golden answers, optional `--rw`), `purify` (run KG audit).
-- **Three-arm comparison** — `benchmarks/three_arm_comparison.py`: runs Crystal+KG, LLM+Docs, Naked LLM on accepted golden answers. Produces markdown report with accuracy table and per-question results. Also wired into UI as "Three-Arm Comparison on Golden Answers" section in Ingest tab.
-
----
-
-## 2026-04-12 — KG Quality Gates, Rollback, and Audit
-
-### What changed
-- **Triplet validation gates** — `src/crystal/ingest/validation.py`: Three fast, deterministic gates run before KG insertion. Subject gate rejects pronouns/common nouns/junk prefixes. Predicate gate rejects non-canonical predicates. Object type gate validates format per predicate (date_filed must be date-like, cited_by_count must be numeric, etc.). Hard vs soft severity classification.
-- **Fixed `normalize_predicate()` substring match** — `src/crystal/ingest/llm_extract.py`: Removed dangerous `canon in low or low in canon` fallback that could silently reclassify predicates. Now exact match + alias lookup only. Same fix applied in `confidence.py` scorer.
-- **Source sentence persistence** — `Triplet` dataclass now has `source_sentence` field. NER extraction stamps `sent.text` on each triplet. `SqliteKnowledgeGraph.bulk_insert()` accepts 4-tuples `(s, p, o, source_sentence)`. New `source_sentence` column in `triplets` table with migration for existing DBs.
-- **Batch provenance + rollback** — `ingestion_batches` table tracks every `bulk_insert()` call with `batch_id`, source, count, status. `delete_batch(batch_id)` rolls back all triplets from a batch. `list_batches()`, `batch_stats()`, `delete_by_ids()` for visibility and cleanup.
-- **KG audit tool** — `src/crystal/tools/kg/audit.py`: Fast, deterministic health check (zero LLM cost). Runs validation gates on all KG facts. CLI: `python -m crystal.tools.kg.audit --db data/legal.sqlite [--fix]`.
-- **KG proofreader** — `src/crystal/tools/kg/proofreader.py`: Two-pass deep clean. Pass 1: fast gates (free). Pass 2: LLM proofreading (semantic verification against source sentences). Tiered trust: hard failures auto-delete, soft+LLM → auto-delete, LLM-only → human review queue. CLI: `python -m crystal.tools.kg.proofread --db data/legal.sqlite [--fix] [--fast]`.
-- **LLM proofreading** — `proofread_triplets()` in validation.py. Groups by source sentence, sends verification prompt per group. Falls back to plausibility check for legacy data without source sentences.
-- **Wired validation into ingestion pipeline** — `ingest_document()` now runs `validate_triplet()` before confidence scoring. Rejected triplets never reach the KG.
-- **KG cleaned** — Proofreader fast-mode deleted 764 garbage facts (pronoun subjects, verb predicates, bad date_filed/cites objects). Backfilled 306 empty `source` fields. Health score: 0.75 → 0.93.
-- **59 new tests** — validation gates, LLM proofreading, batch provenance, rollback, audit, proofreader, ingestion integration. 1,122 tests total.
+- `src/crystal/ui/app.py` went from 1,970 lines to 93. Split into a composition-root layout:
+  - `ui/state.py` — compiled graph, `KG_MODES`, default KG.
+  - `ui/formatting.py` — pure formatters (stats, facts DF, banners, route labels). No Gradio imports.
+  - `ui/tabs/ask.py` (142) — `ask_question` + `build_ask_tab`.
+  - `ui/tabs/ingest.py` (619) — ingestion + proposed-answers + comparison actions + `build_ingest_tab`.
+  - `ui/tabs/kg.py` (405) — explorer + KG switch/import actions + `build_kg_tab` (owns cross-tab wiring that used to touch both Ingest and KG widgets).
+  - `ui/tabs/review.py` (852) — batch review + benchmark/RW actions + `build_review_tab`.
+- `ui/app.py::build_ui()` is now a thin composition root: creates shared `kg_state` + `kg_banner`, then delegates to each `build_<tab>` factory, passing `IngestTab` into `build_kg_tab` so cross-tab outputs stay explicit.
+- Each `build_<tab>` returns a dataclass of its components so future cross-tab wiring stays typed rather than free-form.
+- `crystal.ui.app` still re-exports `_kg_info`, `_format_kg_stats`, `_format_kg_facts`, `_default_kg_info`, `import_structured_data`, `KG_MODES`, `build_ui`, `main` for back-compat with `tests/unit/ui/test_ui_helpers.py`.
+- Smoke-tested: `build_ui()` constructs cleanly; 1,272 tests pass, 8 skipped (unchanged from baseline).
 
 ### Decisions
-- Tiered trust policy for KG proofreader: fast gates are deterministic and trusted for auto-delete. LLM proofreading is probabilistic — rejections go to human review queue, never auto-delete on LLM judgment alone. Exception: soft gate failure + LLM rejection = auto-delete (two independent signals agree).
-- `normalize_predicate()` substring match removed entirely rather than tightened. Better to reject an unmapped predicate and let the predicate gate handle it than to silently misclassify.
-- `source_sentence` column added via migration for backward compatibility with existing DBs. Existing facts get empty string, new facts get the actual sentence.
+- `switch_kg_mode` and `import_structured_data` live in `tabs/kg.py` (not a separate `actions/` module) because they are wired from the KG tab; ownership follows the event source rather than the touched components.
+- Kept dataclasses per tab (`AskTab`, `IngestTab`, `KgTab`, `ReviewTab`) instead of plain dicts so component references are discoverable and renames surface at type-check time.
+
+---
+
+## 2026-04-16 — Project Review + Programmatic Cleanup
+
+### What changed
+- **`bulk_insert` silent counter bug fixed.** `INSERT OR IGNORE` never raises `IntegrityError`, so the old `try/except + inserted += 1` counted attempts, not actual rows. Switched to `cursor.rowcount` and skipped writing the `ingestion_batches` row when 0 rows landed (removes phantom-batch rows). Cleaned 4 orphaned batch rows from `data/legal.sqlite`.
+- **`ingest_document` dedup leak fixed.** The NER and LLM extraction paths could hand the same `(s,p,o)` tuple to validation twice; one copy went to `auto_accepted`/`pending_review`, the duplicate went to `rejected`. `test_no_duplicate_triplets_in_result` now passes for terry-v-ohio. Dedup now happens pre-validation using a single `extraction_seen` set.
+- **Deleted 8 `benchmarks/*` shim modules** (`run_benchmark.py`, `run_augmented_benchmark.py`, `run_reasoning_benchmark.py`, `ground_truth.py`, `legal_ground_truth.py`, `fitness.py`, `rubric.py`, `scoring.py`). The last four were already dead (package `benchmarks/ground_truth/` and `benchmarks/scoring/` take resolution priority). Updated tests, runner docstrings, and README.
+- **`debug_confidence_trace()` helper** in `nodes/planner.py` — returns a per-factor breakdown of the grounding-confidence score (entity tier/score, predicate modifier, ambiguity penalty, final, tier). Useful for Ralph Wiggum diagnosis and the review UI.
+- **`QuestionGenLoop` no longer reports vacuous success.** When 0 questions are generated it returns `score=0.0` with a `no_questions_generated` failure diagnosis so the orchestrator will actually trigger prompt mutation.
+- **`three_arm_comparison`**: default corpus is now `opinion_golden` (the headline demo), and `--corpus all` prints per-corpus sections instead of a merged dilute report.
+
+### Decisions
+- Not re-ingesting opinion text to resurrect `origin='ner_extraction'` rows. Those were purified on purpose; the right move is real opinion-doc ingestion, not backfilling.
 
 ---
 

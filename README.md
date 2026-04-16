@@ -35,14 +35,18 @@ and accumulates information at each step.
 
 Three benchmark runners in `benchmarks/`, all writing JSON results to `benchmarks/results/`:
 
-- **`run_benchmark.py`** — Baseline (naked LLM) vs. treatment (Crystal + KG) on answerable + adversarial cases. Scores with D1 rubric (accuracy, specificity, no-hallucination).
-- **`run_reasoning_benchmark.py`** — Token-level comparison using a thinking model. Measures reasoning token (K) reduction from grounding.
-- **`run_augmented_benchmark.py`** — Output quality on augmented paths (`kg_augmented`, `math_augmented`). Runs both naked LLM and full Crystal pipeline with real LLM calls, scores with rubric side-by-side.
+- **`benchmarks.runners.baseline`** — Baseline (naked LLM) vs. treatment (Crystal + KG) on answerable + adversarial cases. Scores with accuracy + abstention.
+- **`benchmarks.runners.reasoning`** — Token-level comparison using a thinking model. Measures reasoning token (K) reduction from grounding.
+- **`benchmarks.runners.augmented`** — Output quality on augmented paths (`kg_augmented`, `math_augmented`). Runs both naked LLM and full Crystal pipeline with real LLM calls, scores side-by-side.
+- **`benchmarks.three_arm_comparison`** — Crystal+KG vs LLM+docs vs Naked LLM on the demo corpora. Use `--corpus opinion_golden` for the headline number.
+- **`benchmarks.package_results`** — Runs all three corpora and produces a unified demo report.
 
 ```bash
-python -m benchmarks.run_benchmark
-python -m benchmarks.run_reasoning_benchmark
-python -m benchmarks.run_augmented_benchmark
+python -m benchmarks.runners.baseline
+python -m benchmarks.runners.reasoning
+python -m benchmarks.runners.augmented
+python -m benchmarks.three_arm_comparison --corpus opinion_golden
+python -m benchmarks.package_results --output benchmarks/results/demo_report.md
 ```
 
 ## Setup

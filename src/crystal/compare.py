@@ -6,16 +6,25 @@ Runs the same questions through:
   3. Naked LLM without any document context
 
 Returns a structured comparison table.
+
+Also provides LLM-based question generation from extracted triplets.
 """
 
 from __future__ import annotations
 
+import json
 import logging
+from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Callable
 
 from crystal.graph import build_crystal_graph
-from crystal.ingest.validation import validate_object, validate_subject
+from crystal.ingest.question_gen import canonical_template
+from crystal.ingest.validation import (
+    _JUNK_SUBJECTS as VALIDATION_JUNK_SUBJECTS,
+    validate_object,
+    validate_subject,
+)
 from crystal.state import make_initial_state
 
 logger = logging.getLogger(__name__)
@@ -109,37 +118,12 @@ def before_after_comparison(
     return result
 
 
-_PRED_TEMPLATES = {
-    "court": "What court decided {subject}?",
-    "date_filed": "When was {subject} decided?",
-    "judges": "Who were the judges in {subject}?",
-    "opinion_author": "Who wrote the opinion in {subject}?",
-    "cites": "What cases does {subject} cite?",
-    "attorneys": "Who were the attorneys in {subject}?",
-    "disposition": "What was the outcome of {subject}?",
-    "cited_by_count": "What is the citation count for {subject}?",
-    "precedential_status": "What is the precedential status of {subject}?",
-    "per_curiam": "Was {subject} a per curiam decision?",
-}
-
-
-_JUNK_SUBJECTS = {
-    "i", "he", "she", "it", "we", "they", "this", "that", "court",
-    "courts", "state", "states", "law", "case", "cases", "the court",
-    "this case", "the state", "defendant", "plaintiff", "petitioner",
-    "respondent", "appellant", "appellee", "parties", "conclusions",
-    "provisions", "progress", "burden", "equity", "presentations",
-    "opinion", "dissent", "concurrence", "judgment", "order",
-}
-
-_JUNK_PREFIXES = ("this ", "the ", "said ", "such ", "that ")
-
-
 def _is_plausible_case_name(subject: str) -> bool:
     """Check if a subject looks like a legal case name, not NER noise.
 
     Delegates to the shared validation module for the core checks,
     then applies additional question-generation-specific heuristics.
+    Uses the canonical junk-subject set from `crystal.ingest.validation`.
     """
     s = subject.strip().lower()
     if len(s) < 3 or len(s) > 120:
@@ -153,7 +137,7 @@ def _is_plausible_case_name(subject: str) -> bool:
         parts = s.replace(" v. ", " v ").split(" v ", 1)
         left = parts[0].strip()
         right = parts[1].strip() if len(parts) > 1 else ""
-        if left in _JUNK_SUBJECTS or right in _JUNK_SUBJECTS:
+        if left in VALIDATION_JUNK_SUBJECTS or right in VALIDATION_JUNK_SUBJECTS:
             return False
         if len(left) < 2 or len(right) < 2:
             return False
@@ -170,10 +154,11 @@ def _is_plausible_case_name(subject: str) -> bool:
 
 
 def generate_questions_from_triplets(triplets: list[tuple[str, str, str]], max_questions: int = 5) -> list[str]:
-    """Generate questions from extracted triplets using known predicate templates.
+    """Generate questions from extracted triplets using canonical predicate templates.
 
-    Only generates questions for predicates we have templates for and subjects
-    that look like real case names or legal entities.
+    Only generates questions for predicates with a canonical template
+    (see `crystal.ingest.question_gen.PREDICATE_QUESTION_FORMS`) and for
+    subjects that look like real case names or legal entities.
     Allows multiple questions per subject (one per predicate).
     """
     questions = []
@@ -183,7 +168,7 @@ def generate_questions_from_triplets(triplets: list[tuple[str, str, str]], max_q
         if len(questions) >= max_questions:
             break
 
-        template = _PRED_TEMPLATES.get(pred.lower())
+        template = canonical_template(pred)
         if not template:
             continue
 
@@ -201,3 +186,136 @@ def generate_questions_from_triplets(triplets: list[tuple[str, str, str]], max_q
         questions.append(template.format(subject=subj.title()))
 
     return questions
+
+
+# ── LLM-based question generation ─────────────────────────────────────
+
+# Stored as a module-level constant so the QuestionGenLoop can mutate it.
+QUESTION_GEN_PROMPT = """
+\
+You are generating test questions from knowledge graph facts about legal cases.
+
+Given the facts below about a legal entity, generate {max_questions} natural-language \
+questions that can be answered directly from these facts. For each question, provide \
+the golden answer (the correct answer derived from the facts).
+
+Guidelines:
+- Vary question style: "What did the court hold?", "Who wrote the opinion?", \
+"When was the case decided?" — not just "What is the X of Y?"
+- For holdings and doctrines, ask about legal principles, not the predicate name. \
+Example: "What constitutional right did Gideon v. Wainwright establish?" \
+instead of "What is the holding of Gideon v. Wainwright?"
+- For reasoning, ask about rationale: "Why did the court rule that way?" or \
+"What was the basis for the decision?"
+- Each question must be answerable from the provided facts alone.
+- Golden answers should be concise and factual, drawn directly from the object values.
+- If there are fewer meaningful facts than {max_questions}, generate fewer questions.
+
+Entity: {subject}
+
+Facts:
+{facts}
+
+Respond with a JSON array of objects, each with "question" and "golden_answer" keys. \
+Example: [{{"question": "What did the court hold in X v. Y?", "golden_answer": "The court held that..."}}]
+
+JSON:
+"""
+
+
+def generate_questions_llm(
+    triplets: list[tuple[str, str, str]],
+    call_llm_fn: Callable[[str], tuple[str, dict | None]],
+    *,
+    max_questions: int = 10,
+    max_per_subject: int = 3,
+) -> list[dict]:
+    """Generate questions from triplets using the LLM for natural phrasing.
+
+    Groups triplets by subject, sends each group to the LLM with
+    QUESTION_GEN_PROMPT, and parses out questions + golden answers.
+
+    Falls back to template generation for any subject where the LLM
+    call fails or returns unparseable output.
+
+    Returns list of dicts with: question, golden_answer, source_triplet.
+    """
+    grouped: dict[str, list[tuple[str, str, str]]] = defaultdict(list)
+    for subj, pred, obj in triplets:
+        if not _is_plausible_case_name(subj):
+            continue
+        if not validate_object(pred, obj).valid:
+            continue
+        grouped[subj].append((subj, pred, obj))
+
+    results: list[dict] = []
+
+    for subj, facts in grouped.items():
+        if len(results) >= max_questions:
+            break
+
+        facts_text = "\n".join(
+            f"- {pred}: {obj}" for _, pred, obj in facts
+        )
+        prompt = QUESTION_GEN_PROMPT.format(
+            subject=subj.title(),
+            facts=facts_text,
+            max_questions=min(max_per_subject, max_questions - len(results)),
+        )
+
+        try:
+            response_text, _ = call_llm_fn(prompt)
+            parsed = _parse_question_response(response_text)
+        except Exception:
+            logger.warning("LLM question gen failed for %s, using templates", subj)
+            parsed = []
+
+        if not parsed:
+            for _, pred, obj in facts[:max_per_subject]:
+                template = canonical_template(pred)
+                if template:
+                    parsed.append({
+                        "question": template.format(subject=subj.title()),
+                        "golden_answer": obj,
+                    })
+
+        for item in parsed[:max_per_subject]:
+            if len(results) >= max_questions:
+                break
+            src = facts[0] if facts else ("", "", "")
+            for _, pred, obj in facts:
+                if obj.lower() in item.get("golden_answer", "").lower():
+                    src = (subj, pred, obj)
+                    break
+            results.append({
+                "question": item["question"],
+                "golden_answer": item["golden_answer"],
+                "source_triplet": list(src),
+            })
+
+    return results
+
+
+def _parse_question_response(text: str) -> list[dict]:
+    """Parse LLM response into list of {question, golden_answer} dicts."""
+    text = text.strip()
+    start = text.find("[")
+    end = text.rfind("]")
+    if start == -1 or end == -1:
+        return []
+    try:
+        items = json.loads(text[start:end + 1])
+    except json.JSONDecodeError:
+        return []
+    if not isinstance(items, list):
+        return []
+    valid = []
+    for item in items:
+        if (isinstance(item, dict)
+                and item.get("question")
+                and item.get("golden_answer")):
+            valid.append({
+                "question": str(item["question"]).strip(),
+                "golden_answer": str(item["golden_answer"]).strip(),
+            })
+    return valid

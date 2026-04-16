@@ -7,9 +7,9 @@ reasoning steps. Even if grounding increases N, the reduction in K can
 dominate because K multiplies the quadratic term.
 
 Usage:
-    python -m benchmarks.run_reasoning_benchmark
-    python -m benchmarks.run_reasoning_benchmark --model gemini-2.5-flash
-    python -m benchmarks.run_reasoning_benchmark --cases augmented_only
+    python -m benchmarks.runners.reasoning
+    python -m benchmarks.runners.reasoning --model gemini-2.5-flash
+    python -m benchmarks.runners.reasoning --cases augmented_only
 
 Requires GOOGLE_API_KEY in environment.
 Uses a thinking-capable model (default: gemini-2.5-flash).

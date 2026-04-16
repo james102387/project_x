@@ -147,7 +147,7 @@ _TIER1_TEMPLATES: list[str] = [
     "Tell me the {predicate} of {subject}.",
 ]
 
-_PREDICATE_QUESTION_FORMS: dict[str, list[str]] = {
+PREDICATE_QUESTION_FORMS: dict[str, list[str]] = {
     "court": [
         "What court decided {subject}?",
         "What court heard {subject}?",
@@ -192,6 +192,25 @@ _PREDICATE_QUESTION_FORMS: dict[str, list[str]] = {
         "What is the precedential status of {subject}?",
         "Is {subject} a published opinion?",
     ],
+    "cites": [
+        "What cases does {subject} cite?",
+        "Which cases are cited by {subject}?",
+    ],
+    "holding": [
+        "What did the court hold in {subject}?",
+        "What was the holding in {subject}?",
+        "What did {subject} decide?",
+    ],
+    "doctrine": [
+        "What legal principle was established in {subject}?",
+        "What doctrine did {subject} establish?",
+        "What legal rule came from {subject}?",
+    ],
+    "reasoning": [
+        "What was the court's reasoning in {subject}?",
+        "How did the court reason in {subject}?",
+        "What rationale did the court give in {subject}?",
+    ],
     "capital": [
         "What is the capital of {subject}?",
     ],
@@ -204,9 +223,29 @@ _PREDICATE_QUESTION_FORMS: dict[str, list[str]] = {
     ],
 }
 
-# Predicates where we should NOT generate naive questions
-# (values too long or multi-part to be useful match strings)
-_SKIP_PREDICATES: set[str] = {"opinions", "headmatter", "headnotes", "syllabus", "summary"}
+LONG_PREDICATES: set[str] = {"holding", "doctrine", "reasoning"}
+
+SKIP_PREDICATES: set[str] = {"opinions", "headmatter", "headnotes", "syllabus", "summary"}
+
+
+def canonical_template(predicate: str) -> str | None:
+    """Return the canonical (first) question template for a predicate, or None.
+
+    This is the single-template resolver used by triplet-level generators
+    (compare.py) that don't want randomized phrasing variety.
+    """
+    forms = PREDICATE_QUESTION_FORMS.get(predicate.lower())
+    return forms[0] if forms else None
+
+
+def object_length_limit(predicate: str) -> int:
+    """Max object length for question generation (doctrinal preds get more room)."""
+    return 2000 if predicate.lower() in LONG_PREDICATES else 200
+
+
+_PREDICATE_QUESTION_FORMS = PREDICATE_QUESTION_FORMS
+_LONG_PREDICATES = LONG_PREDICATES
+_SKIP_PREDICATES = SKIP_PREDICATES
 
 
 def generate_tier1(
@@ -231,12 +270,14 @@ def generate_tier1(
             pred = fact["predicate"]
             obj = fact["object"]
 
-            if pred.lower() in _SKIP_PREDICATES:
+            if pred.lower() in SKIP_PREDICATES:
                 continue
-            if not obj or len(obj) > 200:
+            if not obj:
+                continue
+            if len(obj) > object_length_limit(pred):
                 continue
 
-            templates = _PREDICATE_QUESTION_FORMS.get(pred.lower())
+            templates = PREDICATE_QUESTION_FORMS.get(pred.lower())
             if templates and template_variety:
                 template = random.choice(templates)
                 question = template.format(subject=subject.title())
@@ -379,10 +420,77 @@ def generate_all(
     max_tier1_per_subject: int = 3,
     negative_count: int = 5,
     tier2_predicates: set[str] | None = None,
+    call_llm_fn=None,
 ) -> list[QuestionCase]:
-    """Generate a complete test suite from a KG."""
+    """Generate a complete test suite from a KG.
+
+    When call_llm_fn is provided, uses LLM to generate richer Tier 1
+    questions (especially for holdings/doctrines/reasoning). Falls back
+    to templates when LLM is unavailable or fails.
+    """
     cases: list[QuestionCase] = []
-    cases.extend(generate_tier1(kg, max_per_subject=max_tier1_per_subject))
+
+    if call_llm_fn is not None:
+        llm_cases = generate_tier1_llm(
+            kg, call_llm_fn, max_per_subject=max_tier1_per_subject,
+        )
+        cases.extend(llm_cases)
+    if not cases:
+        cases.extend(generate_tier1(kg, max_per_subject=max_tier1_per_subject))
+
     cases.extend(generate_tier2(kg, target_predicates=tier2_predicates))
     cases.extend(generate_negatives(kg, count=negative_count))
+    return cases
+
+
+def generate_tier1_llm(
+    kg: KnowledgeGraph,
+    call_llm_fn,
+    *,
+    max_per_subject: int = 3,
+) -> list[QuestionCase]:
+    """Generate Tier 1 questions using LLM for natural phrasing.
+
+    Collects all facts per subject, sends them to the LLM in batch,
+    and parses out questions with golden answers.
+    """
+    from crystal.compare import generate_questions_llm
+
+    subjects = sorted(kg.subjects)
+    triplets = []
+    for subject in subjects:
+        for fact in kg.lookup(subject=subject):
+            pred = fact["predicate"]
+            obj = fact["object"]
+            if pred.lower() in SKIP_PREDICATES:
+                continue
+            if not obj:
+                continue
+            if len(obj) > object_length_limit(pred):
+                continue
+            triplets.append((subject, pred, obj))
+
+    results = generate_questions_llm(
+        triplets, call_llm_fn,
+        max_questions=len(subjects) * max_per_subject,
+        max_per_subject=max_per_subject,
+    )
+
+    cases = []
+    for r in results:
+        st = r.get("source_triplet", [])
+        source = tuple(st) if st and len(st) == 3 else None
+        golden = r["golden_answer"]
+        match_str = golden.lower()
+        match_words = [w.strip() for w in match_str.split(",") if len(w.strip()) > 2]
+        if not match_words:
+            match_words = [match_str[:200]]
+        cases.append(QuestionCase(
+            question=r["question"],
+            golden_answer=golden,
+            match_strings=match_words[:3],
+            is_negative=False,
+            tier=1,
+            source_triplet=source,
+        ))
     return cases

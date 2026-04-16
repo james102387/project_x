@@ -258,13 +258,44 @@ def _load_available_documents() -> dict[str, str]:
 def main():
     parser = argparse.ArgumentParser(description="Three-arm comparison benchmark")
     parser.add_argument("--output", "-o", type=str, help="Save report to file")
+    parser.add_argument(
+        "--corpus", choices=["opinion_golden", "accepted", "legal", "all"],
+        default="opinion_golden",
+        help="Which test corpus to use (default: opinion_golden — the demo set)",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-    report = run_three_arm()
+    corpus_sections: list[tuple[str, list]] = []
+    if args.corpus == "opinion_golden":
+        from benchmarks.ground_truth.opinion_golden import OPINION_GOLDEN_CASES
+        corpus_sections = [("opinion_golden", OPINION_GOLDEN_CASES)]
+    elif args.corpus == "legal":
+        from benchmarks.ground_truth.legal import LEGAL_BENCHMARK_CASES
+        corpus_sections = [("legal", LEGAL_BENCHMARK_CASES)]
+    elif args.corpus == "accepted":
+        corpus_sections = [("accepted", None)]
+    elif args.corpus == "all":
+        from benchmarks.ground_truth.opinion_golden import OPINION_GOLDEN_CASES
+        from benchmarks.ground_truth.legal import LEGAL_BENCHMARK_CASES
+        from crystal.review import collect_accepted_cases
+        corpus_sections = [
+            ("opinion_golden", OPINION_GOLDEN_CASES),
+            ("legal", LEGAL_BENCHMARK_CASES),
+            ("accepted", collect_accepted_cases()),
+        ]
 
-    md = report.to_markdown()
+    md_parts: list[str] = []
+    for name, cases in corpus_sections:
+        if not cases:
+            md_parts.append(f"## Corpus: {name}\n\n(empty — skipped)\n")
+            continue
+        md_parts.append(f"## Corpus: {name} ({len(cases)} cases)\n")
+        report = run_three_arm(cases=cases)
+        md_parts.append(report.to_markdown())
+
+    md = "\n\n".join(md_parts)
     print(md)
 
     if args.output:

@@ -279,6 +279,105 @@ class TestSaveProposedAsBatch:
         assert accepted[0][1] == "A1 corrected"
 
 
+class TestProvenanceInBatches:
+    """Tests that origin and source_document are persisted in review batch JSON."""
+
+    def test_save_proposed_includes_provenance(self, review_dir):
+        from crystal.review import save_proposed_as_batch
+        rows = [
+            {
+                "question": "What court decided Miranda?",
+                "crystal_answer": "Supreme Court",
+                "golden_answer": "Supreme Court",
+                "route": "kg_answerable",
+                "confidence": "HIGH",
+                "origin": "opinion_doc",
+                "source_document": "miranda-v-arizona.json",
+            },
+        ]
+        path = save_proposed_as_batch(rows, source="test", review_dir=review_dir)
+        data = json.loads(path.read_text())
+        case = data["cases"][0]
+        assert case["origin"] == "opinion_doc"
+        assert case["source_document"] == "miranda-v-arizona.json"
+
+    def test_save_proposed_defaults_unknown(self, review_dir):
+        from crystal.review import save_proposed_as_batch
+        rows = [
+            {
+                "question": "Q?",
+                "crystal_answer": "A",
+                "golden_answer": "A",
+            },
+        ]
+        path = save_proposed_as_batch(rows, review_dir=review_dir)
+        data = json.loads(path.read_text())
+        case = data["cases"][0]
+        assert case["origin"] == "unknown"
+        assert case["source_document"] == ""
+
+    def test_collect_accepted_with_origin_filter(self, review_dir):
+        from crystal.review import collect_accepted_cases
+        cases_data = [
+            {
+                "question": "Q1",
+                "golden_answer": "A1",
+                "match_strings": ["a1"],
+                "is_negative": False,
+                "status": "accepted",
+                "origin": "api_metadata",
+                "source_document": "scaffold",
+            },
+            {
+                "question": "Q2",
+                "golden_answer": "A2",
+                "match_strings": ["a2"],
+                "is_negative": False,
+                "status": "accepted",
+                "origin": "opinion_doc",
+                "source_document": "loving-v-virginia.txt",
+            },
+        ]
+        _write_batch(review_dir, "prov1", cases_data)
+        all_accepted = collect_accepted_cases(review_dir)
+        assert len(all_accepted) == 2
+
+        api_only = collect_accepted_cases(review_dir, origin_filter="api_metadata")
+        assert len(api_only) == 1
+        assert api_only[0][0] == "Q1"
+
+        opinion_only = collect_accepted_cases(review_dir, origin_filter="opinion_doc")
+        assert len(opinion_only) == 1
+        assert opinion_only[0][0] == "Q2"
+
+    def test_collect_accepted_with_document_filter(self, review_dir):
+        from crystal.review import collect_accepted_cases
+        cases_data = [
+            {
+                "question": "Q1",
+                "golden_answer": "A1",
+                "match_strings": ["a1"],
+                "is_negative": False,
+                "status": "accepted",
+                "origin": "opinion_doc",
+                "source_document": "miranda.json",
+            },
+            {
+                "question": "Q2",
+                "golden_answer": "A2",
+                "match_strings": ["a2"],
+                "is_negative": False,
+                "status": "accepted",
+                "origin": "opinion_doc",
+                "source_document": "roe.json",
+            },
+        ]
+        _write_batch(review_dir, "prov2", cases_data)
+        miranda_only = collect_accepted_cases(review_dir, document_filter="miranda.json")
+        assert len(miranda_only) == 1
+        assert miranda_only[0][0] == "Q1"
+
+
 class TestDeriveMatchStrings:
     def test_simple_answer(self):
         from crystal.review import _derive_match_strings
@@ -296,3 +395,130 @@ class TestDeriveMatchStrings:
         from crystal.review import _derive_match_strings
         assert _derive_match_strings("") == []
         assert _derive_match_strings(None) == []
+
+
+class TestRevalidatePendingQuestions:
+    """Tests for revalidate_pending_questions() — stale question cleanup."""
+
+    def test_rejects_triplet_missing_from_kg(self, review_dir):
+        from crystal.review import revalidate_pending_questions, load_batch_questions
+        from crystal.tools.kg.store import SqliteKnowledgeGraph
+
+        kg = SqliteKnowledgeGraph(":memory:")
+        kg.bulk_insert([("roe v. wade", "court", "Supreme Court of the United States")])
+
+        _write_batch(review_dir, "b1", [
+            {
+                "question": "What court decided Roe v. Wade?",
+                "golden_answer": "Supreme Court",
+                "match_strings": ["supreme court"],
+                "is_negative": False,
+                "tier": 1,
+                "status": "pending_review",
+                "source_triplet": ["roe v. wade", "court", "Supreme Court of the United States"],
+            },
+            {
+                "question": "When was Ghost Case decided?",
+                "golden_answer": "1999",
+                "match_strings": ["1999"],
+                "is_negative": False,
+                "tier": 1,
+                "status": "pending_review",
+                "source_triplet": ["ghost case", "date_filed", "1999"],
+            },
+        ])
+
+        result = revalidate_pending_questions(kg, review_dir)
+        assert result["total_checked"] == 2
+        assert result["total_rejected"] == 1
+        assert result["rejected"][0]["question"] == "When was Ghost Case decided?"
+
+        qs = load_batch_questions("b1", review_dir)
+        assert qs[0]["status"] == "pending_review"
+        assert qs[1]["status"] == "rejected"
+
+    def test_rejects_triplet_failing_validation(self, review_dir):
+        from crystal.review import revalidate_pending_questions, load_batch_questions
+        from crystal.tools.kg.store import SqliteKnowledgeGraph
+
+        kg = SqliteKnowledgeGraph(":memory:")
+        kg.bulk_insert([("Lovings", "date_filed", "convicted of violating § 20-58")])
+
+        _write_batch(review_dir, "b2", [{
+            "question": "When was Lovings decided?",
+            "golden_answer": "convicted of violating § 20-58",
+            "match_strings": [],
+            "is_negative": False,
+            "tier": 2,
+            "status": "pending_review",
+            "source_triplet": ["Lovings", "date_filed", "convicted of violating § 20-58"],
+        }])
+
+        result = revalidate_pending_questions(kg, review_dir)
+        assert result["total_rejected"] == 1
+        assert "validation" in result["rejected"][0]["reason"]
+
+        qs = load_batch_questions("b2", review_dir)
+        assert qs[0]["status"] == "rejected"
+
+    def test_skips_already_decided_cases(self, review_dir):
+        from crystal.review import revalidate_pending_questions
+        from crystal.tools.kg.store import SqliteKnowledgeGraph
+
+        kg = SqliteKnowledgeGraph(":memory:")
+
+        _write_batch(review_dir, "b3", [
+            {
+                "question": "Q1?",
+                "golden_answer": "A1",
+                "match_strings": ["a1"],
+                "is_negative": False,
+                "tier": 1,
+                "status": "accepted",
+                "source_triplet": ["gone", "date_filed", "1999"],
+            },
+            {
+                "question": "Q2?",
+                "golden_answer": "A2",
+                "match_strings": ["a2"],
+                "is_negative": False,
+                "tier": 1,
+                "status": "rejected",
+                "source_triplet": ["also gone", "date_filed", "2000"],
+            },
+        ])
+
+        result = revalidate_pending_questions(kg, review_dir)
+        assert result["total_checked"] == 0
+        assert result["total_rejected"] == 0
+
+    def test_no_op_when_no_pending(self, review_dir):
+        from crystal.review import revalidate_pending_questions
+        result = revalidate_pending_questions(None, review_dir)
+        assert result["total_checked"] == 0
+
+    def test_updates_pending_count_in_file(self, review_dir):
+        from crystal.review import revalidate_pending_questions
+        from crystal.tools.kg.store import SqliteKnowledgeGraph
+
+        kg = SqliteKnowledgeGraph(":memory:")
+        kg.bulk_insert([("x v. y", "court", "Supreme Court")])
+
+        _write_batch(review_dir, "b4", [
+            _make_case("Q1"),
+            {
+                "question": "Q2 stale?",
+                "golden_answer": "gone",
+                "match_strings": [],
+                "is_negative": False,
+                "tier": 1,
+                "status": "pending_review",
+                "source_triplet": ["vanished", "date_filed", "gone"],
+            },
+        ])
+
+        revalidate_pending_questions(kg, review_dir)
+
+        batch_path = review_dir / "batch_b4.json"
+        data = json.loads(batch_path.read_text())
+        assert data.get("pending") == 1

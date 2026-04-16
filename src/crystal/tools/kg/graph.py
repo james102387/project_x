@@ -51,6 +51,18 @@ class KnowledgeGraph:
             self._entity_index.add(obj.lower())
             self._subject_index.add(subject.lower())
 
+    # ── Mutation ───────────────────────────────────────────────────────
+
+    def extend(self, triplets: list[Triplet]) -> int:
+        """Append new triplets, skipping duplicates. Returns count added."""
+        new = [
+            (s, p, o) for s, p, o in triplets
+            if f"{s}|{p}".lower() not in self._forward
+        ]
+        self.triplets.extend(new)
+        self._build(new)
+        return len(new)
+
     # ── Resolution cascades ───────────────────────────────────────────
 
     def _resolve_entity(self, text: str) -> tuple[str, str]:

@@ -22,6 +22,7 @@ from benchmarks.ralph_wiggum.predicate_loop import PredicateLoop
 from benchmarks.ralph_wiggum.entity_loop import EntityLoop
 from benchmarks.ralph_wiggum.threshold_loop import ThresholdLoop
 from benchmarks.ralph_wiggum.extraction_loop import ExtractionLoop
+from benchmarks.ralph_wiggum.question_gen_loop import QuestionGenLoop
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +37,11 @@ class OrchestratorResult:
 class Orchestrator:
     """Coordinates all Ralph Wiggum loops with shared evaluation."""
 
-    LOOP_CLASSES: list[type[BaseLoop]] = [PredicateLoop, EntityLoop, ThresholdLoop]
+    LOOP_CLASSES: list[type[BaseLoop]] = [
+        PredicateLoop, EntityLoop, ThresholdLoop, QuestionGenLoop,
+    ]
+
+    EXTRACTION_LOOP_CLASS: type = ExtractionLoop
 
     def __init__(
         self,
@@ -47,6 +52,8 @@ class Orchestrator:
         use_git: bool = False,
         use_full_pipeline: bool = True,
         mock_llm_fn=None,
+        extraction_cases: list | None = None,
+        run_extraction_loop: bool = False,
     ) -> None:
         self.kg = kg
         self.cases = cases
@@ -55,6 +62,8 @@ class Orchestrator:
         self.use_git = use_git
         self.use_full_pipeline = use_full_pipeline
         self.mock_llm_fn = mock_llm_fn
+        self.extraction_cases = extraction_cases or []
+        self.run_extraction_loop = run_extraction_loop
 
     def run(
         self,
@@ -62,6 +71,23 @@ class Orchestrator:
         max_iterations_per_loop: int = 10,
     ) -> OrchestratorResult:
         loop_results: dict[str, LoopResult] = {}
+
+        if self.run_extraction_loop and self.extraction_cases:
+            ext_loop = self.EXTRACTION_LOOP_CLASS(
+                extraction_cases=self.extraction_cases,
+                call_llm_fn=self.call_llm_fn,
+                use_git=self.use_git,
+            )
+            logger.info("Running %s...", ext_loop.LOOP_NAME)
+            result = ext_loop.run(
+                threshold=threshold,
+                max_iterations=max_iterations_per_loop,
+            )
+            loop_results[ext_loop.LOOP_NAME] = result
+            logger.info(
+                "%s finished: %.1f%% (%d iterations)",
+                ext_loop.LOOP_NAME, result.final_score * 100, result.iterations_run,
+            )
 
         for loop_cls in self.LOOP_CLASSES:
             loop = loop_cls(

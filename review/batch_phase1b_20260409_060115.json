@@ -28,7 +28,11 @@
         "aetna life insurance v. moore",
         "cites",
         "continental life insurance v. chamberlain"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "continental life insurance v. chamberlain, insurance co. v. wilkinson, insurance company v. mahone, kuhn v. fairmont coal co., moulor v. american life insurance, new jersey mutual life insurance v. baker, northern assurance co. of london v. grand view building ass'n, northern assurance co. v. grand view building assn., penman v. st. paul fire & marine insurance, phoenix life ins. co. v. raddin"
     },
     {
       "question": "Which cases are cited by Allen V. Siebert?",
@@ -47,7 +51,11 @@
         "allen v. siebert",
         "cites",
         "artuz v. bennett"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "artuz v. bennett, carey v. saffold, cole v. state, commonwealth v. banks, daniel siebert v. donal campbell, ex parte ward, kirkland v. state, pace v. diguglielmo, people v. boclair, siebert v. alabama"
     },
     {
       "question": "What cases does American Broadcasting Cos. V. Aereo, Inc. cite?",
@@ -66,7 +74,11 @@
         "american broadcasting cos. v. aereo, inc.",
         "cites",
         "costar group, inc. v. loopnet, inc."
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "costar group, inc. v. loopnet, inc., fox broadcasting co. v. dish network l.l.c., lawson v. fmr llc, metro-goldwyn-mayer studios inc. v. grokster, ltd., new york times co. v. tasini, parker v. google, inc., sony corp. of america v. universal city studios, inc., teleprompter corp. v. columbia broadcasting system, inc., united states v. american society of composers, authors & publishers, united states v. detroit timber & lumber co."
     },
     {
       "question": "What cases does Atherton V. Federal Deposit Insurance Corp. cite?",
@@ -85,7 +97,11 @@
         "atherton v. federal deposit insurance corp.",
         "cites",
         "banco nacional de cuba v. sabbatino"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "banco nacional de cuba v. sabbatino, boyle v. united technologies corp., city of milwaukee v. illinois, clarke v. securities industry assn., federal deposit ins. corp. v. swager, federal deposit insurance corporation, as receiver for central savings and loan association v. daniel t. mcsweeney frederick c. stalder, hinderlider v. la plata river & cherry creek ditch co., howard v. lyons, resolution trust corporation v. henry chapman, united states v. standard oil co. of california"
     },
     {
       "question": "Which cases are cited by Ayrshire Collieries Corp. V. United States?",
@@ -104,7 +120,11 @@
         "ayrshire collieries corp. v. united states",
         "cites",
         "ayrshire collieries corp. v. united states"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "ayrshire collieries corp. v. united states, board of trade of kansas city v. united states, illinois commerce commission v. united states, interstate commerce commission v. alabama midland railway co., interstate commerce commission v. baltimore & ohio railroad, l. t. barringer & co. v. united states, new york v. united states, texas & pacific railway co. v. united states, united states v. chicago, milwaukee, st. paul & pacific r."
     },
     {
       "question": "Which cases are cited by Bank Of California, National Ass'N V. Richardson?",
@@ -123,7 +143,11 @@
         "bank of california, national ass'n v. richardson",
         "cites",
         "bank of redemption v. boston"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "bank of redemption v. boston, covington v. first nat. bank of covington, m'culloch v. state of maryland, mercantile bank v. new york, owensboro national bank v. owensboro, people v. weaver, weston and others v. the city council of charleston"
     },
     {
       "question": "Which cases are cited by Berisha V. Lawson?",
@@ -142,7 +166,11 @@
         "berisha v. lawson",
         "cites",
         "d.j.m. v. hannibal public school district 60"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "d.j.m. v. hannibal public school district 60, dun & bradstreet, inc. v. greenmoss builders, inc., haughwout v. tordenti, john doe, a minor, by his mother and next friend, jane doe v. pulaski county special school district, rosen v. united states, state v. draskovich, state v. johnston, united states v. anthony elonis, united states v. dillard"
     },
     {
       "question": "What cases does Brashear V. Mason cite?",
@@ -158,7 +186,11 @@
         "brashear v. mason",
         "cites",
         "decatur v. paulding"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "decatur v. paulding, kendall v. united states ex rel. stokes"
     },
     {
       "question": "What cases does Brown V. United States cite?",
@@ -177,7 +209,11 @@
         "brown v. united states",
         "cites",
         "begay v. united states"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "begay v. united states, clark v. martinez, commonwealth v. harrelson, consumer financial protection bureau v. community financial services assn. of america, ltd., flores-figueroa v. united states, gwaltney of smithfield, ltd. v. chesapeake bay foundation, inc., hassett v. welch, johnson v. united states, new hampshire hemp council, inc. v. marshall, united states v. wilson"
     },
     {
       "question": "Which cases are cited by Chicago Mercantile Exchange V. Deaktor?",
@@ -193,7 +229,11 @@
         "chicago mercantile exchange v. deaktor",
         "cites",
         "darryl b. deaktor v. l. d. schreiber & co., al phillips, jr. v. the chicago mercantile exchange"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "darryl b. deaktor v. l. d. schreiber & co., al phillips, jr. v. the chicago mercantile exchange, ricci v. chicago mercantile exchange"
     },
     {
       "question": "Which cases are cited by Chicago, Rock Island & Pacific Railway Co. V. Shaffer?",
@@ -212,7 +252,11 @@
         "chicago, rock island & pacific railway co. v. shaffer",
         "cites",
         "jeffrey manufacturing co. v. blagg"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "jeffrey manufacturing co. v. blagg, louisville & nashville railroad v. melton, minneapolis & st. louis railway co. v. beckwith, missouri, kansas & texas railway co. v. may, new york central railroad company v. white, rast v. van deman & lewis co."
     },
     {
       "question": "What cases does City National Bank Of El Paso V. El Paso & Northeastern Railroad cite?",
@@ -228,7 +272,11 @@
         "city national bank of el paso v. el paso & northeastern railroad",
         "cites",
         "city nat. bank of el paso v. el paso & n. e. ry. co."
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "city nat. bank of el paso v. el paso & n. e. ry. co., ela v. american merchants' union express co."
     },
     {
       "question": "Which cases are cited by City Of Memphis V. Cumberland Telephone & Telegraph Co.?",
@@ -247,7 +295,11 @@
         "city of memphis v. cumberland telephone & telegraph co.",
         "cites",
         "barney v. city of new york"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "barney v. city of new york, blackburn v. portland gold mining co., gold-washing and water co. v. keyes, hamilton gas light & coke co. v. hamilton city, lampasas v. bell, loeb v. columbia township trustees, macfadden v. united states, western union telegraph co. v. ann arbor railroad"
     },
     {
       "question": "Which cases are cited by Clingman V. Beaver?",
@@ -266,7 +318,11 @@
         "clingman v. beaver",
         "cites",
         "adarand constructors, inc. v. mineta"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "adarand constructors, inc. v. mineta, anderson v. celebrezze, bullock v. carter, capp v. state, div. of elections, cooper industries, inc. v. aviall services, inc., davis v. bandemer, eu v. san francisco county democratic central committee, ray v. blair, storer v. brown, taylor v. freeland & kronz"
     },
     {
       "question": "Which cases are cited by Coleman V. Johnson?",
@@ -285,7 +341,11 @@
         "coleman v. johnson",
         "cites",
         "cavazos v. smith"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "cavazos v. smith, commonwealth v. bostick, commonwealth v. mcfarland, commonwealth v. montalvo, jackson v. virginia, johnson v. mechling, lorenzo johnson v. neal mechling, renico v. lett"
     },
     {
       "question": "Which cases are cited by Coventry Health Care Of Mo., Inc. V. Nevils?",
@@ -304,7 +364,11 @@
         "coventry health care of mo., inc. v. nevils",
         "cites",
         "chevron u. s. a. inc. v. natural resources defense council, inc."
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "chevron u. s. a. inc. v. natural resources defense council, inc., gobeille v. liberty mut. ins. co., helfrich v. blue cross & blue shield assoc, hillman v. maretta, jodie nevils v. group health plan, inc. and acs recovery services, inc., marmet health care center, inc. v. brown, morales v. trans world airlines, inc., mueller v. burchfield, northwest, inc. v. ginsberg, teresa bell v. blue cross & blue shield of ok"
     },
     {
       "question": "What cases does Cox V. Hart cite?",
@@ -323,7 +387,11 @@
         "cox v. hart",
         "cites",
         "booth v. small"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "booth v. small, georgia railroad & banking co. v. smith, illinois steel co. v. bilot, minis v. united states, robinson v. forrest, sawyer v. gray, united states v. curtner, united states v. morrison, united states v. trans-missouri freight assn., white v. united states"
     },
     {
       "question": "Which cases are cited by Daniels V. Williams?",
@@ -342,7 +410,11 @@
         "daniels v. williams",
         "cites",
         "baker v. mccollan"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "baker v. mccollan, den ex dem. murray v. hoboken land & improvement co., dent v. west virginia, hurtado v. california, leroy fibre co. v. chicago, milwaukee & st. paul railway, m'culloch v. state of maryland, paul v. davis, somerville's executors v. hamilton, south v. maryland ex rel. pottle, wolff v. mcdonnell"
     },
     {
       "question": "Which cases are cited by Davis V. John L. Roper Lumber Co.?",
@@ -359,7 +431,11 @@
         "davis v. john l. roper lumber co.",
         "cites",
         "barrett v. van pelt"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "barrett v. van pelt, davis v. john l. roper lumber co., georgia, florida & alabama railway co. v. blish milling co."
     },
     {
       "question": "What cases does Davis V. United States cite?",
@@ -378,7 +454,11 @@
         "davis v. united states",
         "cites",
         "rosales-mireles v. united states"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "rosales-mireles v. united states, united states v. carlos saro, united states of america v. cornelio cabrera-baez, united states v. david sahakian, united states v. durham, united states v. james vincent wells, united states v. olano, united states v. robert griffiths, united states v. romeo, united states v. sargent, united states v. tobias a. thomas"
     },
     {
       "question": "Which cases are cited by De Sylva V. Ballentine?",
@@ -397,7 +477,11 @@
         "de sylva v. ballentine",
         "cites",
         "board of comm'rs of jackson cty. v. united states"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "board of comm'rs of jackson cty. v. united states, fred fisher music co. v. m. witmark & sons, hutchinson investment co. v. caldwell, mazer v. stein, mccool v. smith, reconstruction finance corporation v. beaver county, seaboard air line railway v. kenney, united states v. fisk, united states v. minker"
     },
     {
       "question": "What cases does Deming V. Carlisle Packing Co. cite?",
@@ -416,7 +500,11 @@
         "deming v. carlisle packing co.",
         "cites",
         "alabama great southern railway co. v. thompson"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "alabama great southern railway co. v. thompson, amory v. amory, blythe v. hinckley, chanute city v. trader, citizens' bank v. cannon, equitable life assurance society v. brown, illinois central railroad v. sheegog, new orleans waterworks co. v. louisiana, richardson v. louisville & nashville railroad, swafford v. templeton"
     },
     {
       "question": "What cases does District Of Columbia V. Woodbury cite?",
@@ -435,7 +523,11 @@
         "district of columbia v. woodbury",
         "cites",
         "burton v. driggs"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "burton v. driggs, caldwell v. murphy, camden v. doremus, kennon v. gilmer, nebraska city v. campbell, patrick v. graham, railroad co. v. barron, smith v. holcomb, stockton v. frey, vicksburg & meridian railroad v. putnam"
     },
     {
       "question": "What cases does Donaldson, Assignee V. Farwell cite?",
@@ -454,7 +546,11 @@
         "donaldson, assignee v. farwell",
         "cites",
         "bank of leavenworth v. hunt"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "bank of leavenworth v. hunt, byrd v. hall, donaldson v. farwell, lupin v. marie, m'kinney v. reader"
     },
     {
       "question": "Which cases are cited by Dr. Miles Medical Co. V. John D. Park & Sons Co.?",
@@ -473,7 +569,11 @@
         "dr. miles medical co. v. john d. park & sons co.",
         "cites",
         "bement v. national harrow co."
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "bement v. national harrow co., board of trade of chicago v. christie grain & stock co., bobbs-merrill co. v. straus, chapin v. brown bros., fowle v. park, grant v. raymond, judd v. . harrington, people v. . sheldon, people v. milk exchange, ltd., tabor v. . hoffman"
     },
     {
       "question": "What cases does Edmonson V. Bloomshire cite?",
@@ -489,7 +589,11 @@
         "edmonson v. bloomshire",
         "cites",
         "mesa v. united states"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "mesa v. united states, the dos hermanos"
     },
     {
       "question": "What cases does Edward P. Fourniquet And Wife, And Martin W. Ewing And Wife V. John Perkins cite?",
@@ -507,7 +611,11 @@
         "edward p. fourniquet and wife, and martin w. ewing and wife v. john perkins",
         "cites",
         "clark v. hall"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "clark v. hall, fourniquet v. perkins, john perkins v. edward f. fourniquet and wife, and martin w. ewing and wife, perkins v. fourniquet"
     },
     {
       "question": "Which cases are cited by Elias V. Ramirez?",
@@ -525,7 +633,11 @@
         "elias v. ramirez",
         "cites",
         "benson v. mcmahon"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "benson v. mcmahon, bryant v. united states, ornelas v. ruiz, terlinden v. ames"
     },
     {
       "question": "What cases does Endicott Johnson Corp. V. Perkins cite?",
@@ -544,7 +656,11 @@
         "endicott johnson corp. v. perkins",
         "cites",
         "boyd v. united states"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "boyd v. united states, ellis v. interstate commerce commission, federal trade commission v. american tobacco co., general tobacco & grocery co. v. fleming, harriman v. interstate commerce commission, interstate commerce commission v. brimson, perkins v. endicott johnson corp., perkins v. endicott johnson corporation, perkins v. lukens steel co."
     },
     {
       "question": "What cases does Erie Railroad V. Purdy cite?",
@@ -563,7 +679,11 @@
         "erie railroad v. purdy",
         "cites",
         "boyd v. nebraska ex rel. thayer"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "boyd v. nebraska ex rel. thayer, carter v. texas, miller v. texas, mitchell v. clark, morrison v. watson, neal v. delaware, sage v. . city of brooklyn, spies v. illinois, the people ex rel. sinkler v. . terry, wabash, st. louis & pacific railway co. v. illinois"
     },
     {
       "question": "Which cases are cited by Ex Parte Fuller?",
@@ -580,7 +700,11 @@
         "ex parte fuller",
         "cites",
         "johnson v. united states"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "johnson v. united states, matter of harris, perlman v. united states"
     },
     {
       "question": "Which cases are cited by Ex Parte Ralston?",
@@ -597,7 +721,11 @@
         "ex parte ralston",
         "cites",
         "bondurant, tutrix v. watson"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "bondurant, tutrix v. watson, mcdonogh v. millaudon, mussina v. cavazos"
     },
     {
       "question": "Which cases are cited by Federal Power Commission V. Florida Power & Light Co.?",
@@ -616,7 +744,11 @@
         "federal power commission v. florida power & light co.",
         "cites",
         "arkansas power & light company v. federal power commission"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "arkansas power & light company v. federal power commission, gainesville utilities department v. florida power corp., indiana & michigan electric company v. federal power commission, new england divisions case, pennsylvania water & power co. v. federal power commission, public service company of indiana, inc. v. federal power commission, the cincinnati gas & electric company and the union light, heat and power company v. federal power commission, travelers' indemnity co. v. parkersburg iron & steel co., united states ex rel. chapman v. federal power commission, united states ex rel. chapman, secretary of the interior v. federal power commission virginia rea ass'n v. federal power commission"
     },
     {
       "question": "What cases does Fentress Coal & Coke Co. V. Elmore cite?",
@@ -635,7 +767,11 @@
         "fentress coal & coke co. v. elmore",
         "cites",
         "aspen mining & smelting co. v. billings"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "aspen mining & smelting co. v. billings, brown v. alton water co., metropolitan water co. v. kaw valley drainage district, omaha baum iron store co. v. moline plow co., shapiro v. united states, union trust co. of st. louis v. westhus"
     },
     {
       "question": "Which cases are cited by Flowers V. Mississippi?",
@@ -654,7 +790,11 @@
         "flowers v. mississippi",
         "cites",
         "edmonson v. leesville concrete co."
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "edmonson v. leesville concrete co., georgia v. mccollum, j. e. b. v. alabama ex rel. t. b., jeb v. alabama ex rel. tb, loving v. virginia, miller-el v. cockrell, miller-el v. dretke, plessy v. ferguson, snyder v. louisiana, swain v. alabama"
     },
     {
       "question": "Which cases are cited by Food & Drug Administration V. Brown & Williamson Tobacco Corp.?",
@@ -673,7 +813,11 @@
         "food & drug administration v. brown & williamson tobacco corp.",
         "cites",
         "62 cases of jam v. united states"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "62 cases of jam v. united states, action on smoking and health v. patricia roberts harris, secretary of the department of health and human services, bob jones university v. united states, cipollone v. liggett group, inc., motor vehicle mfrs. assn. of united states, inc. v. state farm mut. automobile ins. co., oncale v. sundowner offshore services, inc., permian basin area rate cases, smiley v. citibank (south dakota), n. a., tennessee valley authority v. hill, united states v. article of drug . . . bacto-unidisk"
     },
     {
       "question": "What cases does Garcia Ramirez V. United States cite?",
@@ -689,7 +833,11 @@
         "garcia ramirez v. united states",
         "cites",
         "united states v. booker"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "united states v. booker, united states v. ramirez"
     },
     {
       "question": "Which cases are cited by Good Samaritan Hospital V. Shalala?",
@@ -708,7 +856,11 @@
         "good samaritan hospital v. shalala",
         "cites",
         "city of austin, texas, brackenridge hospital v. margaret m. heckler"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "city of austin, texas, brackenridge hospital v. margaret m. heckler, daughters of miriam center for the aged v. mathews, fairfax nursing center, inc. v. joseph a. califano, jr., secretary of health, education & welfare, heckler v. campbell, kingsbrook jewish medical center v. richardson, medical center hospital v. otis r. bowen, secretary of health & human services, mt. diablo hospital v. sullivan, schweiker v. gray panthers, sierra medical center, plaintiff-appellee, v. louis w. sullivan, m.d., secretary of health and human services, defendant-appellant, springdale convalescent center v. f. david mathews, secretary of health, education and welfare"
     },
     {
       "question": "What cases does Hardt V. Reliance Standard Life Insurance cite?",
@@ -727,7 +879,11 @@
         "hardt v. reliance standard life insurance",
         "cites",
         "carolyn j. gibbs v. ashley c. gibbs, a minor child and andrew f. gibbs, a minor child, intervenor v. general american life insurance company"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "carolyn j. gibbs v. ashley c. gibbs, a minor child and andrew f. gibbs, a minor child, intervenor v. general american life insurance company, cottrill v. sparrow, johnson & ursillo, inc., farrar v. hobby, federal express corp. v. holowecki, goldie miller, as of the estate of sarah m. potok v. united welfare fund, graham v. hartford life and accident ins. co., pens. plan guide p 23882i william h. freeman, cross-appellant v. continental insurance company, cross-appellee, sole v. wyner, tate v. long term disability plan for salaried employees of champion international corp. 506, texas state teachers ass'n v. garland independent school district"
     },
     {
       "question": "Which cases are cited by Insurance Co. Of North America V. Guardiola?",
@@ -745,7 +901,11 @@
         "insurance co. of north america v. guardiola",
         "cites",
         "blackburn v. crawfords"
-      ]
+      ],
+      "origin": "api_metadata",
+      "source_document": "n/a",
+      "crystal_route": "template",
+      "crystal_proposed": "blackburn v. crawfords, dwyer v. dunbar, freeborn v. smith, york company v. central railroad"
     }
   ]
 }

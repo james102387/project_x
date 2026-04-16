@@ -234,11 +234,16 @@ def ingest_document(
 
     scored: list[ScoredTriplet] = []
     validation_rejected: list[ScoredTriplet] = []
+    extraction_seen: set[tuple[str, str, str]] = set()
 
     for triplet in ner_result.triplets:
         norm_pred = normalize_predicate(
             triplet.predicate, ontology_predicates, predicate_aliases,
         )
+        dedup_key = (triplet.subject.lower(), norm_pred.lower(), triplet.object.lower())
+        if dedup_key in extraction_seen:
+            continue
+        extraction_seen.add(dedup_key)
         vr = validate_triplet(triplet.subject, norm_pred, triplet.object)
         if not vr.valid:
             validation_rejected.append(ScoredTriplet(
@@ -249,6 +254,7 @@ def ingest_document(
                 extraction_source="ner",
                 ingestion_confidence=0.0,
                 status="rejected",
+                source_document=source,
             ))
             continue
         conf = score_ingestion_confidence(
@@ -263,6 +269,7 @@ def ingest_document(
             source_sentence=triplet.source_sentence,
             extraction_source="ner",
             ingestion_confidence=conf,
+            source_document=source,
         ))
 
     if call_llm_fn is not None:
@@ -276,6 +283,10 @@ def ingest_document(
                 norm_pred = normalize_predicate(
                     rt.predicate, ontology_predicates, predicate_aliases,
                 )
+                dedup_key = (rt.subject.lower(), norm_pred.lower(), rt.object.lower())
+                if dedup_key in extraction_seen:
+                    continue
+                extraction_seen.add(dedup_key)
                 vr = validate_triplet(rt.subject, norm_pred, rt.object)
                 if not vr.valid:
                     validation_rejected.append(ScoredTriplet(
@@ -286,6 +297,7 @@ def ingest_document(
                         extraction_source=ext_source,
                         ingestion_confidence=0.0,
                         status="rejected",
+                        source_document=source,
                     ))
                     continue
                 conf = score_ingestion_confidence(
@@ -300,6 +312,7 @@ def ingest_document(
                     source_sentence=rt.source_sentence,
                     extraction_source=ext_source,
                     ingestion_confidence=conf,
+                    source_document=source,
                 ))
 
     seen = set()
@@ -332,10 +345,23 @@ def ingest_document(
 
     if auto_accepted and kg is not None:
         try:
-            kg.bulk_insert(
-                [st.as_tuple_with_sentence() for st in auto_accepted],
-                source=source,
-            )
+            from crystal.tools.kg.store import SqliteKnowledgeGraph
+            if isinstance(kg, SqliteKnowledgeGraph):
+                tuples_with_origin = [
+                    (st.subject, st.predicate, st.object,
+                     st.source_sentence, st.origin)
+                    for st in auto_accepted
+                ]
+                kg.bulk_insert(
+                    tuples_with_origin,
+                    source=source,
+                    source_document=source,
+                )
+            else:
+                kg.bulk_insert(
+                    [st.as_tuple_with_sentence() for st in auto_accepted],
+                    source=source,
+                )
             _post_insert_validate(auto_accepted)
         except Exception:
             logger.exception("Failed to insert auto-accepted triplets into KG")
